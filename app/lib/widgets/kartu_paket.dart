@@ -119,6 +119,7 @@ class KartuPaket extends StatelessWidget {
                   const SizedBox(height: 4),
                   // jam ambil + sisa porsi, sisanya oren kalau tinggal dikit
                   Text.rich(
+                    // TextSpan: potongan teks, jadi satu baris bisa beda2 gaya
                     TextSpan(
                       style: const TextStyle(
                         fontSize: Teks.keterangan,

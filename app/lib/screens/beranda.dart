@@ -59,16 +59,19 @@ class _BerandaState extends State<Beranda> {
     }
     final jumlahDapur = tampil.map((paket) => paket['mitra']).toSet().length;
 
-    // biar ga ketutup status bar
+    // SafeArea: biar ga ketutup status bar
     return SafeArea(
+      // ListView: list yg bisa discroll ke bawah
       child: ListView(
         // bawahnya dikasih jarak gede biar kartu terakhir ga ketutup bar keranjang
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
         children: [
+          // Row: nyusun widget ke samping (horizontal)
           Row(
             children: [
               const Icon(Icons.place_outlined, size: 20),
               const SizedBox(width: 6),
+              // Text: nampilin tulisan
               const Text(
                 'Samarinda Ulu',
                 style: TextStyle(
@@ -77,8 +80,9 @@ class _BerandaState extends State<Beranda> {
                 ),
               ),
               const Icon(Icons.keyboard_arrow_down),
+              // Spacer: ngisi ruang kosong, jadi tombol di kanannya kedorong ke ujung
               const Spacer(),
-              // icon cari, pindah ke halaman cari
+              // IconButton: icon cari, pindah ke halaman cari
               IconButton(
                 tooltip: 'Cari paket',
                 icon: const Icon(Icons.search),
@@ -98,6 +102,7 @@ class _BerandaState extends State<Beranda> {
                 icon: const Icon(Icons.favorite_border),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
+                    // SnackBar: pesan kecil yg muncul sebentar di bawah layar
                     const SnackBar(
                       content: Text(
                         'Mitra favorit belum tersedia di versi ini',
@@ -129,7 +134,7 @@ class _BerandaState extends State<Beranda> {
           ),
           const SizedBox(height: 16),
 
-          // chip kategori bisa digeser ke samping
+          // SingleChildScrollView: chip kategori bisa digeser ke samping
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -172,8 +177,10 @@ class _BerandaState extends State<Beranda> {
 
           // kalau kategori yg dipilih ga ada paketnya
           if (tampil.isEmpty)
+            // Padding: ngasih jarak di sekeliling child nya
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 48),
+              // Column: nyusun widget ke bawah (vertical)
               child: Column(
                 children: [
                   const Icon(
@@ -197,6 +204,7 @@ class _BerandaState extends State<Beranda> {
                     style: TextStyle(color: Warna.teksPendukung),
                   ),
                   const SizedBox(height: 16),
+                  // OutlinedButton: tombol yg cuma ada garis pinggirnya
                   OutlinedButton(
                     onPressed: () => setState(() => kategoriDipilih = 'Semua'),
                     child: const Text('Lihat semua kategori'),

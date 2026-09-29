@@ -33,10 +33,11 @@ class Akun extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
+            // ListTile: baris siap pakai, ada leading (kiri), title, subtitle, trailing (kanan)
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               onTap: () => _BarisMenu.segeraHadir(context, 'Profil'),
-              // inisial nama, gantiin foto profil
+              // CircleAvatar: lingkaran isi inisial nama, gantiin foto profil
               leading: const CircleAvatar(
                 radius: 28,
                 backgroundColor: Warna.softGreen,
