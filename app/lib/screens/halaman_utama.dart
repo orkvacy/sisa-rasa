@@ -66,7 +66,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   Map<String, dynamic> buatPesanan() {
     // kode acak SR-xxxx, huruf O/I sama angka 0/1 dibuang biar ga ketuker pas dibaca
-    const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // pake regex nanti
     final acak = Random();
     var kode = 'SR-';
     for (var i = 0; i < 4; i++) {
@@ -154,7 +154,9 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           IndexedStack(
             index: tabAktif,
             children: [
-              Beranda(daftarPaket: dummyDeals, onBukaPaket: bukaDetail),
+              Beranda(
+                daftarPaket: dummyDeals, 
+              onBukaPaket: bukaDetail),
               Pesanan(
                 daftarPesanan: daftarPesanan,
                 onBukaKode: (pesanan) => Navigator.push(
@@ -188,7 +190,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       // NavigationBar: navigasi bawah buat pindah halaman utama
       bottomNavigationBar: NavigationBar(
         backgroundColor: Colors.white,
-        indicatorColor: Warna.hijauLembut,
+        indicatorColor: Warna.softGreen,
         selectedIndex: tabAktif,
         onDestinationSelected: (index) => setState(() => tabAktif = index),
         destinations: const [

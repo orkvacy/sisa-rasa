@@ -203,7 +203,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Warna.hijauLembut,
+                            color: Warna.softGreen,
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Text(

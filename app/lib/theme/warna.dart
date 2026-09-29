@@ -8,7 +8,7 @@ class Warna {
   static const teksPendukung = Color(0xFF5E5A53);
   static const garis = Color(0xFFE4DED4);
   static const hijau = Color(0xFF1A382B);
-  static const hijauLembut = Color(0xFFE2E9E3);
+  static const softGreen = Color(0xFFE2E9E3);
   static const merah = Color(0xFFB3261E);
 
   // bar keranjang sama chip yg dipilih

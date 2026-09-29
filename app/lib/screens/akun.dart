@@ -37,7 +37,7 @@ class Akun extends StatelessWidget {
               // inisial nama, gantiin foto profil
               leading: const CircleAvatar(
                 radius: 28,
-                backgroundColor: Warna.hijauLembut,
+                backgroundColor: Warna.softGreen,
                 child: Text(
                   'RA',
                   style: TextStyle(
@@ -62,7 +62,7 @@ class Akun extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Warna.hijauLembut,
+                      color: Warna.softGreen,
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: const Text(
