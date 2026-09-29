@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sisa_rasa/screens/beranda.dart';
+import 'package:sisa_rasa/screens/halaman_utama.dart';
+import 'package:sisa_rasa/theme/warna.dart';
 
 void main() {
   runApp(const SisaRasaApp());
@@ -14,13 +15,19 @@ class SisaRasaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sisa Rasa',
       debugShowCheckedModeBanner: false,
-      // theme: aturan warna umum, sementara, nnti mau di redesign
+      // theme: warna ijo hutan, latar krem, font jakarta sans. ngikut figma v2
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Warna.hijau,
+          primary: Warna.hijau,
+          surface: Warna.latar,
+        ),
+        scaffoldBackgroundColor: Warna.latar,
+        fontFamily: 'PlusJakartaSans',
         useMaterial3: true,
       ),
-      // landing page utama yg direct kalau baru buka
-      home: const Beranda(),
+      // halaman awal yg ada navigation bar nya
+      home: const HalamanUtama(),
     );
   }
 }

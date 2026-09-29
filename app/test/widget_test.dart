@@ -4,17 +4,66 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sisa_rasa/main.dart';
 
 void main() {
-  testWidgets('beranda nampilin nama aplikasi sama daftar paket',
-      (WidgetTester tester) async {
+  setUp(() {});
+
+  testWidgets('beranda nampilin judul, kelompok jam, dan navigation bar', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
 
-    // nama aplikasi harus muncul di app bar
-    expect(find.text('Sisa Rasa'), findsOneWidget);
+    expect(find.text('Sore ini'), findsOneWidget);
+    expect(find.text('Sekarang'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
 
-    // judul daftar paket harus ada
-    expect(find.text('Paket hari ini'), findsOneWidget);
+  testWidgets('pindah tab lewat navigation bar', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
 
-    // kolom cari harus ada
-    expect(find.byType(TextField), findsOneWidget);
+    await tester.tap(find.text('Pesanan').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Belum ada pesanan aktif'), findsOneWidget);
+
+    await tester.tap(find.text('Akun').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Rani Amelia'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('detail, tambah, keranjang, pesan, sampai kode ambil', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
+
+    // Navigator.push ke detail
+    await tester.tap(find.text('Sandwich Sisa Brunch'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tambah · Rp14.000'), findsOneWidget);
+
+    // kolom jumlah hanya menerima angka dan dibatasi sisa porsi (3)
+    await tester.enterText(find.byType(TextField), '9a');
+    await tester.pump();
+    expect(find.text('Tambah · Rp42.000'), findsOneWidget);
+
+    // tambah lalu Navigator.pop kembali ke beranda, bar keranjang muncul
+    await tester.tap(find.text('Tambah · Rp42.000'));
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('3 porsi · Ibis Hotel'), findsOneWidget);
+
+    // buka keranjang lalu pesan
+    await tester.tap(find.text('3 porsi · Ibis Hotel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Pesan · Rp42.000'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pesanan dibuat'), findsOneWidget);
+    expect(find.textContaining('SR-'), findsOneWidget);
+
+    // kembali, otomatis pindah ke tab Pesanan
+    await tester.ensureVisible(find.text('Lihat pesanan saya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lihat pesanan saya'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aktif · 1'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
   });
 }
