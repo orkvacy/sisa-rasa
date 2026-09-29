@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# catatan belajar pribadi, tidak di-push
+CATATAN_BELAJAR.md
