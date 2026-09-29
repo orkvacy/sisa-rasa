@@ -1,7 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// isi keranjang: id paket -> jumlah porsi
-/// pake cubit soalnya aksinya simpel, tinggal panggil fungsi terus emit
 class KeranjangCubit extends Cubit<Map<String, int>> {
   KeranjangCubit() : super({});
 

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/data/dummy_deals.dart';
 
-/// nyimpen daftar paket + sisa porsinya
-/// state nya List paket, tiap ada yg berubah emit list baru
+// nyimpen daftar paket + sisa porsinya
+// state nya List paket, tiap ada yg berubah emit list baru
 class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   // isi awalnya salinan dummyDeals, biar data aslinya ga ikut keubah
   PaketCubit()

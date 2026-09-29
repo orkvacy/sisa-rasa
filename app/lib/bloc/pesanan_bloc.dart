@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
-/// daftar pesanan, yg terbaru paling atas
-/// pake bloc (bukan cubit) biar keliatan bedanya: di sini ubahnya lewat event
 class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
   PesananBloc() : super([]) {
     on<PesananDibuat>(buatPesanan);
