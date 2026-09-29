@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/kartu_paket.dart';
 
 /// halaman cari, dibuka dari icon cari di beranda
 class Cari extends StatefulWidget {
-  const Cari({required this.daftarPaket, required this.onBukaPaket, super.key});
+  const Cari({required this.onBukaPaket, super.key});
 
-  final List<Map<String, dynamic>> daftarPaket;
   final ValueChanged<Map<String, dynamic>> onBukaPaket;
 
   @override
@@ -20,7 +21,8 @@ class _CariState extends State<Cari> {
   @override
   Widget build(BuildContext context) {
     // nyari di nama paket sama nama mitra
-    final hasil = widget.daftarPaket.where((paket) {
+    final daftarPaket = context.watch<PaketCubit>().state;
+    final hasil = daftarPaket.where((paket) {
       final teks = '${paket['nama']} ${paket['mitra']}'.toLowerCase();
       return paket['tutup'] > jamSekarang && teks.contains(searchQuery);
     }).toList();

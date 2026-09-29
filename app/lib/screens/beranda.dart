@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/cari.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
@@ -8,13 +10,8 @@ import 'package:sisa_rasa/widgets/kartu_paket_besar.dart';
 
 /// landing page, paketnya dikelompokin per jam buka
 class Beranda extends StatefulWidget {
-  const Beranda({
-    required this.daftarPaket,
-    required this.onBukaPaket,
-    super.key,
-  });
+  const Beranda({required this.onBukaPaket, super.key});
 
-  final List<Map<String, dynamic>> daftarPaket;
   final ValueChanged<Map<String, dynamic>> onBukaPaket;
 
   @override
@@ -33,8 +30,11 @@ class _BerandaState extends State<Beranda> {
 
   @override
   Widget build(BuildContext context) {
+    // context.watch: ambil daftar paket dari PaketCubit, kalau stoknya berubah beranda ikut digambar ulang
+    final daftarPaket = context.watch<PaketCubit>().state;
+
     // paket yg udah tutup ga ditampilin, terus disaring sesuai chip kategori
-    final tampil = widget.daftarPaket.where((paket) {
+    final tampil = daftarPaket.where((paket) {
       return paket['tutup'] > jamSekarang &&
           (kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih);
     }).toList();
@@ -86,10 +86,8 @@ class _BerandaState extends State<Beranda> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Cari(
-                        daftarPaket: widget.daftarPaket,
-                        onBukaPaket: widget.onBukaPaket,
-                      ),
+                      builder: (context) =>
+                          Cari(onBukaPaket: widget.onBukaPaket),
                     ),
                   );
                 },

@@ -64,6 +64,11 @@ void main() {
     await tester.tap(find.text('Lihat pesanan saya'));
     await tester.pumpAndSettle();
     expect(find.text('Aktif · 1'), findsOneWidget);
+
+    // stok dikurangin lewat PaketCubit: sandwich tinggal 0, beranda nampilin Habis
+    await tester.tap(find.text('Beranda').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Habis'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
+import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -7,16 +10,9 @@ import 'package:sisa_rasa/widgets/timeline_ambil.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
-  const DetailPaket({
-    required this.paket,
-    required this.mitraKeranjang,
-    required this.onTambah,
-    super.key,
-  });
+  const DetailPaket({required this.paket, super.key});
 
   final Map<String, dynamic> paket;
-  final String? mitraKeranjang;
-  final void Function(Map<String, dynamic> paket, int jumlah) onTambah;
 
   @override
   State<DetailPaket> createState() => _DetailPaketState();
@@ -39,9 +35,16 @@ class _DetailPaketState extends State<DetailPaket> {
   }
 
   Future<void> tambahKeKeranjang() async {
+    // context.read: ambil cubit buat manggil fungsinya aja, ga perlu digambar ulang
+    final keranjangCubit = context.read<KeranjangCubit>();
+    final keranjang = keranjangCubit.state;
+    final mitraKeranjang = keranjang.isEmpty
+        ? null
+        : context.read<PaketCubit>().cari(keranjang.keys.first)['mitra'];
+    var gantiMitra = false;
+
     // kalau keranjangnya udah isi paket dari mitra lain, tanya dulu
-    if (widget.mitraKeranjang != null &&
-        widget.mitraKeranjang != widget.paket['mitra']) {
+    if (mitraKeranjang != null && mitraKeranjang != widget.paket['mitra']) {
       final ganti = await showModalBottomSheet<bool>(
         context: context,
         showDragHandle: true,
@@ -61,7 +64,7 @@ class _DetailPaketState extends State<DetailPaket> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Keranjangmu berisi paket dari ${widget.mitraKeranjang}. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
+                'Keranjangmu berisi paket dari $mitraKeranjang. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
                 style: const TextStyle(
                   fontSize: Teks.isi,
                   height: 1.45,
@@ -93,9 +96,10 @@ class _DetailPaketState extends State<DetailPaket> {
         ),
       );
       if (ganti != true) return;
+      gantiMitra = true;
     }
 
-    widget.onTambah(widget.paket, jumlah);
+    keranjangCubit.tambah(widget.paket, jumlah, gantiMitra: gantiMitra);
     if (!mounted) return;
     // snackbar dinaikin 88 biar munculnya di atas bar keranjang, ga nutupin
     ScaffoldMessenger.of(context).showSnackBar(

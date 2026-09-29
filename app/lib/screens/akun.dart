@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
 /// tab akun: profil, kartu dampak, sama menu setelan
 class Akun extends StatelessWidget {
-  const Akun({required this.daftarPesanan, super.key});
-
-  final List<Map<String, dynamic>> daftarPesanan;
+  const Akun({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final daftarPesanan = context.watch<PesananBloc>().state;
     var porsi = 0;
     var hemat = 0;
     for (final pesanan in daftarPesanan) {

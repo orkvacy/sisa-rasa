@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -6,13 +8,11 @@ import 'package:sisa_rasa/utils/format.dart';
 /// tab pesanan, isinya pesanan aktif sama yg udah selesai
 class Pesanan extends StatefulWidget {
   const Pesanan({
-    required this.daftarPesanan,
     required this.onBukaKode,
     required this.onCariPaket,
     super.key,
   });
 
-  final List<Map<String, dynamic>> daftarPesanan;
   final ValueChanged<Map<String, dynamic>> onBukaKode;
   final VoidCallback onCariPaket;
 
@@ -25,8 +25,10 @@ class _PesananState extends State<Pesanan> {
 
   @override
   Widget build(BuildContext context) {
+    // ambil daftar pesanan dari PesananBloc, tiap ada pesanan baru tab ini ikut update
+    final daftarPesanan = context.watch<PesananBloc>().state;
     // semua pesanan di versi ini masih nunggu diambil, jadi masuknya ke aktif
-    final daftar = tabAktif ? widget.daftarPesanan : <Map<String, dynamic>>[];
+    final daftar = tabAktif ? daftarPesanan : <Map<String, dynamic>>[];
 
     return SafeArea(
       child: ListView(
@@ -60,9 +62,7 @@ class _PesananState extends State<Pesanan> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          aktif
-                              ? 'Aktif · ${widget.daftarPesanan.length}'
-                              : 'Selesai',
+                          aktif ? 'Aktif · ${daftarPesanan.length}' : 'Selesai',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: tabAktif == aktif
