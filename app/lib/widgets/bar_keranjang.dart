@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -55,12 +56,15 @@ class BarKeranjang extends StatelessWidget {
                 children: [
                   Text(
                     '$jumlahPorsi porsi · $mitra',
-                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                    style: const TextStyle(
+                      fontSize: Teks.kecil,
+                      color: Colors.white70,
+                    ),
                   ),
                   Text(
                     rupiah(total),
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: Teks.nama,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),

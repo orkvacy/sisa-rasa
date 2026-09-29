@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -34,7 +35,7 @@ class KodeAmbil extends StatelessWidget {
                     'Selesai',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: Teks.tombol,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -48,7 +49,7 @@ class KodeAmbil extends StatelessWidget {
                     child: Text(
                       pesananBaru ? 'Pesanan dibuat' : 'Kode ambil',
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: Teks.judul,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
@@ -60,7 +61,7 @@ class KodeAmbil extends StatelessWidget {
               Text(
                 'Tunjukkan kode ini di kasir ${pesanan['mitra']} saat jam ambil. Bayar di tempat.',
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: Teks.isi,
                   height: 1.45,
                   color: Colors.white,
                 ),
@@ -101,7 +102,7 @@ class KodeAmbil extends StatelessWidget {
                                 pesanan['kode'],
                                 style: const TextStyle(
                                   fontFamily: 'JetBrainsMono',
-                                  fontSize: 38,
+                                  fontSize: Teks.kode,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 3,
                                 ),
@@ -109,7 +110,7 @@ class KodeAmbil extends StatelessWidget {
                               const Text(
                                 'Atau sebutkan kode ini ke kasir',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: Teks.keterangan,
                                   color: Warna.teksPendukung,
                                 ),
                               ),
@@ -169,7 +170,7 @@ class KodeAmbil extends StatelessWidget {
                                   Text(
                                     rupiah(pesanan['total']),
                                     style: const TextStyle(
-                                      fontSize: 22,
+                                      fontSize: Teks.subjudul,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -231,7 +232,10 @@ class KodeAmbil extends StatelessWidget {
                   ),
                   child: const Text(
                     'Lihat pesanan saya',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontSize: Teks.tombol,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),

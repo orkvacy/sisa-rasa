@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -80,7 +81,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
               Text(
                 '${rupiah(widget.paket['hargaDiskon'])} / porsi · sisa $sisa',
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: Teks.kecil,
                   color: Warna.teksPendukung,
                 ),
               ),

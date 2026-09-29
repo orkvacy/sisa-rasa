@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sisa_rasa/screens/kode_ambil.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/kartu_keranjang.dart';
@@ -100,7 +101,7 @@ class _KeranjangState extends State<Keranjang> {
                     const Text(
                       'Keranjang kosong',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: Teks.nama,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -142,7 +143,7 @@ class _KeranjangState extends State<Keranjang> {
                                 child: Text(
                                   pertama['mitra'],
                                   style: const TextStyle(
-                                    fontSize: 16,
+                                    fontSize: Teks.tombol,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -187,7 +188,7 @@ class _KeranjangState extends State<Keranjang> {
                                   child: Text(
                                     'Satu pesanan hanya dari satu mitra, karena diambil langsung di tempat.',
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: Teks.keterangan,
                                       color: Warna.teksPendukung,
                                     ),
                                   ),
@@ -231,7 +232,7 @@ class _KeranjangState extends State<Keranjang> {
                                       ? 'Tutup ${sisaWaktu(pertama['tutup'])} lagi'
                                       : 'Buka ${sisaWaktu(pertama['mulai'])} lagi',
                                   style: const TextStyle(
-                                    fontSize: 13,
+                                    fontSize: Teks.keterangan,
                                     fontWeight: FontWeight.w700,
                                     color: Warna.mendesak,
                                   ),
@@ -243,7 +244,7 @@ class _KeranjangState extends State<Keranjang> {
                           Text(
                             '${jam(pertama['mulai'])} – ${jam(pertama['tutup'])}',
                             style: const TextStyle(
-                              fontSize: 28,
+                              fontSize: Teks.judul,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -300,7 +301,7 @@ class _KeranjangState extends State<Keranjang> {
                               Text(
                                 rupiah(total),
                                 style: const TextStyle(
-                                  fontSize: 22,
+                                  fontSize: Teks.subjudul,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -351,7 +352,7 @@ class _KeranjangState extends State<Keranjang> {
                             child: Text(
                               'Pesan · ${rupiah(total)}',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: Teks.tombol,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -361,7 +362,7 @@ class _KeranjangState extends State<Keranjang> {
                         const Text(
                           'Belum bayar sekarang. Bayar di kasir saat mengambil.',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: Teks.kecil,
                             color: Warna.teksPendukung,
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -66,14 +67,14 @@ class TimelineAmbil extends StatelessWidget {
                     Text(
                       label[i],
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: Teks.kecil,
                         color: Warna.teksPendukung,
                       ),
                     ),
                     Text(
                       jam(waktu[i]),
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: Teks.keterangan,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

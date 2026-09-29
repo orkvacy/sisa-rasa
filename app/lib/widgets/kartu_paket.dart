@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -62,7 +63,7 @@ class KartuPaket extends StatelessWidget {
                     child: Text(
                       '−${persenDiskon(paket['hargaAsli'], paket['hargaDiskon'])}%',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: Teks.kecil,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -79,7 +80,7 @@ class KartuPaket extends StatelessWidget {
                   Text(
                     '${paket['mitra']} · ${paket['jarak']}',
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: Teks.keterangan,
                       color: Warna.teksPendukung,
                     ),
                   ),
@@ -89,7 +90,7 @@ class KartuPaket extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: Teks.tombol,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -99,7 +100,7 @@ class KartuPaket extends StatelessWidget {
                       Text(
                         rupiah(paket['hargaDiskon']),
                         style: const TextStyle(
-                          fontSize: 17,
+                          fontSize: Teks.nama,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -108,7 +109,7 @@ class KartuPaket extends StatelessWidget {
                       Text(
                         rupiah(paket['hargaAsli']),
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: Teks.keterangan,
                           color: Warna.teksPendukung,
                           decoration: TextDecoration.lineThrough,
                         ),
@@ -120,7 +121,7 @@ class KartuPaket extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: Teks.keterangan,
                         color: Warna.teksPendukung,
                       ),
                       children: [

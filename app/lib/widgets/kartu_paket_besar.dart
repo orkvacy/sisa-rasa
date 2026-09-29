@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -60,7 +61,7 @@ class KartuPaketBesar extends StatelessWidget {
                       child: Text(
                         '−${persenDiskon(paket['hargaAsli'], paket['hargaDiskon'])}%',
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: Teks.kecil,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -82,7 +83,7 @@ class KartuPaketBesar extends StatelessWidget {
                       child: Text(
                         sisa == 0 ? 'Habis' : 'Sisa $sisa',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: Teks.kecil,
                           fontWeight: FontWeight.w700,
                           color: sisa <= 3 ? Warna.mendesak : Warna.teks,
                         ),
@@ -100,7 +101,7 @@ class KartuPaketBesar extends StatelessWidget {
                   Text(
                     '${paket['mitra']} · ${paket['jarak']}',
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: Teks.keterangan,
                       color: Warna.teksPendukung,
                     ),
                   ),
@@ -108,7 +109,7 @@ class KartuPaketBesar extends StatelessWidget {
                   Text(
                     paket['nama'],
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: Teks.nama,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -118,7 +119,7 @@ class KartuPaketBesar extends StatelessWidget {
                       Text(
                         rupiah(paket['hargaDiskon']),
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: Teks.hargaBesar,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -130,7 +131,7 @@ class KartuPaketBesar extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: Teks.keterangan,
                             color: Warna.teksPendukung,
                             decoration: TextDecoration.lineThrough,
                           ),
@@ -145,7 +146,7 @@ class KartuPaketBesar extends StatelessWidget {
                       Text(
                         's/d ${jam(paket['tutup'])}',
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: Teks.keterangan,
                           fontWeight: FontWeight.w700,
                           color: Warna.mendesak,
                         ),

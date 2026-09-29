@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -33,7 +34,7 @@ class _PesananState extends State<Pesanan> {
         children: [
           const Text(
             'Pesanan',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: Teks.judul, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 16),
           // segmen aktif / selesai
@@ -94,7 +95,7 @@ class _PesananState extends State<Pesanan> {
                         ? 'Belum ada pesanan aktif'
                         : 'Belum ada pesanan selesai',
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: Teks.nama,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -151,14 +152,14 @@ class _PesananState extends State<Pesanan> {
                             Text(
                               pesanan['mitra'],
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: Teks.keterangan,
                                 color: Warna.teksPendukung,
                               ),
                             ),
                             Text(
                               '${pesanan['isi'][0]['jumlah']} × ${pesanan['isi'][0]['nama']}',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: Teks.tombol,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -206,14 +207,17 @@ class _PesananState extends State<Pesanan> {
                                 pesanan['kode'],
                                 style: const TextStyle(
                                   fontFamily: 'JetBrainsMono',
-                                  fontSize: 20,
+                                  fontSize: Teks.kodeKecil,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Text(
-                                '${jam(pesanan['mulai'])}–${jam(pesanan['tutup'])} · buka ${sisaWaktu(pesanan['mulai'])} lagi',
+                                // kalau jam ambilnya udah mulai, yg ditampilin sisa waktu sampe tutup
+                                sudahBuka(pesanan)
+                                    ? '${jam(pesanan['mulai'])}–${jam(pesanan['tutup'])} · tutup ${sisaWaktu(pesanan['tutup'])} lagi'
+                                    : '${jam(pesanan['mulai'])}–${jam(pesanan['tutup'])} · buka ${sisaWaktu(pesanan['mulai'])} lagi',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: Teks.kecil,
                                   fontWeight: FontWeight.w600,
                                   color: Warna.mendesak,
                                 ),
@@ -224,7 +228,7 @@ class _PesananState extends State<Pesanan> {
                         Text(
                           rupiah(pesanan['total']),
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: Teks.nama,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -260,7 +264,10 @@ class _PesananState extends State<Pesanan> {
             const Text(
               'Pesanan yang sudah diambil pindah ke Selesai.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
+              style: TextStyle(
+                fontSize: Teks.keterangan,
+                color: Warna.teksPendukung,
+              ),
             ),
         ],
       ),
@@ -319,14 +326,17 @@ class _LangkahStatus extends StatelessWidget {
           Text(
             nama,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: Teks.kecil,
               fontWeight: FontWeight.w700,
               color: status == 'belum' ? Warna.teksPendukung : Warna.teks,
             ),
           ),
           Text(
             waktu,
-            style: const TextStyle(fontSize: 12, color: Warna.teksPendukung),
+            style: const TextStyle(
+              fontSize: Teks.kecil,
+              color: Warna.teksPendukung,
+            ),
           ),
         ],
       ),

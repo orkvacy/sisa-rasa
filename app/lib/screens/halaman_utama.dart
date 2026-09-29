@@ -154,9 +154,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           IndexedStack(
             index: tabAktif,
             children: [
-              Beranda(
-                daftarPaket: dummyDeals, 
-              onBukaPaket: bukaDetail),
+              Beranda(daftarPaket: dummyDeals, onBukaPaket: bukaDetail),
               Pesanan(
                 daftarPesanan: daftarPesanan,
                 onBukaKode: (pesanan) => Navigator.push(

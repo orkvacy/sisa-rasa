@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sisa_rasa/screens/cari.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/kartu_paket.dart';
@@ -70,7 +71,10 @@ class _BerandaState extends State<Beranda> {
               const SizedBox(width: 6),
               const Text(
                 'Samarinda Ulu',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  fontSize: Teks.tombol,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const Icon(Icons.keyboard_arrow_down),
               const Spacer(),
@@ -111,7 +115,7 @@ class _BerandaState extends State<Beranda> {
           Text(
             jamSekarang < 18 * 60 ? 'Sore ini' : 'Malam ini',
             style: const TextStyle(
-              fontSize: 36,
+              fontSize: Teks.judulBesar,
               height: 1.1,
               fontWeight: FontWeight.w800,
             ),
@@ -120,7 +124,7 @@ class _BerandaState extends State<Beranda> {
           Text(
             '$totalPorsi porsi dari $jumlahDapur dapur di sekitarmu, siap diambil sebelum mereka tutup.',
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: Teks.isi,
               height: 1.45,
               color: Warna.teksPendukung,
             ),
@@ -184,7 +188,7 @@ class _BerandaState extends State<Beranda> {
                     'Belum ada paket ${kategoriDipilih.toLowerCase()} sore ini',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: Teks.nama,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -259,7 +263,10 @@ class _HeaderJam extends StatelessWidget {
         children: [
           Text(
             judul,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+            style: const TextStyle(
+              fontSize: Teks.subjudul,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           // titik ijo tanda udah buka
           if (sudahBuka) ...[
@@ -280,7 +287,7 @@ class _HeaderJam extends StatelessWidget {
               keterangan,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Teks.keterangan,
                 fontWeight: FontWeight.w600,
                 color: sudahBuka ? Warna.mendesak : Warna.teksPendukung,
               ),

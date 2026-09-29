@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/timeline_ambil.dart';
@@ -53,13 +54,16 @@ class _DetailPaketState extends State<DetailPaket> {
             children: [
               const Text(
                 'Ganti isi keranjang?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontSize: Teks.subjudul,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Keranjangmu berisi paket dari ${widget.mitraKeranjang}. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: Teks.isi,
                   height: 1.45,
                   color: Warna.teksPendukung,
                 ),
@@ -165,7 +169,7 @@ class _DetailPaketState extends State<DetailPaket> {
                         Text(
                           paket['nama'],
                           style: const TextStyle(
-                            fontSize: 26,
+                            fontSize: Teks.subjudul,
                             height: 1.15,
                             fontWeight: FontWeight.w800,
                           ),
@@ -177,7 +181,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             Text(
                               rupiah(paket['hargaDiskon']),
                               style: const TextStyle(
-                                fontSize: 28,
+                                fontSize: Teks.judul,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -187,7 +191,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               child: Text(
                                 rupiah(paket['hargaAsli']),
                                 style: const TextStyle(
-                                  fontSize: 15,
+                                  fontSize: Teks.isi,
                                   color: Warna.teksPendukung,
                                   decoration: TextDecoration.lineThrough,
                                 ),
@@ -209,7 +213,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           child: Text(
                             'Hemat ${rupiah(paket['hargaAsli'] - paket['hargaDiskon'])}',
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: Teks.keterangan,
                               fontWeight: FontWeight.w700,
                               color: Warna.hijau,
                             ),
@@ -219,7 +223,7 @@ class _DetailPaketState extends State<DetailPaket> {
                         Text(
                           paket['deskripsi'],
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: Teks.isi,
                             height: 1.5,
                             color: Warna.teksPendukung,
                           ),
@@ -254,7 +258,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               ? 'Semua $total porsi sudah diselamatkan'
                               : '${total - sisa} dari $total porsi sudah diselamatkan · sisa $sisa',
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: Teks.keterangan,
                             color: Warna.teksPendukung,
                           ),
                         ),
@@ -303,7 +307,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                               ? 'Tutup ${sisaWaktu(paket['tutup'])} lagi'
                                               : 'Buka ${sisaWaktu(paket['mulai'])} lagi',
                                           style: const TextStyle(
-                                            fontSize: 13,
+                                            fontSize: Teks.keterangan,
                                             fontWeight: FontWeight.w700,
                                             color: Warna.mendesak,
                                           ),
@@ -317,7 +321,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               Text(
                                 '${jam(paket['mulai'])} – ${jam(paket['tutup'])}',
                                 style: const TextStyle(
-                                  fontSize: 30,
+                                  fontSize: Teks.judul,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -452,7 +456,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             ],
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: Teks.nama,
                               fontWeight: FontWeight.w700,
                             ),
                             decoration: const InputDecoration(
@@ -499,7 +503,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               ? 'Porsi habis'
                               : 'Tambah · ${rupiah(paket['hargaDiskon'] * jumlah)}',
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: Teks.tombol,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
@@ -23,7 +24,7 @@ class Akun extends StatelessWidget {
         children: [
           const Text(
             'Akun',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: Teks.judul, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 16),
           // Material dipake buat latar kartu, soalnya kalau Container berwarna efek pencet ListTile nya ketutup
@@ -41,7 +42,7 @@ class Akun extends StatelessWidget {
                 child: Text(
                   'RA',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: Teks.nama,
                     fontWeight: FontWeight.w800,
                     color: Warna.hijau,
                   ),
@@ -49,7 +50,10 @@ class Akun extends StatelessWidget {
               ),
               title: const Text(
                 'Rani Amelia',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontSize: Teks.nama,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +72,7 @@ class Akun extends StatelessWidget {
                     child: const Text(
                       'Pembeli',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: Teks.kecil,
                         fontWeight: FontWeight.w700,
                         color: Warna.hijau,
                       ),
@@ -111,7 +115,7 @@ class Akun extends StatelessWidget {
                           Text(
                             '$porsi',
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: Teks.subjudul,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
                             ),
@@ -119,7 +123,7 @@ class Akun extends StatelessWidget {
                           const Text(
                             'porsi terselamatkan',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: Teks.kecil,
                               color: Colors.white70,
                             ),
                           ),
@@ -133,7 +137,7 @@ class Akun extends StatelessWidget {
                           Text(
                             rupiah(hemat),
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: Teks.subjudul,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
                             ),
@@ -141,7 +145,7 @@ class Akun extends StatelessWidget {
                           const Text(
                             'kamu hemat',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: Teks.kecil,
                               color: Colors.white70,
                             ),
                           ),
@@ -160,7 +164,7 @@ class Akun extends StatelessWidget {
             child: Text(
               'Akun',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Teks.keterangan,
                 fontWeight: FontWeight.w700,
                 color: Warna.teksPendukung,
               ),
@@ -188,7 +192,7 @@ class Akun extends StatelessWidget {
             child: Text(
               'Preferensi',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Teks.keterangan,
                 fontWeight: FontWeight.w700,
                 color: Warna.teksPendukung,
               ),
@@ -219,7 +223,7 @@ class Akun extends StatelessWidget {
             child: Text(
               'Lainnya',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Teks.keterangan,
                 fontWeight: FontWeight.w700,
                 color: Warna.teksPendukung,
               ),
