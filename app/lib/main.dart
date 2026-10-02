@@ -19,10 +19,12 @@ class SisaRasaApp extends StatelessWidget {
     // biar semua halaman (termasuk yg dibuka pake Navigator.push) bisa akses
     return MultiBlocProvider(
       providers: [
+        // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
         BlocProvider(create: (context) => PaketCubit()),
         BlocProvider(create: (context) => KeranjangCubit()),
         BlocProvider(create: (context) => PesananBloc()),
       ],
+      // MaterialApp: akar aplikasi, ngatur judul, tema, sama halaman awal
       child: MaterialApp(
         title: 'Sisa Rasa',
         debugShowCheckedModeBanner: false,

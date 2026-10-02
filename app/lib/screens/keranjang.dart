@@ -81,6 +81,7 @@ class _KeranjangState extends State<Keranjang> {
           ),
           actions: [
             if (ids.isNotEmpty)
+              // TextButton: tombol tulisan doang tanpa latar
               TextButton(
                 onPressed: () => context.read<KeranjangCubit>().kosongkan(),
                 child: const Text(
@@ -94,7 +95,7 @@ class _KeranjangState extends State<Keranjang> {
           ],
         ),
         body: ids.isEmpty
-            // keranjang kosong
+            // Center: kalau keranjang kosong, isinya ditaruh di tengah layar
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -301,6 +302,7 @@ class _KeranjangState extends State<Keranjang> {
                                 ),
                               ],
                             ),
+                            // Divider: garis pemisah horizontal
                             const Divider(height: 24, color: Warna.garis),
                             Row(
                               children: [

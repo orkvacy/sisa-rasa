@@ -28,7 +28,7 @@ class _CariState extends State<Cari> {
     }).toList();
 
     return Scaffold(
-      // appBar: tombol back nya udah otomatis Navigator.pop
+      // AppBar: bar atas, tombol back nya udah otomatis Navigator.pop
       appBar: AppBar(
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,

@@ -99,6 +99,7 @@ class _BerandaState extends State<Beranda> {
     }
     final jumlahDapur = tampil.map((paket) => paket['mitra']).toSet().length;
 
+<<<<<<< HEAD
     Widget baris(Map<String, dynamic> paket) {
       return BarisPaket(
         paket: paket,
@@ -109,7 +110,11 @@ class _BerandaState extends State<Beranda> {
     }
 
     // biar ga ketutup status bar
+=======
+    // SafeArea: biar ga ketutup status bar
+>>>>>>> origin/main
     return SafeArea(
+      // ListView: list yg bisa discroll ke bawah
       child: ListView(
         // bawahnya dikasih jarak gede biar item terakhir ga ketutup navigasi + bar keranjang
         padding: const EdgeInsets.fromLTRB(
@@ -119,22 +124,47 @@ class _BerandaState extends State<Beranda> {
           NavigasiMelayang.ruangBawahKeranjang,
         ),
         children: [
+          // Row: nyusun widget ke samping (horizontal)
           Row(
             children: [
               const Icon(Icons.place_outlined, size: 20),
               const SizedBox(width: 6),
+<<<<<<< HEAD
               Text(
+=======
+              // Text: nampilin tulisan
+              const Text(
+>>>>>>> origin/main
                 'Samarinda Ulu',
                 style: teks.labelLarge?.copyWith(fontSize: 15),
               ),
               const Icon(Icons.keyboard_arrow_down),
+              // Spacer: ngisi ruang kosong, jadi tombol di kanannya kedorong ke ujung
               const Spacer(),
+<<<<<<< HEAD
+=======
+              // IconButton: icon cari, pindah ke halaman cari
+              IconButton(
+                tooltip: 'Cari paket',
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Cari(onBukaPaket: widget.onBukaPaket),
+                    ),
+                  );
+                },
+              ),
+>>>>>>> origin/main
               // icon favorit, halamannya belum ada
               IconButton(
                 tooltip: 'Mitra favorit',
                 icon: const Icon(Icons.favorite_border),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
+                    // SnackBar: pesan kecil yg muncul sebentar di bawah layar
                     const SnackBar(
                       content: Text(
                         'Mitra favorit belum tersedia di versi ini',
@@ -162,6 +192,7 @@ class _BerandaState extends State<Beranda> {
           ),
           const SizedBox(height: 16),
 
+<<<<<<< HEAD
           // kolom cari selalu tampil, diketuk langsung pindah ke halaman cari
           TextField(
             readOnly: true,
@@ -174,6 +205,9 @@ class _BerandaState extends State<Beranda> {
           const SizedBox(height: 12),
 
           // chip kategori bisa digeser ke samping
+=======
+          // SingleChildScrollView: chip kategori bisa digeser ke samping
+>>>>>>> origin/main
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -194,8 +228,10 @@ class _BerandaState extends State<Beranda> {
 
           // kalau kategori yg dipilih ga ada paketnya
           if (tampil.isEmpty)
+            // Padding: ngasih jarak di sekeliling child nya
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 48),
+              // Column: nyusun widget ke bawah (vertical)
               child: Column(
                 children: [
                   Icon(
@@ -218,6 +254,7 @@ class _BerandaState extends State<Beranda> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  // OutlinedButton: tombol yg cuma ada garis pinggirnya
                   OutlinedButton(
                     onPressed: () => setState(() => kategoriDipilih = 'Semua'),
                     child: const Text('Lihat semua kategori'),

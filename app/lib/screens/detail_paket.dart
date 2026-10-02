@@ -75,7 +75,7 @@ class _DetailPaketState extends State<DetailPaket> {
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                // Navigator.pop sambil ngirim jawaban true
+                // FilledButton: tombol utama yg warnanya penuh, Navigator.pop sambil ngirim jawaban true
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(backgroundColor: Warna.merah),

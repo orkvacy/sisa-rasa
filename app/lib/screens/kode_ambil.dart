@@ -26,6 +26,7 @@ class KodeAmbil extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Align: naruh child di posisi tertentu, di sini kanan
               Align(
                 alignment: Alignment.centerRight,
                 // Navigator.pop ngirim false, berarti ga pindah tab
@@ -91,7 +92,7 @@ class KodeAmbil extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // qr asli, isinya kode ambil jadi bisa di scan kasir
+                              // QrImageView: qr asli, isinya kode ambil jadi bisa di scan kasir
                               QrImageView(
                                 data: pesanan['kode'],
                                 size: 150,

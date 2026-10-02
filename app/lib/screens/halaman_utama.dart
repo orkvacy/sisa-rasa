@@ -65,6 +65,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   @override
   Widget build(BuildContext context) {
+    // Scaffold: kerangka halaman, ada body sama bottomNavigationBar
     return Scaffold(
       // extendBody: halaman tab nerusin sampe belakang navigasi melayang,
       // snackbar tetep muncul di atas navigasi karena navigasinya bottomNavigationBar
@@ -97,6 +98,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
               builder: (context, keranjang) {
                 // bar keranjang cuma muncul di beranda, itupun kalau keranjang ada isinya
                 if (tabAktif != 0 || keranjang.isEmpty) {
+                  // SizedBox: kotak ukuran tetap, .shrink() berarti ukurannya 0 jadi ga keliatan
                   return const SizedBox.shrink();
                 }
                 final paketCubit = context.read<PaketCubit>();
@@ -120,6 +122,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                 );
               },
             ),
+<<<<<<< HEAD
             NavigasiMelayang(
               tabs: _tabs,
               tabAktif: tabAktif,
@@ -127,6 +130,36 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             ),
           ],
         ),
+=======
+          ),
+        ],
+      ),
+      // NavigationBar: navigasi bawah buat pindah halaman utama
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.white,
+        indicatorColor: Warna.softGreen,
+        selectedIndex: tabAktif,
+        onDestinationSelected: (index) => setState(() => tabAktif = index),
+        destinations: const [
+          // NavigationDestination: satu tombol tab di navigation bar
+          NavigationDestination(
+            // Icon: nampilin ikon bawaan material (Icons.xxx)
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home, color: Warna.hijau),
+            label: 'Beranda',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long, color: Warna.hijau),
+            label: 'Pesanan',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person, color: Warna.hijau),
+            label: 'Akun',
+          ),
+        ],
+>>>>>>> origin/main
       ),
     );
   }
