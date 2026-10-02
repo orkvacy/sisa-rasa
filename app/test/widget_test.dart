@@ -53,10 +53,10 @@ void main() {
     await tester.tap(find.text('Tambah · Rp42.000'));
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
-    expect(find.text('3 porsi · Ibis Hotel'), findsOneWidget);
+    expect(find.text('3 porsi'), findsOneWidget);
 
     // buka keranjang lalu pesan
-    await tester.tap(find.text('3 porsi · Ibis Hotel'));
+    await tester.tap(find.text('3 porsi'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Pesan · Rp42.000'));
     await tester.pumpAndSettle();

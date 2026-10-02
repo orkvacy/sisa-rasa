@@ -110,10 +110,9 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                       keranjang[id]!;
                 }
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: BarKeranjang(
                     foto: pertama['foto'],
-                    mitra: pertama['mitra'],
                     jumlahPorsi: porsi,
                     total: total,
                     onTap: bukaKeranjang,

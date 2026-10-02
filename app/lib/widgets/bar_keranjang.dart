@@ -1,86 +1,107 @@
 import 'package:flutter/material.dart';
-import 'package:sisa_rasa/theme/teks.dart';
-import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
-/// bar item gelap yg ngambang di atas navigation bar kalau keranjang ada isinya
+/// pil gelap yg ngambang tepat di atas navigasi melayang kalau keranjang ada isinya.
+/// lebarnya disamain sama navigasi (274) biar rapi satu kolom
 class BarKeranjang extends StatelessWidget {
   const BarKeranjang({
     required this.foto,
-    required this.mitra,
     required this.jumlahPorsi,
     required this.total,
     required this.onTap,
     super.key,
   });
 
+  static const _lebar = 274.0;
+
   final String foto;
-  final String mitra;
   final int jumlahPorsi;
   final int total;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(8, 8, 14, 8),
-        decoration: BoxDecoration(
-          color: Warna.gelap,
-          borderRadius: BorderRadius.circular(18),
-          // BoxShadow: bayangan agak tebel biar keliatan di atas kartu
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                foto,
-                width: 44,
-                height: 44,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$jumlahPorsi porsi · $mitra',
-                    style: const TextStyle(
-                      fontSize: Teks.kecil,
-                      color: Colors.white70,
+    final cs = Theme.of(context).colorScheme;
+    final teks = Theme.of(context).textTheme;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _lebar),
+        // Material + InkWell: biar ada efek riak waktu diketuk
+        child: Material(
+          color: cs.inverseSurface,
+          borderRadius: BorderRadius.circular(999),
+          elevation: 6,
+          shadowColor: cs.scrim.withValues(alpha: 0.4),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(999),
+            child: Semantics(
+              button: true,
+              label: 'Keranjang, $jumlahPorsi porsi, ${rupiah(total)}',
+              excludeSemantics: true,
+              child: Padding(
+                // tinggi total 56 (>= 48 dp) buat area sentuh
+                padding: const EdgeInsets.fromLTRB(8, 8, 14, 8),
+                child: Row(
+                  children: [
+                    ClipOval(
+                      child: Image.asset(
+                        foto,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  Text(
-                    rupiah(total),
-                    style: const TextStyle(
-                      fontSize: Teks.nama,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$jumlahPorsi porsi',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: teks.labelSmall?.copyWith(
+                              color: cs.onInverseSurface.withValues(
+                                alpha: 0.75,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            rupiah(total),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: teks.titleSmall?.copyWith(
+                              color: cs.onInverseSurface,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      'Keranjang',
+                      style: teks.labelSmall?.copyWith(
+                        color: cs.onInverseSurface,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: cs.onInverseSurface,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const Text(
-              'Keranjang',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.white),
-          ],
+          ),
         ),
       ),
     );
