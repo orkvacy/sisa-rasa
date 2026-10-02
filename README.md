@@ -3,9 +3,6 @@
 Aplikasi untuk menjual makanan berlebih dari hotel, restoran, dan bakery dengan
 harga diskon sebelum terbuang.
 
-Repo ini dikerjakan untuk posttest praktikum Pemrograman Piranti Bergerak,
-dibangun bertahap mengikuti materi tiap pertemuan.
-
 ## Kenapa dibuat
 
 Tiap hari banyak makanan yang masih layak dibuang cuma karena tidak habis
@@ -32,6 +29,23 @@ yang pesan, porsi ditahan 15 menit sampai dibayar, paket hilang sendiri kalau
 jam ambilnya sudah lewat, dan satu pesanan cuma boleh dari satu mitra karena
 diambil langsung di tempat.
 
+## Desain
+
+Semua layar, alur, dan prototype-nya ada di Figma. Kalau mau tahu nanti
+tampilan aplikasinya bakal seperti apa, lihat di sini:
+
+[Sisa Rasa Mobile UI](https://www.figma.com/design/30sjBpMW2zR5TOnABwM7Hd/Sisa-Rasa-Mobile-UI?node-id=146-3241)
+
+## Branch
+
+| Branch | Isinya |
+| --- | --- |
+| `main` | Fitur yang sudah aman dan siap masuk production. Cuma diisi lewat PR dari `develop`. |
+| `develop` | Tempat fitur dikumpulkan dan dites dulu, semacam staging. Branch fitur dibuat dari sini dan di-PR balik ke sini. |
+| `posttest` | Khusus praktikum Pemrograman Piranti Bergerak. Scope-nya beda, ngikutin materi tiap modul, jadi tidak di-merge ke `main` maupun `develop`. |
+
+Alurnya: `fitur/...` → `develop` → `main`.
+
 ## Tech Stack
 
 - Flutter dan Dart, dengan GoRouter, Cubit/BLoC, dan Clean Architecture
@@ -49,7 +63,7 @@ backend/   server Go
 ## Dokumentasi
 
 - [PRD](docs/PRD.md) - latar belakang produk dan alasan perancangannya
-- [SRS](docs/SRS.md) - daftar kebutuhan yang harus dipenuhi
+- [SRS](docs/srs.md) - daftar kebutuhan yang harus dipenuhi
 - [Rencana Increment](docs/RENCANA-INCREMENT.md) - metode dan urutan pengerjaan (ongoing)
 - [Milestone](docs/MILESTONE.md) - progress tiap checkpoint (ongoing)
 
