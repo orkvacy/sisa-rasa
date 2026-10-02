@@ -3,6 +3,16 @@
 Aplikasi untuk menjual makanan berlebih dari hotel, restoran, dan bakery dengan
 harga diskon sebelum terbuang.
 
+## Kelompok
+
+| NIM | Nama |
+| --- | --- |
+| 2409106046 | Muhammad Nabil Rahmatullah |
+| 2409106049 | Muhammad Naufal Adi Brata Putra Suharizman Poerwo |
+| 2409106050 | Ananda Daffa Harahap |
+| 2409106056 | Muhammad Dzaki Rifa'I |
+| 2409106084 | Aulia Natasya |
+
 ## Kenapa dibuat
 
 Tiap hari banyak makanan yang masih layak dibuang cuma karena tidak habis
@@ -51,6 +61,65 @@ Alurnya: `fitur/...` → `develop` → `main`.
 - Flutter dan Dart, dengan GoRouter, Cubit/BLoC, dan Clean Architecture
 - Go dan SQLite untuk backend
 - Dijalankan di VPS sendiri
+
+## Keamanan
+
+Karena aplikasinya pegang uang (pembayaran pembeli dan saldo mitra), keamanan
+dipikirin dari awal. Belum semuanya jadi, diterapkan bertahap sesuai SRS.
+
+### Aplikasi (Flutter)
+
+- **HTTPS saja** (NF-06). Koneksi `http://` biasa diblok lewat
+  `network_security_config` di Android dan App Transport Security di iOS.
+- **SSL pinning.** Aplikasi cuma mau ngobrol sama server yang public key
+  sertifikatnya cocok sama yang disimpan di aplikasi, jadi tidak bisa
+  disadap lewat sertifikat palsu (man-in-the-middle). Yang di-pin public key-nya,
+  bukan sertifikatnya, karena sertifikat Let's Encrypt diperpanjang tiap 90 hari.
+  Saat perpanjang key-nya dipakai ulang, dan disiapkan satu pin cadangan
+  biar aplikasi tidak putus kalau key harus diganti.
+- **Token disimpan di `flutter_secure_storage`** (Keystore di Android, Keychain
+  di iOS), bukan di `SharedPreferences`.
+- **Tidak ada rahasia di aplikasi.** Server key payment gateway dan sejenisnya
+  cuma ada di server. Apa pun yang ada di APK dianggap bisa dibongkar.
+- **Build rilis diobfuscate** pakai `flutter build --obfuscate --split-debug-info`.
+- **Request ke server dihemat.** Kolom cari pakai debounce (nunggu ±400 ms
+  setelah berhenti ngetik baru kirim request), request lama yang belum selesai
+  dibatalin kalau ada yang baru, tombol bayar/pesan dikunci selama request
+  jalan biar tidak kepencet dua kali, dan daftar paket dimuat per halaman
+  (pagination). Ini cuma biar server tidak kebanjiran dari aplikasi sendiri,
+  perlindungan aslinya tetap rate limit di server.
+
+### Server (Go)
+
+- **Kata sandi di-hash bcrypt** dan tidak pernah disimpan atau dikirim balik
+  dalam bentuk asli (F-31). Bcrypt otomatis nambahin salt acak di tiap hash,
+  jadi dua akun dengan sandi yang sama hasil hash-nya tetap beda dan tidak
+  bisa dibobol pakai tabel hash jadi (rainbow table). Cost-nya diset 12 biar
+  sengaja lambat kalau dicoba brute force.
+- **Login tidak bocorin info.** Pesan gagalnya sama untuk email tidak terdaftar
+  dan sandi salah, plus dibatasi jumlah percobaannya (rate limit) biar tidak
+  bisa ditebak terus-terusan.
+- **Rate limit di semua endpoint** per IP dan per akun, lebih ketat di login
+  dan pembuatan pesanan. Kelewatan batas dapat respons `429 Too Many Requests`.
+- **Token sesi berumur pendek** dan dicabut waktu logout (F-33).
+- **Hak akses dicek di server** di tiap endpoint, bukan cuma disembunyiin di
+  aplikasi. Pembeli tidak bisa manggil endpoint mitra atau admin (F-32).
+- **Semua input divalidasi ulang di server** (NF-09). Query ke SQLite pakai
+  parameter, tidak pernah gabung string, biar aman dari SQL injection.
+- **Stok dikurangi dalam satu transaksi** biar dua orang yang rebutan porsi
+  terakhir tidak bikin stok minus (NF-07).
+- **Status lunas cuma dari notifikasi payment gateway** yang tanda tangannya
+  sudah diverifikasi, bukan dari laporan aplikasi (NF-10).
+- **Pencairan saldo pakai kunci unik** jadi tidak pernah terkirim dua kali (NF-11).
+- **Kode ambil acak dan sekali pakai**, dicek ke server waktu dipindai mitra.
+- **Rahasia disimpan di environment variable**, tidak pernah di-commit ke repo.
+
+### Infrastruktur (VPS)
+
+- Sertifikat TLS dari Let's Encrypt di belakang reverse proxy, dengan HSTS.
+- Firewall cuma buka port 80, 443, dan SSH. SSH cuma pakai key, login root
+  dimatiin, ditambah fail2ban.
+- Database SQLite di-backup berkala ke tempat terpisah.
 
 ## Struktur folder (sementara)
 
