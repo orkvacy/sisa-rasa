@@ -46,15 +46,91 @@ tampilan aplikasinya bakal seperti apa, lihat di sini:
 
 [Sisa Rasa Mobile UI](https://www.figma.com/design/30sjBpMW2zR5TOnABwM7Hd/Sisa-Rasa-Mobile-UI?node-id=146-3241)
 
-## Branch
+## Alur kerja & rilis
+
+Repo ini **tidak memakai branch sebagai environment**. Kalau `develop` = staging
+dan `main` = production, yang dites di staging dan yang naik ke production itu
+dua hasil build yang beda, jadi lolos di staging belum tentu aman di production.
+Belum lagi merge antar branch yang sering bentrok dan hotfix yang harus di-merge
+balik.
+
+Jadi prinsipnya: **build sekali, file yang sama dipromosikan.**
+
+```
+fitur/... ──PR──▶ main ──▶ build otomatis (APK + binary Go)
+                              │
+                              ├─▶ staging     otomatis tiap ada merge ke main
+                              └─▶ production  pas dibikin tag versi, file yang SAMA
+```
+
+### Branch
 
 | Branch | Isinya |
 | --- | --- |
-| `main` | Fitur yang sudah aman dan siap masuk production. Cuma diisi lewat PR dari `develop`. |
-| `develop` | Tempat fitur dikumpulkan dan dites dulu, semacam staging. Branch fitur dibuat dari sini dan di-PR balik ke sini. |
-| `posttest` | Khusus praktikum Pemrograman Piranti Bergerak. Scope-nya beda, ngikutin materi tiap modul, jadi tidak di-merge ke `main` maupun `develop`. |
+| `main` | Satu-satunya branch utama. Selalu harus bisa di-build dan lolos tes. |
+| `fitur/<nama>` | Tempat ngerjain satu fitur, dibuat dari `main` lalu di-PR balik ke `main`. Contoh: `fitur/keranjang`, `fitur/login`. |
+| `perbaikan/<nama>` | Sama kayak fitur, tapi buat benerin bug. Contoh: `perbaikan/stok-minus`. |
+| `posttest` | Khusus praktikum Pemrograman Piranti Bergerak. Scope-nya beda, ngikutin materi tiap modul, jadi tidak di-merge ke `main`. |
 
-Alurnya: `fitur/...` → `develop` → `main`.
+Aturan PR ke `main`:
+
+- Branch fitur dibikin kecil dan umurnya pendek (idealnya beres dalam beberapa
+  hari), biar tidak jauh ketinggalan dari `main` dan tidak bentrok.
+- `flutter analyze` dan `flutter test` harus lolos.
+- Di-review dan di-approve dulu sebelum di-merge.
+- Merge pakai *Squash and merge*, jadi satu PR = satu commit rapi di `main`.
+- Branch fitur dihapus setelah di-merge.
+
+### Environment
+
+Staging dan production jalan dari kode yang sama. Bedanya cuma di
+**konfigurasi**, bukan di kode:
+
+| | Staging | Production |
+| --- | --- | --- |
+| Kapan update | Otomatis tiap ada merge ke `main` | Pas dibikin tag versi (`v1.0.0`) |
+| Server | `staging` di VPS | `production` di VPS |
+| Database | Terpisah, isinya data uji | Data asli |
+| Payment gateway | Mode sandbox | Mode live |
+| Dipakai | Tim, buat ngetes | Pengguna asli |
+
+- Server Go baca konfigurasi dari environment variable (alamat database,
+  server key payment gateway, dll), tidak ada yang ditulis di kode.
+- Aplikasi Flutter dapat alamat server lewat `--dart-define` waktu build:
+
+  ```bash
+  flutter build apk --dart-define=API_URL=https://staging.contoh.id
+  ```
+
+### Rilis ke production
+
+1. Pastikan versi di `main` sudah dicek di staging dan aman.
+2. Bikin tag versi di commit itu, lalu push tag-nya:
+
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+3. Build dari tag itu dinaikkan ke production dan APK-nya dilampirin di
+   halaman Releases.
+
+Penomoran versinya `vMAJOR.MINOR.PATCH`:
+
+- **PATCH** (`v1.0.1`): cuma perbaikan bug.
+- **MINOR** (`v1.1.0`): ada fitur baru, yang lama tetap jalan.
+- **MAJOR** (`v2.0.0`): ada perubahan besar yang bikin versi lama tidak cocok
+  lagi, misalnya API server berubah total.
+
+### Kalau ada bug di production
+
+Perbaikannya tetap lewat `main`: bikin `perbaikan/<nama>` dari `main`, PR,
+merge, cek di staging, terus bikin tag patch baru (misal `v1.0.1`). Tidak ada
+branch production yang perlu di-merge balik.
+
+> **Status:** alur ini sudah disepakati, tapi build dan deploy otomatisnya
+> (GitHub Actions) belum dibuat. Sementara ini tes dan build masih dijalankan
+> manual sebelum merge.
 
 ## Tech Stack
 
