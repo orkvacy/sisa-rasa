@@ -1,6 +1,6 @@
 # PRD Sisa Rasa
 
-> Dokumen terkait: [RENCANA-INCREMENT.md](RENCANA-INCREMENT.md) (metode dan rencana kerja per minggu) · [MILESTONE.md](MILESTONE.md) (buat track progress)
+> Dokumen terkait: [SRS](srs.md) (daftar kebutuhan yang bisa dicek satu per satu)
 
 ## 1. Tentang Sisa Rasa
 
@@ -62,8 +62,15 @@ Bagian ini bersifat mengikat. Menambah salah satunya butuh keputusan sadar, buka
 
 - Metode bayar selain QRIS, GoPay, dan Virtual Account (termasuk bayar di tempat), saldo pembeli, poin, dan voucher
 - Skor higienis mitra
-- Chat di dalam aplikasi, notifikasi, rating dan ulasan. Menghubungi mitra cukup lewat telepon atau WhatsApp di luar aplikasi
+- Chat di dalam aplikasi, rating dan ulasan. Menghubungi mitra cukup lewat telepon atau WhatsApp di luar aplikasi
 - Pelacakan lokasi pembeli secara langsung. Petunjuk arah cukup membuka aplikasi peta
+
+Notifikasi masuk lingkup, tapi khusus untuk status pesanan dan pengingat
+(batas bayar dan jam tutup ambil), karena alurnya bergantung pada waktu.
+
+Pesanan yang tidak diambil sampai jam tutup ambil bukan lagi tanggung jawab
+mitra: dana tidak dikembalikan dan tetap diteruskan ke mitra. Aturan ini
+ditampilkan ke pembeli sebelum membayar (SRS F-56).
 
 Meja Berbagi (donasi paket yang tidak terjual) dan verifikasi mitra oleh admin
 sudah masuk SRS sebagai kebutuhan opsional (F-22, F-37).
