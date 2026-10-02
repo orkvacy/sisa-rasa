@@ -2,21 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sisa_rasa/main.dart';
+import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 void main() {
   setUp(() {});
 
-  testWidgets('beranda nampilin judul, kelompok jam, dan navigation bar', (tester) async {
+  testWidgets('beranda nampilin judul, kelompok jam, dan navigasi melayang', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
 
     expect(find.text('Sore ini'), findsOneWidget);
     expect(find.text('Sekarang'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigasiMelayang), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('pindah tab lewat navigation bar', (tester) async {
+  testWidgets('pindah tab lewat navigasi melayang', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
 
@@ -30,7 +33,9 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('detail, tambah, keranjang, pesan, sampai kode ambil', (tester) async {
+  testWidgets('detail, tambah, keranjang, pesan, sampai kode ambil', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
 

@@ -8,8 +8,8 @@ import 'package:sisa_rasa/screens/detail_paket.dart';
 import 'package:sisa_rasa/screens/keranjang.dart';
 import 'package:sisa_rasa/screens/kode_ambil.dart';
 import 'package:sisa_rasa/screens/pesanan.dart';
-import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/widgets/bar_keranjang.dart';
+import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// halaman induk, yg punya navigation bar (beranda, pesanan, akun)
 /// data paket, keranjang, pesanan udah pindah ke cubit/bloc (lihat main.dart)
@@ -22,6 +22,24 @@ class HalamanUtama extends StatefulWidget {
 }
 
 class _HalamanUtamaState extends State<HalamanUtama> {
+  static const _tabs = [
+    TabNavigasi(
+      label: 'Beranda',
+      ikon: Icons.home_outlined,
+      ikonAktif: Icons.home,
+    ),
+    TabNavigasi(
+      label: 'Pesanan',
+      ikon: Icons.receipt_long_outlined,
+      ikonAktif: Icons.receipt_long,
+    ),
+    TabNavigasi(
+      label: 'Akun',
+      ikon: Icons.person_outline,
+      ikonAktif: Icons.person,
+    ),
+  ];
+
   // 0 beranda, 1 pesanan, 2 akun
   // cuma dipake di halaman ini, jadi cukup setState, ga perlu cubit
   int tabAktif = 0;
@@ -48,34 +66,34 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Stack: halaman tab di belakang, bar keranjang ngambang di depannya
-      body: Stack(
+      // extendBody: halaman tab nerusin sampe belakang navigasi melayang,
+      // snackbar tetep muncul di atas navigasi karena navigasinya bottomNavigationBar
+      extendBody: true,
+      // IndexedStack: cuma nampilin 1 tab, tapi tab lain ga di-reset (scroll nya tetep)
+      body: IndexedStack(
+        index: tabAktif,
         children: [
-          // IndexedStack: cuma nampilin 1 tab, tapi tab lain ga di-reset (scroll nya tetep)
-          IndexedStack(
-            index: tabAktif,
-            children: [
-              Beranda(onBukaPaket: bukaDetail),
-              Pesanan(
-                onBukaKode: (pesanan) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => KodeAmbil(pesanan: pesanan),
-                  ),
-                ),
-                onCariPaket: () => setState(() => tabAktif = 0),
+          Beranda(onBukaPaket: bukaDetail),
+          Pesanan(
+            onBukaKode: (pesanan) => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => KodeAmbil(pesanan: pesanan),
               ),
-              const Akun(),
-            ],
+            ),
+            onCariPaket: () => setState(() => tabAktif = 0),
           ),
-          // Positioned: nempelin bar keranjang di bawah, kiri kanan dikasih jarak
-          // (Positioned harus anak langsung Stack, makanya BlocBuilder nya di dalem)
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 12,
+          const Akun(),
+        ],
+      ),
+      // bar keranjang sama navigasi melayang numpuk di bawah, latarnya transparan
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             // BlocBuilder: cuma bagian ini yg digambar ulang tiap isi keranjang berubah
-            child: BlocBuilder<KeranjangCubit, Map<String, int>>(
+            BlocBuilder<KeranjangCubit, Map<String, int>>(
               builder: (context, keranjang) {
                 // bar keranjang cuma muncul di beranda, itupun kalau keranjang ada isinya
                 if (tabAktif != 0 || keranjang.isEmpty) {
@@ -91,41 +109,25 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                       (paketCubit.cari(id)['hargaDiskon'] as int) *
                       keranjang[id]!;
                 }
-                return BarKeranjang(
-                  foto: pertama['foto'],
-                  mitra: pertama['mitra'],
-                  jumlahPorsi: porsi,
-                  total: total,
-                  onTap: bukaKeranjang,
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: BarKeranjang(
+                    foto: pertama['foto'],
+                    mitra: pertama['mitra'],
+                    jumlahPorsi: porsi,
+                    total: total,
+                    onTap: bukaKeranjang,
+                  ),
                 );
               },
             ),
-          ),
-        ],
-      ),
-      // NavigationBar: navigasi bawah buat pindah halaman utama
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.white,
-        indicatorColor: Warna.softGreen,
-        selectedIndex: tabAktif,
-        onDestinationSelected: (index) => setState(() => tabAktif = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Warna.hijau),
-            label: 'Beranda',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long, color: Warna.hijau),
-            label: 'Pesanan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Warna.hijau),
-            label: 'Akun',
-          ),
-        ],
+            NavigasiMelayang(
+              tabs: _tabs,
+              tabAktif: tabAktif,
+              onPilih: (index) => setState(() => tabAktif = index),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/kartu_paket.dart';
 import 'package:sisa_rasa/widgets/kartu_paket_besar.dart';
+import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// landing page, paketnya dikelompokin per jam buka
 class Beranda extends StatefulWidget {
@@ -63,7 +64,12 @@ class _BerandaState extends State<Beranda> {
     return SafeArea(
       child: ListView(
         // bawahnya dikasih jarak gede biar kartu terakhir ga ketutup bar keranjang
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          NavigasiMelayang.ruangBawahKeranjang,
+        ),
         children: [
           Row(
             children: [
