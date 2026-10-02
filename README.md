@@ -13,20 +13,24 @@ terjual sebelum toko tutup. Sementara itu ada mahasiswa dan keluarga yang lagi
 cari makanan murah. Aplikasi ini jadi jembatannya.
 
 Alurnya sederhana. Mitra mengunggah paket makanan berlebih hari itu dengan
-harga diskon, pembeli memesan lewat aplikasi dan dapat kode ambil, lalu
-mengambil sendiri pada jam yang sudah ditentukan sambil bayar di tempat.
+harga diskon, pembeli memesan dan membayar lewat aplikasi (QRIS, GoPay, atau
+VA) lalu dapat kode ambil, kemudian mengambil sendiri pada jam yang sudah
+ditentukan.
 
 ## Yang bisa dilakukan
 
-Ada dua peran, dibedakan lewat akun waktu login.
+Ada tiga peran, dibedakan lewat akun waktu login: pembeli, mitra, dan admin.
 
-Pembeli bisa mencari paket, lihat detailnya, masukkan ke keranjang, pesan, dan
-lihat riwayat pesanannya. Mitra bisa mengunggah paket, mengelola paket
-miliknya, dan menandai pesanan yang sudah diambil.
+Pembeli bisa mencari paket, lihat detailnya, masukkan ke keranjang, bayar lewat
+QRIS, GoPay, atau VA, lalu memantau status pesanannya sampai diambil. Mitra
+bisa mengelola paket dan stoknya, menyiapkan pesanan, memindai kode ambil, dan
+menerima saldo yang dicairkan otomatis ke rekening. Admin memverifikasi mitra
+dan memantau angka platform.
 
 Beberapa aturan yang bikin aplikasinya terasa nyata: stok berkurang tiap ada
-yang pesan, paket hilang sendiri kalau jam ambilnya sudah lewat, dan satu
-pesanan cuma boleh dari satu mitra karena diambil langsung di tempat.
+yang pesan, porsi ditahan 15 menit sampai dibayar, paket hilang sendiri kalau
+jam ambilnya sudah lewat, dan satu pesanan cuma boleh dari satu mitra karena
+diambil langsung di tempat.
 
 ## Tech Stack
 
@@ -38,7 +42,7 @@ pesanan cuma boleh dari satu mitra karena diambil langsung di tempat.
 
 ```
 docs/      dokumentasi
-mobile/    aplikasi Flutter
+app/       aplikasi Flutter
 backend/   server Go
 ```
 

@@ -4,7 +4,7 @@ import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/halaman_utama.dart';
-import 'package:sisa_rasa/theme/warna.dart';
+import 'package:sisa_rasa/theme/tema.dart';
 
 void main() {
   runApp(const SisaRasaApp());
@@ -28,17 +28,12 @@ class SisaRasaApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Sisa Rasa',
         debugShowCheckedModeBanner: false,
-        // theme: warna ijo hutan, latar krem, font jakarta sans. ngikut figma v2
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Warna.hijau,
-            primary: Warna.hijau,
-            surface: Warna.latar,
-          ),
-          scaffoldBackgroundColor: Warna.latar,
-          fontFamily: 'PlusJakartaSans',
-          useMaterial3: true,
-        ),
+        // tema dari figma v3 (token warna + tipografi), lihat theme/tema.dart
+        theme: SisaRasaTema.terang(),
+        darkTheme: SisaRasaTema.gelap(),
+        // dikunci terang dulu, layar-layar masih pake Warna statis.
+        // ganti ke ThemeMode.system kalau semua layar udah pindah ke tema
+        themeMode: ThemeMode.light,
         // halaman awal yg ada navigation bar nya
         home: const HalamanUtama(),
       ),

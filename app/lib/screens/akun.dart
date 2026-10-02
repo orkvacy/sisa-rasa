@@ -4,6 +4,7 @@ import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// tab akun: profil, kartu dampak, sama menu setelan
 class Akun extends StatelessWidget {
@@ -21,7 +22,12 @@ class Akun extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          NavigasiMelayang.ruangBawah,
+        ),
         children: [
           const Text(
             'Akun',

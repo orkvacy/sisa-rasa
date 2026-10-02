@@ -4,6 +4,7 @@ import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// tab pesanan, isinya pesanan aktif sama yg udah selesai
 class Pesanan extends StatefulWidget {
@@ -32,7 +33,12 @@ class _PesananState extends State<Pesanan> {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          NavigasiMelayang.ruangBawah,
+        ),
         children: [
           const Text(
             'Pesanan',
