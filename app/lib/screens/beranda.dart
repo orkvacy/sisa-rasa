@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/cari.dart';
-import 'package:sisa_rasa/theme/teks.dart';
-import 'package:sisa_rasa/theme/warna.dart';
+import 'package:sisa_rasa/theme/tema.dart';
 import 'package:sisa_rasa/utils/format.dart';
-import 'package:sisa_rasa/widgets/kartu_paket.dart';
+import 'package:sisa_rasa/widgets/baris_paket.dart';
 import 'package:sisa_rasa/widgets/kartu_paket_besar.dart';
 import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
@@ -29,10 +29,49 @@ class _BerandaState extends State<Beranda> {
   ];
   String kategoriDipilih = 'Semua';
 
+  void bukaCari() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Cari(onBukaPaket: widget.onBukaPaket),
+      ),
+    );
+  }
+
+  /// tombol + di baris paket: tambah 1 porsi langsung tanpa buka detail
+  void tambahCepat(Map<String, dynamic> paket) {
+    final keranjangCubit = context.read<KeranjangCubit>();
+    final keranjang = keranjangCubit.state;
+
+    // satu pesanan cuma boleh dari satu mitra, kalau beda buka detail
+    // biar ada pertanyaan "kosongkan keranjang?" di sana
+    if (keranjang.isNotEmpty) {
+      final mitraKeranjang = context.read<PaketCubit>().cari(
+        keranjang.keys.first,
+      )['mitra'];
+      if (mitraKeranjang != paket['mitra']) {
+        widget.onBukaPaket(paket);
+        return;
+      }
+    }
+
+    keranjangCubit.tambah(paket, 1);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('${paket['nama']} masuk keranjang')),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final teks = Theme.of(context).textTheme;
+
     // context.watch: ambil daftar paket dari PaketCubit, kalau stoknya berubah beranda ikut digambar ulang
     final daftarPaket = context.watch<PaketCubit>().state;
+    // keranjang ikut dipantau biar tombol + nonaktif kalau porsinya udah mentok
+    final keranjang = context.watch<KeranjangCubit>().state;
 
     // paket yg udah tutup ga ditampilin, terus disaring sesuai chip kategori
     final tampil = daftarPaket.where((paket) {
@@ -60,10 +99,19 @@ class _BerandaState extends State<Beranda> {
     }
     final jumlahDapur = tampil.map((paket) => paket['mitra']).toSet().length;
 
+    Widget baris(Map<String, dynamic> paket) {
+      return BarisPaket(
+        paket: paket,
+        onTap: () => widget.onBukaPaket(paket),
+        onTambah: () => tambahCepat(paket),
+        bisaTambah: (keranjang[paket['id']] ?? 0) < (paket['sisaPorsi'] as int),
+      );
+    }
+
     // biar ga ketutup status bar
     return SafeArea(
       child: ListView(
-        // bawahnya dikasih jarak gede biar kartu terakhir ga ketutup bar keranjang
+        // bawahnya dikasih jarak gede biar item terakhir ga ketutup navigasi + bar keranjang
         padding: const EdgeInsets.fromLTRB(
           16,
           8,
@@ -75,29 +123,12 @@ class _BerandaState extends State<Beranda> {
             children: [
               const Icon(Icons.place_outlined, size: 20),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Samarinda Ulu',
-                style: TextStyle(
-                  fontSize: Teks.tombol,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: teks.labelLarge?.copyWith(fontSize: 15),
               ),
               const Icon(Icons.keyboard_arrow_down),
               const Spacer(),
-              // icon cari, pindah ke halaman cari
-              IconButton(
-                tooltip: 'Cari paket',
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          Cari(onBukaPaket: widget.onBukaPaket),
-                    ),
-                  );
-                },
-              ),
               // icon favorit, halamannya belum ada
               IconButton(
                 tooltip: 'Mitra favorit',
@@ -118,22 +149,29 @@ class _BerandaState extends State<Beranda> {
           // judul ikut jam, sebelum jam 6 sore "Sore ini"
           Text(
             jamSekarang < 18 * 60 ? 'Sore ini' : 'Malam ini',
-            style: const TextStyle(
-              fontSize: Teks.judulBesar,
-              height: 1.1,
-              fontWeight: FontWeight.w800,
-            ),
+            maxLines: 1,
+            style: teks.displaySmall,
           ),
           const SizedBox(height: 6),
           Text(
             '$totalPorsi porsi dari $jumlahDapur dapur di sekitarmu, siap diambil sebelum mereka tutup.',
-            style: const TextStyle(
-              fontSize: Teks.isi,
+            style: teks.bodyMedium?.copyWith(
               height: 1.45,
-              color: Warna.teksPendukung,
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
+
+          // kolom cari selalu tampil, diketuk langsung pindah ke halaman cari
+          TextField(
+            readOnly: true,
+            onTap: bukaCari,
+            decoration: const InputDecoration(
+              hintText: 'Cari paket atau mitra',
+              prefixIcon: Icon(Icons.search),
+            ),
+          ),
+          const SizedBox(height: 12),
 
           // chip kategori bisa digeser ke samping
           SingleChildScrollView(
@@ -141,33 +179,11 @@ class _BerandaState extends State<Beranda> {
             child: Row(
               children: [
                 for (final nama in kategori) ...[
-                  GestureDetector(
-                    onTap: () => setState(() => kategoriDipilih = nama),
-                    child: Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: nama == kategoriDipilih
-                            ? Warna.gelap
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(
-                          color: nama == kategoriDipilih
-                              ? Warna.gelap
-                              : Warna.garis,
-                        ),
-                      ),
-                      child: Text(
-                        nama,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: nama == kategoriDipilih
-                              ? Colors.white
-                              : Warna.teks,
-                        ),
-                      ),
-                    ),
+                  ChoiceChip(
+                    label: Text(nama),
+                    selected: nama == kategoriDipilih,
+                    showCheckmark: false,
+                    onSelected: (_) => setState(() => kategoriDipilih = nama),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -182,25 +198,24 @@ class _BerandaState extends State<Beranda> {
               padding: const EdgeInsets.symmetric(vertical: 48),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.restaurant_outlined,
                     size: 56,
-                    color: Warna.teksPendukung,
+                    color: cs.onSurfaceVariant,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Belum ada paket ${kategoriDipilih.toLowerCase()} sore ini',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: Teks.nama,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: teks.titleSmall,
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Paket biasanya muncul menjelang sore, setelah mitra menghitung sisa jualannya.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Warna.teksPendukung),
+                    style: teks.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton(
@@ -211,35 +226,31 @@ class _BerandaState extends State<Beranda> {
               ),
             ),
 
-          // kelompok "Sekarang" pake kartu gede
+          // kelompok "Sekarang": satu kartu besar, sisanya baris tenang
           if (sekarang.isNotEmpty) ...[
             _HeaderJam(
               judul: 'Sekarang',
               keterangan: 'Tutup paling cepat ${jam(sekarang.first['tutup'])}',
               sudahBuka: true,
             ),
-            for (final paket in sekarang) ...[
-              KartuPaketBesar(
-                paket: paket,
-                onTap: () => widget.onBukaPaket(paket),
-              ),
-              const SizedBox(height: 12),
-            ],
-            const SizedBox(height: 8),
+            KartuPaketBesar(
+              paket: sekarang.first,
+              onTap: () => widget.onBukaPaket(sekarang.first),
+            ),
+            const SizedBox(height: 4),
+            for (final paket in sekarang.skip(1)) baris(paket),
+            const SizedBox(height: 16),
           ],
 
-          // kelompok per jam pake kartu kecil
+          // kelompok per jam pake baris tenang
           for (final jamMulai in urutanJam) ...[
             _HeaderJam(
               judul: jam(jamMulai),
               keterangan:
                   'Buka ${sisaWaktu(nanti[jamMulai]!.first['mulai'])} lagi',
             ),
-            for (final paket in nanti[jamMulai]!) ...[
-              KartuPaket(paket: paket, onTap: () => widget.onBukaPaket(paket)),
-              const SizedBox(height: 12),
-            ],
-            const SizedBox(height: 8),
+            for (final paket in nanti[jamMulai]!) baris(paket),
+            const SizedBox(height: 16),
           ],
         ],
       ),
@@ -261,15 +272,18 @@ class _HeaderJam extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final teks = Theme.of(context).textTheme;
+    final warna = SisaRasaColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Text(
             judul,
-            style: const TextStyle(
-              fontSize: Teks.subjudul,
-              fontWeight: FontWeight.w800,
+            style: teks.headlineSmall?.copyWith(
+              fontFeatures: SisaRasaText.tabular,
             ),
           ),
           // titik ijo tanda udah buka
@@ -278,8 +292,8 @@ class _HeaderJam extends StatelessWidget {
             Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
-                color: Warna.hijau,
+              decoration: BoxDecoration(
+                color: cs.primary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -290,10 +304,10 @@ class _HeaderJam extends StatelessWidget {
             child: Text(
               keterangan,
               textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: Teks.keterangan,
+              style: teks.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: sudahBuka ? Warna.mendesak : Warna.teksPendukung,
+                color: sudahBuka ? warna.urgent : cs.onSurfaceVariant,
+                fontFeatures: SisaRasaText.tabular,
               ),
             ),
           ),
