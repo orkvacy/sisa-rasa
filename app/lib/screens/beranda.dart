@@ -99,7 +99,6 @@ class _BerandaState extends State<Beranda> {
     }
     final jumlahDapur = tampil.map((paket) => paket['mitra']).toSet().length;
 
-<<<<<<< HEAD
     Widget baris(Map<String, dynamic> paket) {
       return BarisPaket(
         paket: paket,
@@ -109,10 +108,7 @@ class _BerandaState extends State<Beranda> {
       );
     }
 
-    // biar ga ketutup status bar
-=======
     // SafeArea: biar ga ketutup status bar
->>>>>>> origin/main
     return SafeArea(
       // ListView: list yg bisa discroll ke bawah
       child: ListView(
@@ -129,36 +125,15 @@ class _BerandaState extends State<Beranda> {
             children: [
               const Icon(Icons.place_outlined, size: 20),
               const SizedBox(width: 6),
-<<<<<<< HEAD
-              Text(
-=======
               // Text: nampilin tulisan
-              const Text(
->>>>>>> origin/main
+              Text(
                 'Samarinda Ulu',
                 style: teks.labelLarge?.copyWith(fontSize: 15),
               ),
               const Icon(Icons.keyboard_arrow_down),
               // Spacer: ngisi ruang kosong, jadi tombol di kanannya kedorong ke ujung
               const Spacer(),
-<<<<<<< HEAD
-=======
-              // IconButton: icon cari, pindah ke halaman cari
-              IconButton(
-                tooltip: 'Cari paket',
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          Cari(onBukaPaket: widget.onBukaPaket),
-                    ),
-                  );
-                },
-              ),
->>>>>>> origin/main
-              // icon favorit, halamannya belum ada
+              // IconButton: icon favorit, halamannya belum ada
               IconButton(
                 tooltip: 'Mitra favorit',
                 icon: const Icon(Icons.favorite_border),
@@ -192,8 +167,7 @@ class _BerandaState extends State<Beranda> {
           ),
           const SizedBox(height: 16),
 
-<<<<<<< HEAD
-          // kolom cari selalu tampil, diketuk langsung pindah ke halaman cari
+          // TextField: kolom cari selalu tampil, diketuk langsung pindah ke halaman cari
           TextField(
             readOnly: true,
             onTap: bukaCari,
@@ -204,10 +178,7 @@ class _BerandaState extends State<Beranda> {
           ),
           const SizedBox(height: 12),
 
-          // chip kategori bisa digeser ke samping
-=======
           // SingleChildScrollView: chip kategori bisa digeser ke samping
->>>>>>> origin/main
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
