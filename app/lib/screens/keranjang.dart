@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
-import 'package:sisa_rasa/screens/kode_ambil.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -34,15 +35,12 @@ class _KeranjangState extends State<Keranjang> {
   // dipanggil BlocListener di bawah pas pesanan baru udah masuk
   Future<void> bukaKodeAmbil(Map<String, dynamic> pesanan) async {
     // buka kode ambil, terus tunggu balikannya
-    final lihatPesanan = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => KodeAmbil(pesanan: pesanan, pesananBaru: true),
-      ),
+    final lihatPesanan = await context.push<bool>(
+      Rute.kodeAmbil(pesanan['kode'], baru: true),
     );
     if (!mounted) return;
     // keranjang ikut ditutup, jawabannya diterusin ke halaman utama
-    Navigator.pop(context, lihatPesanan);
+    context.pop(lihatPesanan);
   }
 
   @override
@@ -123,7 +121,7 @@ class _KeranjangState extends State<Keranjang> {
                       ),
                       const SizedBox(height: 16),
                       OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => context.pop(),
                         child: const Text('Cari paket'),
                       ),
                     ],

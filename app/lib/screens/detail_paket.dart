@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/theme/teks.dart';
@@ -75,7 +76,8 @@ class _DetailPaketState extends State<DetailPaket> {
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                // FilledButton: tombol utama yg warnanya penuh, Navigator.pop sambil ngirim jawaban true
+                // FilledButton: tombol utama yg warnanya penuh.
+                // bottom sheet bukan rute halaman, jadi nutupnya tetep pake Navigator.pop sambil ngirim jawaban true
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(backgroundColor: Warna.merah),
@@ -110,8 +112,8 @@ class _DetailPaketState extends State<DetailPaket> {
         duration: const Duration(seconds: 2),
       ),
     );
-    // Navigator.pop: balik ke beranda
-    Navigator.pop(context);
+    // context.pop: balik ke halaman sebelumnya (beranda / cari)
+    context.pop();
   }
 
   @override
@@ -375,7 +377,7 @@ class _DetailPaketState extends State<DetailPaket> {
                       backgroundColor: Colors.white,
                       child: IconButton(
                         tooltip: 'Kembali',
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => context.pop(),
                         icon: const Icon(Icons.arrow_back, color: Warna.teks),
                       ),
                     ),

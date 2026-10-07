@@ -39,7 +39,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
 
-    // Navigator.push ke detail
+    // buka detail lewat router (/paket/:id)
     await tester.tap(find.text('Sandwich Sisa Brunch'));
     await tester.pumpAndSettle();
     expect(find.text('Tambah · Rp14.000'), findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
     await tester.pump();
     expect(find.text('Tambah · Rp42.000'), findsOneWidget);
 
-    // tambah lalu Navigator.pop kembali ke beranda, bar keranjang muncul
+    // tambah lalu context.pop kembali ke beranda, bar keranjang muncul
     await tester.tap(find.text('Tambah · Rp42.000'));
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/screens/akun.dart';
 import 'package:sisa_rasa/screens/beranda.dart';
-import 'package:sisa_rasa/screens/detail_paket.dart';
-import 'package:sisa_rasa/screens/keranjang.dart';
-import 'package:sisa_rasa/screens/kode_ambil.dart';
 import 'package:sisa_rasa/screens/pesanan.dart';
 import 'package:sisa_rasa/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
@@ -45,21 +44,15 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   int tabAktif = 0;
 
   void bukaDetail(Map<String, dynamic> paket) {
-    // Navigator.push: buka halaman detail di atas halaman ini
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DetailPaket(paket: paket)),
-    );
+    // context.push: buka halaman detail di atas halaman ini, alamatnya pake id paket
+    context.push(Rute.paket(paket['id']));
   }
 
   Future<void> bukaKeranjang() async {
     // snackbar "masuk keranjang" ditutup dulu biar ga nutupin tombol pesan
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     // ditungguin, kalau balikannya true berarti pindah ke tab pesanan
-    final lihatPesanan = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (context) => const Keranjang()),
-    );
+    final lihatPesanan = await context.push<bool>(Rute.keranjang);
     if (lihatPesanan == true) setState(() => tabAktif = 1);
   }
 
@@ -76,12 +69,8 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         children: [
           Beranda(onBukaPaket: bukaDetail),
           Pesanan(
-            onBukaKode: (pesanan) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => KodeAmbil(pesanan: pesanan),
-              ),
-            ),
+            onBukaKode: (pesanan) =>
+                context.push(Rute.kodeAmbil(pesanan['kode'])),
             onCariPaket: () => setState(() => tabAktif = 0),
           ),
           const Akun(),

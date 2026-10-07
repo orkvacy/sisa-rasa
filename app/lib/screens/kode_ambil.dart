@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
@@ -29,9 +30,9 @@ class KodeAmbil extends StatelessWidget {
               // Align: naruh child di posisi tertentu, di sini kanan
               Align(
                 alignment: Alignment.centerRight,
-                // Navigator.pop ngirim false, berarti ga pindah tab
+                // context.pop ngirim false, berarti ga pindah tab
                 child: TextButton(
-                  onPressed: () => Navigator.pop(context, false),
+                  onPressed: () => context.pop(false),
                   child: const Text(
                     'Selesai',
                     style: TextStyle(
@@ -221,9 +222,9 @@ class KodeAmbil extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                // Navigator.pop ngirim true, halaman utama pindah ke tab pesanan
+                // context.pop ngirim true, halaman utama pindah ke tab pesanan
                 child: FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => context.pop(true),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Warna.hijau,

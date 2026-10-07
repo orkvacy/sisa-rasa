@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
-import 'package:sisa_rasa/screens/cari.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/tema.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/baris_paket.dart';
@@ -30,12 +31,8 @@ class _BerandaState extends State<Beranda> {
   String kategoriDipilih = 'Semua';
 
   void bukaCari() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Cari(onBukaPaket: widget.onBukaPaket),
-      ),
-    );
+    // context.push: buka halaman cari, rutenya diatur di router.dart
+    context.push(Rute.cari);
   }
 
   /// tombol + di baris paket: tambah 1 porsi langsung tanpa buka detail
