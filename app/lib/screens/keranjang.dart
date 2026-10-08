@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
-import 'package:sisa_rasa/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/router.dart';
@@ -20,29 +18,6 @@ class Keranjang extends StatefulWidget {
 }
 
 class _KeranjangState extends State<Keranjang> {
-  void pesan() {
-    final keranjang = context.read<KeranjangCubit>().state;
-    final paketCubit = context.read<PaketCubit>();
-    // bloc diubah lewat event: kirim event PesananDibuat, bloc yg ngurus sisanya
-    context.read<PesananBloc>().add(
-      PesananDibuat(keranjang: keranjang, daftarPaket: paketCubit.state),
-    );
-    // cubit cukup panggil fungsinya langsung
-    paketCubit.kurangiStok(keranjang);
-    context.read<KeranjangCubit>().kosongkan();
-  }
-
-  // dipanggil BlocListener di bawah pas pesanan baru udah masuk
-  Future<void> bukaKodeAmbil(Map<String, dynamic> pesanan) async {
-    // buka kode ambil, terus tunggu balikannya
-    final lihatPesanan = await context.push<bool>(
-      Rute.kodeAmbil(pesanan['kode'], baru: true),
-    );
-    if (!mounted) return;
-    // keranjang ikut ditutup, jawabannya diterusin ke halaman utama
-    context.pop(lihatPesanan);
-  }
-
   @override
   Widget build(BuildContext context) {
     // context.watch: tiap keranjang / stok berubah, halaman ini digambar ulang
@@ -64,329 +39,318 @@ class _KeranjangState extends State<Keranjang> {
       porsi += keranjang[id]!;
     }
 
-    // BlocListener: ga gambar apa2, cuma "dengerin" PesananBloc.
-    // pas jumlah pesanan nambah (berarti barusan pesen), buka halaman kode ambil
-    return BlocListener<PesananBloc, List<Map<String, dynamic>>>(
-      listenWhen: (lama, baru) => baru.length > lama.length,
-      listener: (context, daftarPesanan) => bukaKodeAmbil(daftarPesanan.first),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Warna.latar,
-          surfaceTintColor: Colors.transparent,
-          title: const Text(
-            'Keranjang',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          actions: [
-            if (ids.isNotEmpty)
-              // TextButton: tombol tulisan doang tanpa latar
-              TextButton(
-                onPressed: () => context.read<KeranjangCubit>().kosongkan(),
-                child: const Text(
-                  'Kosongkan',
-                  style: TextStyle(
-                    color: Warna.hijau,
-                    fontWeight: FontWeight.w700,
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Warna.latar,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
+          'Keranjang',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        actions: [
+          if (ids.isNotEmpty)
+            // TextButton: tombol tulisan doang tanpa latar
+            TextButton(
+              onPressed: () => context.read<KeranjangCubit>().kosongkan(),
+              child: const Text(
+                'Kosongkan',
+                style: TextStyle(
+                  color: Warna.hijau,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-          ],
-        ),
-        body: ids.isEmpty
-            // Center: kalau keranjang kosong, isinya ditaruh di tengah layar
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 64,
-                        color: Warna.teksPendukung,
+            ),
+        ],
+      ),
+      body: ids.isEmpty
+          // Center: kalau keranjang kosong, isinya ditaruh di tengah layar
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.shopping_bag_outlined,
+                      size: 64,
+                      color: Warna.teksPendukung,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Keranjang kosong',
+                      style: TextStyle(
+                        fontSize: Teks.nama,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Keranjang kosong',
-                        style: TextStyle(
-                          fontSize: Teks.nama,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Pilih paket di Beranda, lalu ambil sendiri di jam yang ditentukan.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Warna.teksPendukung),
-                      ),
-                      const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () => context.pop(),
-                        child: const Text('Cari paket'),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Pilih paket di Beranda, lalu ambil sendiri di jam yang ditentukan.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Warna.teksPendukung),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('Cari paket'),
+                    ),
+                  ],
                 ),
-              )
-            // Stack: isi keranjang di belakang, bar tombol pesan nempel di bawah
-            : Stack(
-                children: [
-                  ListView(
-                    // bawahnya dikasih jarak biar isinya ga ketutup bar tombol
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 140),
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.storefront_outlined, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    pertama['mitra'],
-                                    style: const TextStyle(
-                                      fontSize: Teks.tombol,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  pertama['jarak'],
-                                  style: const TextStyle(
-                                    color: Warna.teksPendukung,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            for (final id in ids) ...[
-                              KartuKeranjang(
-                                key: ValueKey(id),
-                                paket: paketCubit.cari(id),
-                                jumlah: keranjang[id]!,
-                                onJumlahBerubah: (baru) => context
-                                    .read<KeranjangCubit>()
-                                    .ubahJumlah(id, baru),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Warna.latar,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 18,
-                                    color: Warna.teksPendukung,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Satu pesanan hanya dari satu mitra, karena diambil langsung di tempat.',
-                                      style: TextStyle(
-                                        fontSize: Teks.keterangan,
-                                        color: Warna.teksPendukung,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // kotak jam ambil
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Expanded(
-                                  child: Text(
-                                    'Ambil hari ini',
-                                    style: TextStyle(
-                                      color: Warna.teksPendukung,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Warna.mendesakLembut,
-                                    borderRadius: BorderRadius.circular(99),
-                                  ),
-                                  child: Text(
-                                    sudahBuka(pertama)
-                                        ? 'Tutup ${sisaWaktu(pertama['tutup'])} lagi'
-                                        : 'Buka ${sisaWaktu(pertama['mulai'])} lagi',
-                                    style: const TextStyle(
-                                      fontSize: Teks.keterangan,
-                                      fontWeight: FontWeight.w700,
-                                      color: Warna.mendesak,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${jam(pertama['mulai'])} – ${jam(pertama['tutup'])}',
-                              style: const TextStyle(
-                                fontSize: Teks.judul,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // ringkasan harga
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'Harga normal · $porsi porsi',
-                                    style: const TextStyle(
-                                      color: Warna.teksPendukung,
-                                    ),
-                                  ),
-                                ),
-                                Text(rupiah(hargaNormal)),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Expanded(
-                                  child: Text(
-                                    'Kamu hemat',
-                                    style: TextStyle(
-                                      color: Warna.teksPendukung,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '−${rupiah(hargaNormal - total)}',
-                                  style: const TextStyle(color: Warna.hijau),
-                                ),
-                              ],
-                            ),
-                            // Divider: garis pemisah horizontal
-                            const Divider(height: 24, color: Warna.garis),
-                            Row(
-                              children: [
-                                const Expanded(
-                                  child: Text(
-                                    'Bayar di tempat',
-                                    style: TextStyle(
-                                      color: Warna.teksPendukung,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  rupiah(total),
-                                  style: const TextStyle(
-                                    fontSize: Teks.subjudul,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Positioned: bar tombol pesan nempel di bawah, kiri sampe kanan
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        12,
-                        16,
-                        12 + MediaQuery.of(context).padding.bottom,
-                      ),
+              ),
+            )
+          // Stack: isi keranjang di belakang, bar tombol pesan nempel di bawah
+          : Stack(
+              children: [
+                ListView(
+                  // bawahnya dikasih jarak biar isinya ga ketutup bar tombol
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 140),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        // BoxShadow: bayangan ke atas, sama kayak bar total di modul
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.shade300,
-                            blurRadius: 10,
-                            offset: const Offset(0, -3),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: FilledButton(
-                              onPressed: pesan,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Warna.hijau,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                          Row(
+                            children: [
+                              const Icon(Icons.storefront_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  pertama['mitra'],
+                                  style: const TextStyle(
+                                    fontSize: Teks.tombol,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                'Pesan · ${rupiah(total)}',
+                              Text(
+                                pertama['jarak'],
                                 style: const TextStyle(
-                                  fontSize: Teks.tombol,
-                                  fontWeight: FontWeight.w700,
+                                  color: Warna.teksPendukung,
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Belum bayar sekarang. Bayar di kasir saat mengambil.',
-                            style: TextStyle(
-                              fontSize: Teks.kecil,
-                              color: Warna.teksPendukung,
+                          const SizedBox(height: 14),
+                          for (final id in ids) ...[
+                            KartuKeranjang(
+                              key: ValueKey(id),
+                              paket: paketCubit.cari(id),
+                              jumlah: keranjang[id]!,
+                              onJumlahBerubah: (baru) => context
+                                  .read<KeranjangCubit>()
+                                  .ubahJumlah(id, baru),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Warna.latar,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 18,
+                                  color: Warna.teksPendukung,
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Satu pesanan hanya dari satu mitra, karena diambil langsung di tempat.',
+                                    style: TextStyle(
+                                      fontSize: Teks.keterangan,
+                                      color: Warna.teksPendukung,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    // kotak jam ambil
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Ambil hari ini',
+                                  style: TextStyle(color: Warna.teksPendukung),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Warna.mendesakLembut,
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                                child: Text(
+                                  sudahBuka(pertama)
+                                      ? 'Tutup ${sisaWaktu(pertama['tutup'])} lagi'
+                                      : 'Buka ${sisaWaktu(pertama['mulai'])} lagi',
+                                  style: const TextStyle(
+                                    fontSize: Teks.keterangan,
+                                    fontWeight: FontWeight.w700,
+                                    color: Warna.mendesak,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${jam(pertama['mulai'])} – ${jam(pertama['tutup'])}',
+                            style: const TextStyle(
+                              fontSize: Teks.judul,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // ringkasan harga
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Harga normal · $porsi porsi',
+                                  style: const TextStyle(
+                                    color: Warna.teksPendukung,
+                                  ),
+                                ),
+                              ),
+                              Text(rupiah(hargaNormal)),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Kamu hemat',
+                                  style: TextStyle(color: Warna.teksPendukung),
+                                ),
+                              ),
+                              Text(
+                                '−${rupiah(hargaNormal - total)}',
+                                style: const TextStyle(color: Warna.hijau),
+                              ),
+                            ],
+                          ),
+                          // Divider: garis pemisah horizontal
+                          const Divider(height: 24, color: Warna.garis),
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Subtotal',
+                                  style: TextStyle(color: Warna.teksPendukung),
+                                ),
+                              ),
+                              Text(
+                                rupiah(total),
+                                style: const TextStyle(
+                                  fontSize: Teks.subjudul,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                // Positioned: bar tombol pesan nempel di bawah, kiri sampe kanan
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      12,
+                      16,
+                      12 + MediaQuery.of(context).padding.bottom,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      // BoxShadow: bayangan ke atas, sama kayak bar total di modul
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 10,
+                          offset: const Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: FilledButton(
+                            // context.push: lanjut ke checkout buat pilih cara bayar
+                            onPressed: () => context.push(Rute.checkout),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Warna.hijau,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              'Lanjut ke checkout · ${rupiah(total)}',
+                              style: const TextStyle(
+                                fontSize: Teks.tombol,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Bayar di langkah berikutnya lewat QRIS, GoPay, atau VA.',
+                          style: TextStyle(
+                            fontSize: Teks.kecil,
+                            color: Warna.teksPendukung,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-      ),
+                ),
+              ],
+            ),
     );
   }
 }

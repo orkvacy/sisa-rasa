@@ -360,7 +360,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Tunjukkan kode ambil di kasir, bayar di tempat.',
+                                'Bayar di aplikasi, lalu tunjukkan kode ambil di kasir.',
                               ),
                             ),
                           ],

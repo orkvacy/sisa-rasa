@@ -37,7 +37,16 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
         BlocProvider(create: (context) => PaketCubit()),
         BlocProvider(create: (context) => KeranjangCubit()),
-        BlocProvider(create: (context) => PesananBloc()),
+        // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya
+        BlocProvider(
+          create: (context) {
+            final paket = context.read<PaketCubit>();
+            return PesananBloc(
+              tahanPorsi: paket.kurangiStok,
+              lepasPorsi: paket.kembalikanStok,
+            );
+          },
+        ),
       ],
       // MaterialApp.router: akar aplikasi, halamannya diatur GoRouter (lihat router.dart)
       child: MaterialApp.router(

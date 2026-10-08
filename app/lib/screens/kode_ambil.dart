@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:sisa_rasa/data/pembayaran.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -30,9 +32,11 @@ class KodeAmbil extends StatelessWidget {
               // Align: naruh child di posisi tertentu, di sini kanan
               Align(
                 alignment: Alignment.centerRight,
-                // context.pop ngirim false, berarti ga pindah tab
+                // abis bayar: balik ke beranda buat cari paket lagi.
+                // dibuka dari tab pesanan: balik ke daftar pesanan
                 child: TextButton(
-                  onPressed: () => context.pop(false),
+                  onPressed: () =>
+                      pesananBaru ? context.go(Rute.beranda) : context.pop(),
                   child: const Text(
                     'Selesai',
                     style: TextStyle(
@@ -49,7 +53,7 @@ class KodeAmbil extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      pesananBaru ? 'Pesanan dibuat' : 'Kode ambil',
+                      pesananBaru ? 'Pembayaran berhasil' : 'Kode ambil',
                       style: const TextStyle(
                         fontSize: Teks.judul,
                         fontWeight: FontWeight.w800,
@@ -61,7 +65,7 @@ class KodeAmbil extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Tunjukkan kode ini di kasir ${pesanan['mitra']} saat jam ambil. Bayar di tempat.',
+                'Tunjukkan kode ini di kasir ${pesanan['mitra']} saat jam ambil. Pesanan sudah dibayar.',
                 style: const TextStyle(
                   fontSize: Teks.isi,
                   height: 1.45,
@@ -161,10 +165,10 @@ class KodeAmbil extends StatelessWidget {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                     child: Text(
-                                      'Bayar di tempat',
-                                      style: TextStyle(
+                                      'Dibayar · ${MetodeBayar.nama(pesanan['metode'])}',
+                                      style: const TextStyle(
                                         color: Warna.teksPendukung,
                                       ),
                                     ),
@@ -222,9 +226,9 @@ class KodeAmbil extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                // context.pop ngirim true, halaman utama pindah ke tab pesanan
+                // layar ini nempel di tab pesanan, jadi pop = balik ke daftar pesanan
                 child: FilledButton(
-                  onPressed: () => context.pop(true),
+                  onPressed: () => context.pop(),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Warna.hijau,

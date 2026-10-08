@@ -16,6 +16,8 @@ class Akun extends StatelessWidget {
     var porsi = 0;
     var hemat = 0;
     for (final pesanan in daftarPesanan) {
+      // cuma yg udah dibayar (udah punya kode ambil), yg batal / belum bayar ga dihitung
+      if (pesanan['kode'] == null) continue;
       porsi += pesanan['porsi'] as int;
       hemat += pesanan['hemat'] as int;
     }
