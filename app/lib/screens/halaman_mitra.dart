@@ -6,11 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/router.dart';
+import 'package:sisa_rasa/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/widgets/konfirmasi_ganti_mitra.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
 /// isinya info gerai sama semua paket aktifnya, jadi pembeli bisa ambil
@@ -19,20 +19,6 @@ class HalamanMitra extends StatelessWidget {
   const HalamanMitra({required this.nama, super.key});
 
   final String nama;
-
-  /// buka aplikasi peta, dicari pake alamat mitra
-  Future<void> _petunjukArah(BuildContext context, String alamat) async {
-    final url = Uri.https('www.google.com', '/maps/search/', {
-      'api': '1',
-      'query': alamat,
-    });
-    final berhasil = await launchUrl(url, mode: LaunchMode.externalApplication);
-    if (!berhasil && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aplikasi peta tidak bisa dibuka')),
-      );
-    }
-  }
 
   Future<void> _tambah(BuildContext context, Map<String, dynamic> paket) async {
     final keranjangCubit = context.read<KeranjangCubit>();
@@ -139,7 +125,7 @@ class HalamanMitra extends StatelessWidget {
                     _KartuTutup(
                       tutup: tutup,
                       onPetunjukArah: () =>
-                          _petunjukArah(context, pertama['alamat']),
+                          bukaPeta(context, pertama['alamat']),
                     ),
                   ],
                 ),

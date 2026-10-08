@@ -26,9 +26,9 @@ class Pembayaran extends StatelessWidget {
     return null;
   }
 
-  void batalkan(BuildContext context, String alasan) {
+  void batalkan(BuildContext context, String alasan, {bool otomatis = false}) {
     context.read<PesananBloc>().add(
-      PesananDibatalkan(idPesanan, alasan: alasan),
+      PesananDibatalkan(idPesanan, alasan: alasan, otomatis: otomatis),
     );
   }
 
@@ -77,14 +77,17 @@ class Pembayaran extends StatelessWidget {
     final bool menunggu = pesanan['status'] == StatusPesanan.menungguBayar;
 
     // BlocListener: dengerin perubahan status pesanan ini aja.
-    // lunas -> kode ambil, batal -> balik ke daftar pesanan.
+    // lunas -> detail pesanan, batal -> balik ke daftar pesanan.
     // pake go biar layar pembayaran ketutup dan ga bisa di-back lagi
     return BlocListener<PesananBloc, List<Map<String, dynamic>>>(
       listenWhen: (lama, baru) => _status(lama) != _status(baru),
       listener: (context, daftar) {
         final baru = context.read<PesananBloc>().cari(idPesanan)!;
         if (baru['status'] == StatusPesanan.disiapkan) {
-          context.go(Rute.kodeAmbil(baru['kode'], baru: true));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Pembayaran berhasil')));
+          context.go(Rute.detailPesanan(idPesanan));
         } else if (baru['status'] == StatusPesanan.dibatalkan) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Pesanan dibatalkan. ${baru['alasan']}')),
@@ -130,6 +133,7 @@ class Pembayaran extends StatelessWidget {
                           onHabis: () => batalkan(
                             context,
                             'Tidak dibayar dalam $menitBatasBayar menit.',
+                            otomatis: true,
                           ),
                           style: const TextStyle(
                             fontWeight: FontWeight.w800,

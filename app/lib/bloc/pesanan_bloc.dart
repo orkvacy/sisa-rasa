@@ -19,6 +19,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     on<PesananDibuat>(buatPesanan);
     on<PembayaranDicek>(cekPembayaran);
     on<PesananDibatalkan>(batalkanPesanan);
+    on<StatusPesananDiubah>(ubahStatus);
   }
 
   final LayananPembayaran pembayaran;
@@ -58,6 +59,13 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     ];
   }
 
+  // nomor pesanan SR-yymmddxxx, contoh SR-260914552
+  String _buatNomor(DateTime waktu) {
+    String dua(int angka) => angka.toString().padLeft(2, '0');
+    final acak = Random().nextInt(1000).toString().padLeft(3, '0');
+    return 'SR-${dua(waktu.year % 100)}${dua(waktu.month)}${dua(waktu.day)}$acak';
+  }
+
   // kode acak SR-xxxx, huruf O/I sama angka 0/1 dibuang biar ga ketuker pas dibaca
   String _buatKode() {
     const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -88,6 +96,8 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       final jumlah = event.keranjang[id]!;
       isi.add({
         'nama': paket['nama'],
+        'deskripsi': paket['deskripsi'],
+        'foto': paket['foto'],
         'jumlah': jumlah,
         'harga': paket['hargaDiskon'],
       });
@@ -104,10 +114,14 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       max(1, (pertama['tutup'] as int) - jamSekarang),
     );
     _nomorUrut++;
-    final id = 'ps-${DateTime.now().millisecondsSinceEpoch}-$_nomorUrut';
+    final sekarang = DateTime.now();
+    final id = 'ps-${sekarang.millisecondsSinceEpoch}-$_nomorUrut';
 
     final pesanan = {
       'id': id,
+      // nomor yg ditampilin ke pembeli, beda sama kode ambil
+      'nomor': _buatNomor(sekarang),
+      'dibuat': sekarang,
       'idAkun': event.idAkun,
       'status': StatusPesanan.menungguBayar,
       // kode ambil baru dibikin setelah lunas (F-11)
@@ -174,6 +188,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
             'status': StatusPesanan.disiapkan,
             'kode': _buatKode(),
             'dibayar': jamSekarang,
+            'dibayarPada': DateTime.now(),
           },
         },
       ),
@@ -196,11 +211,41 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
           ...lama,
           'status': StatusPesanan.dibatalkan,
           'alasan': event.alasan,
+          'otomatis': event.otomatis,
+          'dibatalkanPada': DateTime.now(),
           'mengecek': false,
         },
       ),
     );
     // F-40: porsi yg tadinya ditahan dibalikin ke stok
     lepasPorsi?.call(Map<String, int>.from(pesanan['porsiPaket']));
+  }
+
+  /// tahapan yg diubah mitra: disiapkan -> siap diambil (F-43) -> selesai (F-20).
+  /// selain urutan itu ditolak, misalnya pesanan yg belum dibayar
+  void ubahStatus(
+    StatusPesananDiubah event,
+    Emitter<List<Map<String, dynamic>>> emit,
+  ) {
+    final status = cari(event.id)?['status'];
+    final boleh = switch (event.status) {
+      StatusPesanan.siapDiambil => status == StatusPesanan.disiapkan,
+      StatusPesanan.selesai =>
+        status == StatusPesanan.disiapkan ||
+            status == StatusPesanan.siapDiambil,
+      _ => false,
+    };
+    if (!boleh) return;
+    emit(
+      _ubah(
+        event.id,
+        (lama) => {
+          ...lama,
+          'status': event.status,
+          if (event.status == StatusPesanan.selesai)
+            'diambilPada': DateTime.now(),
+        },
+      ),
+    );
   }
 }

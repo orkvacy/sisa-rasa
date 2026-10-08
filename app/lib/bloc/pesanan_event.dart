@@ -27,8 +27,20 @@ class PembayaranDicek extends PesananEvent {
 
 // dikirim pas pembeli batalin (F-55) atau batas bayarnya habis (F-40)
 class PesananDibatalkan extends PesananEvent {
-  PesananDibatalkan(this.id, {required this.alasan});
+  PesananDibatalkan(this.id, {required this.alasan, this.otomatis = false});
 
   final String id;
   final String alasan;
+  // true kalau batalnya karena batas bayar habis, bukan dipencet pembeli
+  final bool otomatis;
+}
+
+// dikirim mitra pas pesanan siap diambil (F-43) atau sudah diambil (F-20).
+// sementara dipencet dari tombol mode uji di detail pesanan
+class StatusPesananDiubah extends PesananEvent {
+  StatusPesananDiubah(this.id, this.status);
+
+  final String id;
+  // StatusPesanan.siapDiambil atau StatusPesanan.selesai
+  final String status;
 }

@@ -23,4 +23,10 @@ class Warna {
   // oren, buat sisa porsi dikit sama hitung mundur
   static const mendesak = Color(0xFF9A4A0B);
   static const mendesakLembut = Color(0xFFFBEBDD);
+
+  // krem kertas: rel segmen pesanan sama pil "Disiapkan" (figma v3 bg/kraft)
+  static const kraft = Color(0xFFE8DCC4);
+
+  // pil "Dibatalkan"
+  static const merahLembut = Color(0xFFF9E3E0);
 }

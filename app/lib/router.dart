@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/akun.dart';
 import 'package:sisa_rasa/screens/beranda.dart';
 import 'package:sisa_rasa/screens/cari.dart';
 import 'package:sisa_rasa/screens/checkout.dart';
 import 'package:sisa_rasa/screens/detail_paket.dart';
+import 'package:sisa_rasa/screens/detail_pesanan.dart';
 import 'package:sisa_rasa/screens/halaman_mitra.dart';
 import 'package:sisa_rasa/screens/halaman_utama.dart';
 import 'package:sisa_rasa/screens/keranjang.dart';
@@ -40,9 +40,10 @@ abstract final class Rute {
   // jadi tombol kembalinya balik ke daftar pesanan
   static String pembayaran(String id) => '/pesanan/pembayaran/$id';
 
-  /// baru = true kalau dibuka langsung abis pesanan lunas
-  static String kodeAmbil(String kode, {bool baru = false}) =>
-      '/pesanan/kode-ambil/$kode${baru ? '?baru=1' : ''}';
+  static String detailPesanan(String id) => '/pesanan/detail/$id';
+
+  /// kode QR layar penuh, dibuka dari pesanan yg kodenya ini
+  static String kodeAmbil(String kode) => '/pesanan/kode-ambil/$kode';
 }
 
 /// dibikin lewat fungsi, bukan variabel global,
@@ -108,6 +109,8 @@ GoRouter buatRouter() {
               GoRoute(
                 path: Rute.pesanan,
                 builder: (context, state) => Pesanan(
+                  onBukaDetail: (pesanan) =>
+                      context.push(Rute.detailPesanan(pesanan['id'])),
                   onBukaKode: (pesanan) =>
                       context.push(Rute.kodeAmbil(pesanan['kode'])),
                   onBayar: (pesanan) =>
@@ -120,17 +123,16 @@ GoRouter buatRouter() {
                     (context, state) =>
                         Pembayaran(idPesanan: state.pathParameters['id']!),
                   ),
-                  layarPenuh('kode-ambil/:kode', (context, state) {
-                    final kode = state.pathParameters['kode']!;
-                    final pesanan = context
-                        .read<PesananBloc>()
-                        .state
-                        .firstWhere((pesanan) => pesanan['kode'] == kode);
-                    return KodeAmbil(
-                      pesanan: pesanan,
-                      pesananBaru: state.uri.queryParameters['baru'] == '1',
-                    );
-                  }),
+                  layarPenuh(
+                    'detail/:id',
+                    (context, state) =>
+                        DetailPesanan(idPesanan: state.pathParameters['id']!),
+                  ),
+                  layarPenuh(
+                    'kode-ambil/:kode',
+                    (context, state) =>
+                        KodeAmbil(kode: state.pathParameters['kode']!),
+                  ),
                 ],
               ),
             ],
