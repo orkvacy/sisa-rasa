@@ -8,6 +8,7 @@ import 'package:sisa_rasa/theme/tema.dart';
 import 'package:sisa_rasa/utils/format.dart';
 import 'package:sisa_rasa/widgets/baris_paket.dart';
 import 'package:sisa_rasa/widgets/kartu_paket_besar.dart';
+import 'package:sisa_rasa/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// landing page, paketnya dikelompokin per jam buka
@@ -36,23 +37,13 @@ class _BerandaState extends State<Beranda> {
   }
 
   /// tombol + di baris paket: tambah 1 porsi langsung tanpa buka detail
-  void tambahCepat(Map<String, dynamic> paket) {
+  Future<void> tambahCepat(Map<String, dynamic> paket) async {
     final keranjangCubit = context.read<KeranjangCubit>();
-    final keranjang = keranjangCubit.state;
+    // satu pesanan cuma boleh dari satu mitra, kalau beda ditanya dulu (F-07)
+    final gantiMitra = await cekGantiMitra(context, paket);
+    if (gantiMitra == null || !mounted) return;
 
-    // satu pesanan cuma boleh dari satu mitra, kalau beda buka detail
-    // biar ada pertanyaan "kosongkan keranjang?" di sana
-    if (keranjang.isNotEmpty) {
-      final mitraKeranjang = context.read<PaketCubit>().cari(
-        keranjang.keys.first,
-      )['mitra'];
-      if (mitraKeranjang != paket['mitra']) {
-        widget.onBukaPaket(paket);
-        return;
-      }
-    }
-
-    keranjangCubit.tambah(paket, 1);
+    keranjangCubit.tambah(paket, 1, gantiMitra: gantiMitra);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

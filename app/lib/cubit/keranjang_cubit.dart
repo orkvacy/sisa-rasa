@@ -19,6 +19,11 @@ class KeranjangCubit extends Cubit<Map<String, int>> {
     emit({...state, id: jumlah});
   }
 
+  // keluarin satu paket dari keranjang (F-08)
+  void hapus(String id) {
+    emit({...state}..remove(id));
+  }
+
   void kosongkan() {
     emit({});
   }
