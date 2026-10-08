@@ -3,7 +3,7 @@
 /// biar kalau nama tahapannya diganti cukup ubah satu tempat
 abstract final class StatusPesanan {
   static const menungguBayar = 'menunggu_bayar';
-  static const diproses = 'diproses';
+  static const disiapkan = 'disiapkan';
   static const siapDiambil = 'siap_diambil';
   static const selesai = 'selesai';
   static const dibatalkan = 'dibatalkan';
@@ -11,7 +11,7 @@ abstract final class StatusPesanan {
 
   static const _label = {
     menungguBayar: 'Menunggu pembayaran',
-    diproses: 'Diproses',
+    disiapkan: 'Disiapkan',
     siapDiambil: 'Siap diambil',
     selesai: 'Selesai',
     dibatalkan: 'Dibatalkan',
@@ -22,5 +22,5 @@ abstract final class StatusPesanan {
 
   /// masuk segmen Berlangsung di tab pesanan (F-12)
   static bool berlangsung(String status) =>
-      status == menungguBayar || status == diproses || status == siapDiambil;
+      status == menungguBayar || status == disiapkan || status == siapDiambil;
 }
