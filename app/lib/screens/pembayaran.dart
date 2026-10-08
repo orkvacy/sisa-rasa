@@ -83,7 +83,7 @@ class Pembayaran extends StatelessWidget {
       listenWhen: (lama, baru) => _status(lama) != _status(baru),
       listener: (context, daftar) {
         final baru = context.read<PesananBloc>().cari(idPesanan)!;
-        if (baru['status'] == StatusPesanan.diproses) {
+        if (baru['status'] == StatusPesanan.disiapkan) {
           context.go(Rute.kodeAmbil(baru['kode'], baru: true));
         } else if (baru['status'] == StatusPesanan.dibatalkan) {
           ScaffoldMessenger.of(context).showSnackBar(

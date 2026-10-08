@@ -85,6 +85,8 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       porsi += jumlah;
     }
 
+    final biaya = biayaLayanan(subtotal);
+
     // F-40: porsi ditahan 15 menit, tapi ga boleh lewat jam tutup ambil
     final menit = min(
       menitBatasBayar,
@@ -111,8 +113,8 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       'porsi': porsi,
       'hargaNormal': hargaNormal,
       'subtotal': subtotal,
-      'biayaLayanan': biayaLayanan,
-      'total': subtotal + biayaLayanan,
+      'biayaLayanan': biaya,
+      'total': subtotal + biaya,
       'hemat': hargaNormal - subtotal,
       // batasBayar buat hitung mundur, batasMenit buat ditulis "sampai 16.35"
       'batasBayar': DateTime.now().add(Duration(minutes: menit)),
@@ -130,7 +132,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     final tagihan = await pembayaran.buatTagihan(
       idPesanan: id,
       metode: event.metode,
-      total: subtotal + biayaLayanan,
+      total: subtotal + biaya,
     );
     emit(_ubah(id, (lama) => {...lama, 'tagihan': tagihan}));
   }
@@ -157,7 +159,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
           ...lama,
           'mengecek': false,
           if (lunas) ...{
-            'status': StatusPesanan.diproses,
+            'status': StatusPesanan.disiapkan,
             'kode': _buatKode(),
             'dibayar': jamSekarang,
           },

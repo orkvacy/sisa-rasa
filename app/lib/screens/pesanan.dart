@@ -358,11 +358,11 @@ class _PesananState extends State<Pesanan> {
         children: [
           _kepala(pesanan),
           const SizedBox(height: 16),
-          // langkah status: diproses -> siap diambil -> selesai (F-41)
+          // langkah status: disiapkan -> siap diambil -> selesai (F-41)
           Row(
             children: [
               _LangkahStatus(
-                nama: StatusPesanan.label(StatusPesanan.diproses),
+                nama: StatusPesanan.label(StatusPesanan.disiapkan),
                 waktu: jam(pesanan['dibayar'] ?? pesanan['dipesan']),
                 status: 'lewat',
               ),

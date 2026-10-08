@@ -51,17 +51,19 @@ void main() {
 
     expect(pesanan['status'], StatusPesanan.menungguBayar);
     expect(pesanan['kode'], isNull);
-    expect(pesanan['total'], 14000 * 2 + biayaLayanan);
+    // biaya layanan 10% dari 28.000
+    expect(pesanan['biayaLayanan'], 2800);
+    expect(pesanan['total'], 28000 + 2800);
     expect(pesanan['hemat'], (35000 - 14000) * 2);
     expect(ditahan, [
       {'p1': 2},
     ]);
   });
 
-  test('cek bayar yg lunas jadi diproses dan dapet kode SR- (F-11)', () async {
+  test('cek bayar yg lunas jadi disiapkan dan dapet kode SR- (F-11)', () async {
     final id = await pesanSandwich(1);
     bloc.add(PembayaranDicek(id));
-    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.diproses);
+    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.disiapkan);
 
     expect(bloc.state.first['kode'], matches(RegExp(r'^SR-[A-Z2-9]{4}$')));
     expect(bloc.state.first['mengecek'], isFalse);
@@ -83,12 +85,12 @@ void main() {
   test('pesanan yg udah lunas ga bisa dibatalin pembeli (F-55)', () async {
     final id = await pesanSandwich(1);
     bloc.add(PembayaranDicek(id));
-    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.diproses);
+    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.disiapkan);
 
     bloc.add(PesananDibatalkan(id, alasan: 'berubah pikiran'));
     await Future<void>.delayed(Duration.zero);
 
-    expect(bloc.state.first['status'], StatusPesanan.diproses);
+    expect(bloc.state.first['status'], StatusPesanan.disiapkan);
     expect(dilepas, isEmpty);
   });
 }

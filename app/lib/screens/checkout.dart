@@ -75,7 +75,8 @@ class _CheckoutState extends State<Checkout> {
       hargaNormal += (paket['hargaAsli'] as int) * keranjang[id]!;
       porsi += keranjang[id]!;
     }
-    final total = subtotal + biayaLayanan;
+    final biaya = biayaLayanan(subtotal);
+    final total = subtotal + biaya;
 
     return Scaffold(
       appBar: AppBar(
@@ -264,11 +265,11 @@ class _CheckoutState extends State<Checkout> {
                       warnaNilai: Warna.hijau,
                     ),
                     // baris biaya layanan ilang sendiri kalau biayanya 0
-                    if (biayaLayanan > 0) ...[
+                    if (biaya > 0) ...[
                       const SizedBox(height: 8),
                       _BarisRincian(
-                        label: 'Biaya layanan',
-                        nilai: rupiah(biayaLayanan),
+                        label: 'Biaya layanan $persenBiayaLayanan%',
+                        nilai: rupiah(biaya),
                       ),
                     ],
                     const Divider(height: 24, color: Warna.garis),

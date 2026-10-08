@@ -1,7 +1,11 @@
-/// biaya layanan per pesanan, dibayar pembeli.
+/// biaya layanan dalam persen dari harga pesanan, dibayar pembeli.
 /// sementara masih ditulis di aplikasi, nanti diambil dari server.
 /// kalau diisi 0, barisnya otomatis ga muncul di checkout
-const int biayaLayanan = 1000;
+const int persenBiayaLayanan = 10;
+
+/// biaya layanan buat [subtotal] tertentu, dibulatkan ke rupiah terdekat
+int biayaLayanan(int subtotal) =>
+    (subtotal * persenBiayaLayanan / 100).round();
 
 /// batas bayar F-40, porsi ditahan selama ini sebelum pesanan batal sendiri
 const int menitBatasBayar = 15;

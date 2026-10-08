@@ -80,13 +80,14 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    // keranjang -> checkout, total checkout ditambah biaya layanan
+    // keranjang -> checkout, total checkout ditambah biaya layanan 10%
     await tester.tap(find.text('3 porsi'));
     await tester.pumpAndSettle();
     expect(find.text('Bayar di tempat'), findsNothing);
     await tester.tap(find.text('Lanjut ke checkout · Rp42.000'));
     await tester.pumpAndSettle();
-    expect(find.text('Bayar · Rp43.000'), findsOneWidget);
+    expect(find.text('Rp4.200'), findsOneWidget);
+    expect(find.text('Bayar · Rp46.200'), findsOneWidget);
 
     // pilih VA, terus pastiin aturan "tidak diambil" (F-56) keliatan sebelum bayar
     await tester.tap(find.text('Virtual Account BCA'));
@@ -99,7 +100,7 @@ void main() {
     expect(find.textContaining('dananya tidak dikembalikan'), findsOneWidget);
 
     // bayar, porsinya langsung ditahan
-    await tester.tap(find.text('Bayar · Rp43.000'));
+    await tester.tap(find.text('Bayar · Rp46.200'));
     await lewati(tester);
     expect(find.text('Salin nomor'), findsOneWidget);
     // keterangan mode uji ada di paling bawah, digulir dulu
@@ -126,6 +127,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Berlangsung · 1'), findsOneWidget);
     expect(find.text('Tampilkan kode'), findsOneWidget);
+    expect(find.text('Disiapkan'), findsWidgets);
 
     // stok yg udah dibayar ga balik: sandwich tinggal 0, beranda nampilin Habis
     await tester.tap(find.text('Beranda').last);
@@ -139,7 +141,7 @@ void main() {
     await tester.pumpWidget(const SisaRasaApp());
 
     await keCheckout(tester);
-    await tester.tap(find.text('Bayar · Rp15.000'));
+    await tester.tap(find.text('Bayar · Rp15.400'));
     await lewati(tester);
     expect(find.text('Bayar dengan QRIS'), findsOneWidget);
     expect(sisaPorsi(tester, 'p1'), 2);
