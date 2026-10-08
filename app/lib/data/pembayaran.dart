@@ -6,6 +6,18 @@ const int persenBiayaLayanan = 10;
 /// biaya layanan buat [subtotal] tertentu, dibulatkan ke rupiah terdekat
 int biayaLayanan(int subtotal) => (subtotal * persenBiayaLayanan / 100).round();
 
+/// komisi platform dalam persen dari harga jual, dipotong dari bagian mitra (F-48).
+/// sementara ditulis di aplikasi, nanti diatur di server
+const int persenKomisi = 10;
+
+int komisi(int hargaJual) => (hargaJual * persenKomisi / 100).round();
+
+/// yg diterima mitra dari satu pesanan: harga jual dikurangi komisi
+int penerimaanBersih(Map<String, dynamic> pesanan) {
+  final int jual = pesanan['subtotal'];
+  return jual - komisi(jual);
+}
+
 /// batas bayar F-40, porsi ditahan selama ini sebelum pesanan batal sendiri
 const int menitBatasBayar = 15;
 

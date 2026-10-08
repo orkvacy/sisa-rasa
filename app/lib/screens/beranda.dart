@@ -49,6 +49,8 @@ class _BerandaState extends State<Beranda> {
     final tampil = daftarPaket.where((paket) {
       return paket['tutup'] > jamSekarang &&
           (paket['sisaPorsi'] as int) > 0 &&
+          // gerai yg lagi ditutup mitra ga ditampilin (F-51)
+          paket['geraiTutup'] != true &&
           (kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih);
     }).toList();
 

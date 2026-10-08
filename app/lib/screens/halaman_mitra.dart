@@ -36,7 +36,10 @@ class HalamanMitra extends StatelessWidget {
     // paket mitra ini yg belum lewat jam tutup (F-25), yg habis tetap tampil dengan tanda Habis
     final daftar = [
       for (final paket in semua)
-        if (paket['mitra'] == nama && paket['tutup'] > jamSekarang) paket,
+        if (paket['mitra'] == nama &&
+            paket['tutup'] > jamSekarang &&
+            paket['geraiTutup'] != true)
+          paket,
     ]..sort((a, b) => a['tutup'].compareTo(b['tutup']));
 
     // mitranya udah ga punya paket aktif (misal kebuka dari link lama)

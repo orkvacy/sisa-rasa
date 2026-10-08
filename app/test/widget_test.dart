@@ -18,6 +18,23 @@ Future<void> lewati(WidgetTester tester) async {
 String jumlahBerlangsung(WidgetTester tester) =>
     tester.widget<Text>(find.byKey(const Key('jumlah-berlangsung'))).data!;
 
+/// buka halaman akun (tab Akun pembeli / avatar dasbor mitra), terus ganti akun
+Future<void> gantiAkun(WidgetTester tester, String nama) async {
+  // di aplikasi mitra, halaman akun dibuka dari avatar di Dasbor
+  if (find.text('Dasbor').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Dasbor').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('akun-mitra')));
+  } else {
+    await tester.tap(find.text('Akun').last);
+  }
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Ganti akun'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(nama).last);
+  await tester.pumpAndSettle();
+}
+
 int sisaPorsi(WidgetTester tester, String id) {
   // skipOffstage false: halaman utama tetep ada di bawah layar penuh (pembayaran dll)
   final context = tester.element(
@@ -193,8 +210,8 @@ void main() {
     await lewati(tester);
     await tester.tap(find.text('Ganti akun'));
     await lewati(tester);
-    // akun mitra udah ada tapi halamannya belum, jadi masih dikunci
-    expect(find.textContaining('halamannya belum ada'), findsOneWidget);
+    // akun mitra juga bisa dipilih (halaman mitra udah ada)
+    expect(find.text('Mitra · dapur.ibis@contoh.id'), findsOneWidget);
     await tester.tap(find.text('Dimas Pratama'));
     await lewati(tester);
     expect(find.text('Dimas Pratama'), findsOneWidget);
@@ -324,48 +341,82 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('pesanan sampai selesai: siap diambil, kode QR, diambil (F-41)', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(400, 900));
-    await tester.pumpWidget(const SisaRasaApp());
+  testWidgets(
+    'pesanan sampai selesai lewat aplikasi mitra (F-41, F-43, F-46)',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 900));
+      await tester.pumpWidget(const SisaRasaApp());
 
-    await keCheckout(tester);
-    await tester.tap(find.text('Bayar sekarang'));
-    await lewati(tester);
-    await tester.tap(find.text('Saya sudah bayar · cek status'));
-    await lewati(tester);
-    await lewati(tester);
-    expect(find.text('Pesananmu sedang disiapkan'), findsOneWidget);
+      // Rani pesan + bayar sandwich Ibis Hotel
+      await keCheckout(tester);
+      await tester.tap(find.text('Bayar sekarang'));
+      await lewati(tester);
+      await tester.tap(find.text('Saya sudah bayar · cek status'));
+      await lewati(tester);
+      await lewati(tester);
+      expect(find.text('Pesananmu sedang disiapkan'), findsOneWidget);
+      final kode = tester
+          .widgetList<Text>(find.textContaining('SR-'))
+          .map((t) => t.data!)
+          .firstWhere((t) => RegExp(r'^SR-[A-Z2-9]{4}$').hasMatch(t));
+      await tester.tap(find.byTooltip('Kembali'));
+      await tester.pumpAndSettle();
 
-    // mode uji gantiin aplikasi mitra: tandai siap diambil (F-43)
-    await tester.tap(find.text('Mode uji: tandai siap diambil'));
-    await tester.pumpAndSettle();
-    expect(find.text('Pesananmu siap diambil!'), findsOneWidget);
+      // masuk sebagai mitra Ibis Hotel, router langsung pindah ke dasbor mitra (F-26)
+      await gantiAkun(tester, 'Ibis Hotel');
+      expect(find.text('Dapur sore ini'), findsOneWidget);
+      expect(find.text('Perlu disiapkan'), findsOneWidget);
 
-    // kode QR layar penuh, tunggu snackbar "Pembayaran berhasil" ilang dulu
-    await tester.pump(const Duration(seconds: 5));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tampilkan QR'));
-    await tester.pumpAndSettle();
-    expect(find.text('Tunjukkan ke kasir Ibis Hotel'), findsOneWidget);
-    expect(find.text('1× Sandwich Sisa'), findsOneWidget);
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Selesai'));
-    await tester.pumpAndSettle();
-    expect(find.text('Pesananmu siap diambil!'), findsOneWidget);
+      // pesanan masuk: tandai siap (F-43)
+      await tester.tap(find.text('Pesanan').last);
+      await tester.pumpAndSettle();
+      expect(find.text(kode), findsOneWidget);
+      await tester.tap(find.text('Tandai siap'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Belum ada pesanan yang perlu disiapkan.'),
+        findsOneWidget,
+      );
 
-    // mitra mindai kodenya: pesanan selesai (F-20)
-    await tester.tap(find.text('Mode uji: tandai sudah diambil'));
-    await tester.pumpAndSettle();
-    expect(find.text('Pesanan sudah diambil'), findsOneWidget);
+      // balik jadi Rani: statusnya ikut berubah jadi siap diambil
+      await gantiAkun(tester, 'Rani Amelia');
+      await tester.tap(find.text('Pesanan').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Siap diambil'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Kembali'));
-    await tester.pumpAndSettle();
-    expect(jumlahBerlangsung(tester), '0');
-    await tester.tap(find.text('Selesai').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Hari ini'), findsOneWidget);
-    expect(find.text('1 porsi terselamatkan'), findsOneWidget);
-    await tester.binding.setSurfaceSize(null);
-  });
+      // kode QR layar penuh, tunggu snackbar "Masuk sebagai ..." ilang dulu
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tampilkan QR'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tunjukkan ke kasir Ibis Hotel'), findsOneWidget);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Selesai'));
+      await tester.pumpAndSettle();
+
+      // mitra cocokkan kode yg disebut pembeli (F-46) -> selesai diambil (F-20)
+      await gantiAkun(tester, 'Ibis Hotel');
+      await tester.tap(find.byTooltip('Pindai kode ambil'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'SR-XXXX');
+      await tester.tap(find.text('Cocokkan kode'));
+      await tester.pumpAndSettle();
+      expect(find.text('Kode SR-XXXX tidak dikenali'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), kode);
+      await tester.tap(find.text('Cocokkan kode'));
+      await tester.pumpAndSettle();
+      expect(find.text('$kode cocok, pesanan selesai diambil'), findsOneWidget);
+      // dasbor: 1 porsi terselamatkan
+      expect(find.text('1'), findsWidgets);
+
+      // pembeli liat pesanannya di segmen Selesai
+      await gantiAkun(tester, 'Rani Amelia');
+      await tester.tap(find.text('Pesanan').last);
+      await tester.pumpAndSettle();
+      expect(jumlahBerlangsung(tester), '0');
+      await tester.tap(find.text('Selesai').last);
+      await tester.pumpAndSettle();
+      expect(find.text('1 porsi terselamatkan'), findsOneWidget);
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
 }

@@ -21,6 +21,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     on<PesananDibatalkan>(batalkanPesanan);
     on<StatusPesananDiubah>(ubahStatus);
     on<MetodeDiganti>(gantiMetode);
+    on<PesananDibatalkanMitra>(batalkanOlehMitra);
   }
 
   final LayananPembayaran pembayaran;
@@ -220,6 +221,31 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     );
     // F-40: porsi yg tadinya ditahan dibalikin ke stok
     lepasPorsi?.call(Map<String, int>.from(pesanan['porsiPaket']));
+  }
+
+  /// mitra batalin pesanan yg udah dibayar: status batal, dana dikembalikan penuh (F-42).
+  /// porsinya ga dibalikin ke stok, soalnya biasanya batal karena makanannya ga ada
+  void batalkanOlehMitra(
+    PesananDibatalkanMitra event,
+    Emitter<List<Map<String, dynamic>>> emit,
+  ) {
+    final status = cari(event.id)?['status'];
+    if (status != StatusPesanan.disiapkan &&
+        status != StatusPesanan.siapDiambil) {
+      return;
+    }
+    emit(
+      _ubah(
+        event.id,
+        (lama) => {
+          ...lama,
+          'status': StatusPesanan.dibatalkan,
+          'alasan': event.alasan,
+          'olehMitra': true,
+          'dibatalkanPada': DateTime.now(),
+        },
+      ),
+    );
   }
 
   /// ganti metode bayar selama belum lunas: tagihan lama dibuang, minta yg baru

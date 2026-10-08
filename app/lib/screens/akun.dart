@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
@@ -41,6 +42,13 @@ class Akun extends StatelessWidget {
         children: [
           Row(
             children: [
+              // dibuka dari dasbor mitra (bukan tab), jadi perlu tombol kembali
+              if (GoRouter.of(context).canPop())
+                IconButton(
+                  tooltip: 'Kembali',
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back),
+                ),
               const Expanded(
                 child: Text(
                   'Akun',
@@ -115,79 +123,83 @@ class Akun extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // kartu dampak, dihitung dari pesanan yg udah dibuat
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Warna.momen,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.eco_outlined, size: 18, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      'Dampakmu hari ini',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$porsi',
-                            style: const TextStyle(
-                              fontSize: Teks.subjudul,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Text(
-                            'porsi terselamatkan',
-                            style: TextStyle(
-                              fontSize: Teks.kecil,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
+          // kartu dampak, dihitung dari pesanan yg udah dibuat.
+          // khusus pembeli, dampak mitra udah ada di dasbornya
+          if (akun['peran'] == 'pembeli') ...[
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Warna.momen,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.eco_outlined, size: 18, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Dampakmu hari ini',
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            rupiah(hemat),
-                            style: const TextStyle(
-                              fontSize: Teks.subjudul,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$porsi',
+                              style: const TextStyle(
+                                fontSize: Teks.subjudul,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          const Text(
-                            'kamu hemat',
-                            style: TextStyle(
-                              fontSize: Teks.kecil,
-                              color: Colors.white70,
+                            const Text(
+                              'porsi terselamatkan',
+                              style: TextStyle(
+                                fontSize: Teks.kecil,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              rupiah(hemat),
+                              style: const TextStyle(
+                                fontSize: Teks.subjudul,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Text(
+                              'kamu hemat',
+                              style: TextStyle(
+                                fontSize: Teks.kecil,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
+          ] else
+            const SizedBox(height: 8),
 
           const Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
@@ -321,8 +333,6 @@ class _TombolGantiAkun extends StatelessWidget {
             for (final akun in dummyAkun)
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                // halaman mitra belum dibikin, jadi akunnya belum bisa dipilih
-                enabled: akun['peran'] == 'pembeli',
                 leading: CircleAvatar(
                   backgroundColor: Warna.softGreen,
                   child: Text(
@@ -338,9 +348,7 @@ class _TombolGantiAkun extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
-                  akun['peran'] == 'pembeli'
-                      ? '${namaPeran(akun['peran']!)} · ${akun['email']}'
-                      : '${namaPeran(akun['peran']!)} · halamannya belum ada',
+                  '${namaPeran(akun['peran']!)} · ${akun['email']}',
                 ),
                 trailing: akun['id'] == aktif
                     ? const Icon(Icons.check_circle, color: Warna.hijau)
@@ -348,9 +356,17 @@ class _TombolGantiAkun extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(sheetContext);
                   if (akun['id'] == aktif) return;
-                  context.read<KeranjangCubit>().kosongkan();
-                  context.read<AkunCubit>().ganti(akun['id']!);
-                  ScaffoldMessenger.of(context)
+                  // diambil dulu sebelum ganti akun: kalau perannya beda,
+                  // router langsung pindah ke halaman peran baru dan layar ini ketutup
+                  final messenger = ScaffoldMessenger.of(context);
+                  final keranjang = context.read<KeranjangCubit>();
+                  final akunCubit = context.read<AkunCubit>();
+                  // halaman akun yg dibuka dari dasbor mitra ditutup dulu,
+                  // biar ga sempet digambar ulang pake akun peran lain
+                  if (GoRouter.of(context).canPop()) context.pop();
+                  keranjang.kosongkan();
+                  akunCubit.ganti(akun['id']!);
+                  messenger
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
                       SnackBar(content: Text('Masuk sebagai ${akun['nama']}')),
