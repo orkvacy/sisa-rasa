@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/akun.dart';
 import 'package:sisa_rasa/screens/beranda.dart';
@@ -12,6 +15,11 @@ import 'package:sisa_rasa/screens/halaman_mitra.dart';
 import 'package:sisa_rasa/screens/halaman_utama.dart';
 import 'package:sisa_rasa/screens/keranjang.dart';
 import 'package:sisa_rasa/screens/kode_ambil.dart';
+import 'package:sisa_rasa/screens/mitra/dasbor.dart';
+import 'package:sisa_rasa/screens/mitra/detail_pesanan_mitra.dart';
+import 'package:sisa_rasa/screens/mitra/halaman_utama_mitra.dart';
+import 'package:sisa_rasa/screens/mitra/pesanan_masuk.dart';
+import 'package:sisa_rasa/screens/mitra/segera_hadir.dart';
 import 'package:sisa_rasa/screens/pembayaran.dart';
 import 'package:sisa_rasa/screens/pesanan.dart';
 
@@ -44,11 +52,34 @@ abstract final class Rute {
 
   /// kode QR layar penuh, dibuka dari pesanan yg kodenya ini
   static String kodeAmbil(String kode) => '/pesanan/kode-ambil/$kode';
+
+  // sisi mitra (layar 9-11b di SRS), cuma kebuka kalau akun yg masuk perannya mitra
+  static const mitraDasbor = '/mitra/dasbor';
+  static const mitraPaket = '/mitra/paket';
+  static const mitraPesanan = '/mitra/pesanan';
+  static const mitraSaldo = '/mitra/saldo';
+  static const mitraAkun = '/mitra/dasbor/akun';
+  static String mitraDetailPesanan(String id) => '/mitra/pesanan/detail/$id';
+}
+
+/// GoRouter dengerin AkunCubit lewat ini, biar pas ganti akun redirect-nya jalan lagi
+class _DengarAkun extends ChangeNotifier {
+  _DengarAkun(Stream<Object?> stream) {
+    _langganan = stream.listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<Object?> _langganan;
+
+  @override
+  void dispose() {
+    _langganan.cancel();
+    super.dispose();
+  }
 }
 
 /// dibikin lewat fungsi, bukan variabel global,
 /// biar tiap SisaRasaApp (termasuk di tes) punya router sama navigator sendiri dari awal
-GoRouter buatRouter() {
+GoRouter buatRouter({required AkunCubit akun}) {
   // navigator paling luar, layar full (detail, checkout, dll) ditaruh di sini
   final akar = GlobalKey<NavigatorState>();
 
@@ -58,6 +89,16 @@ GoRouter buatRouter() {
 
   return GoRouter(
     navigatorKey: akar,
+    refreshListenable: _DengarAkun(akun.stream),
+    // F-26 / F-32: halaman yg kebuka ditentuin peran akun yg lagi masuk.
+    // mitra ga bisa buka halaman pembeli, pembeli ga bisa buka halaman mitra
+    redirect: (context, state) {
+      final mitra = akun.state['peran'] == 'mitra';
+      final diHalamanMitra = state.matchedLocation.startsWith('/mitra');
+      if (mitra && !diHalamanMitra) return Rute.mitraDasbor;
+      if (!mitra && diHalamanMitra) return Rute.beranda;
+      return null;
+    },
     initialLocation: Rute.beranda,
     routes: [
       GoRoute(path: '/', redirect: (context, state) => Rute.beranda),
@@ -142,6 +183,59 @@ GoRouter buatRouter() {
               GoRoute(
                 path: Rute.akun,
                 builder: (context, state) => const Akun(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      // tab mitra: Dasbor, Paket, (tombol pindai di tengah), Pesanan, Saldo
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => HalamanUtamaMitra(shell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Rute.mitraDasbor,
+                builder: (context, state) => const Dasbor(),
+                routes: [layarPenuh('akun', (context, state) => const Akun())],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Rute.mitraPaket,
+                builder: (context, state) => const SegeraHadir(
+                  judul: 'Paket',
+                  keterangan: 'Tambah dan ubah paket menyusul. Sisa porsi bisa diubah dari Dasbor.',
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Rute.mitraPesanan,
+                builder: (context, state) => const PesananMasuk(),
+                routes: [
+                  layarPenuh(
+                    'detail/:id',
+                    (context, state) => DetailPesananMitra(
+                      idPesanan: state.pathParameters['id']!,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Rute.mitraSaldo,
+                builder: (context, state) => const SegeraHadir(
+                  judul: 'Saldo',
+                  keterangan: 'Saldo dan pencairan ke rekening menyusul setelah backend jadi.',
+                ),
               ),
             ],
           ),

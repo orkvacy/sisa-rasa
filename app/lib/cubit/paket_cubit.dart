@@ -36,4 +36,23 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
         },
     ]);
   }
+
+  // mitra ubah sisa porsi langsung dari daftar (F-44)
+  void ubahSisa(String id, int sisa) {
+    emit([
+      for (final paket in state)
+        if (paket['id'] == id) {...paket, 'sisaPorsi': sisa} else paket,
+    ]);
+  }
+
+  // mitra tutup / buka gerai sementara, paketnya ga tampil buat pembeli (F-51)
+  void aturGerai(String mitra, {required bool buka}) {
+    emit([
+      for (final paket in state)
+        if (paket['mitra'] == mitra) {...paket, 'geraiTutup': !buka} else paket,
+    ]);
+  }
+
+  bool geraiBuka(String mitra) =>
+      !state.any((p) => p['mitra'] == mitra && p['geraiTutup'] == true);
 }

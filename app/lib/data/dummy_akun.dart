@@ -20,3 +20,11 @@ const List<Map<String, String>> dummyAkun = [
     'peran': 'mitra',
   },
 ];
+
+/// nama pembeli yg ditampilin ke mitra, dipendekin: "Rani Amelia" -> "Rani A."
+String namaPembeli(String idAkun) {
+  final akun = dummyAkun.where((a) => a['id'] == idAkun).firstOrNull;
+  if (akun == null) return 'Pembeli';
+  final kata = akun['nama']!.split(' ');
+  return kata.length == 1 ? kata.first : '${kata.first} ${kata[1][0]}.';
+}

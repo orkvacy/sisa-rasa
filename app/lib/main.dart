@@ -20,12 +20,15 @@ class SisaRasaApp extends StatefulWidget {
 }
 
 class _SisaRasaAppState extends State<SisaRasaApp> {
+  // akun dibikin di sini (bukan di BlocProvider) soalnya router butuh dengerin akunnya
+  final akun = AkunCubit();
   // router dibikin sekali aja, kalau di build bakal ke-reset tiap digambar ulang
-  late final GoRouter router = buatRouter();
+  late final GoRouter router = buatRouter(akun: akun);
 
   @override
   void dispose() {
     router.dispose();
+    akun.close();
     super.dispose();
   }
 
@@ -36,7 +39,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
     return MultiBlocProvider(
       providers: [
         // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
-        BlocProvider(create: (context) => AkunCubit()),
+        BlocProvider.value(value: akun),
         BlocProvider(create: (context) => PaketCubit()),
         BlocProvider(create: (context) => KeranjangCubit()),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya

@@ -131,4 +131,22 @@ void main() {
       'Virtual Account Mandiri',
     );
   });
+
+  test(
+    'mitra batalin pesanan lunas: status batal, porsi ga dibalikin (F-42)',
+    () async {
+      final id = await pesanSandwich(1);
+      // belum dibayar: mitra ga bisa batalin
+      bloc.add(PesananDibatalkanMitra(id, alasan: 'Paket sudah habis.'));
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.first['status'], StatusPesanan.menungguBayar);
+
+      bloc.add(PembayaranDicek(id));
+      await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.disiapkan);
+      bloc.add(PesananDibatalkanMitra(id, alasan: 'Paket sudah habis.'));
+      await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.dibatalkan);
+      expect(bloc.state.first['olehMitra'], isTrue);
+      expect(dilepas, isEmpty);
+    },
+  );
 }

@@ -35,6 +35,15 @@ class PesananDibatalkan extends PesananEvent {
   final bool otomatis;
 }
 
+// dikirim mitra pas pesanan yg udah dibayar ga bisa dipenuhi (paket habis, dapur tutup).
+// dana pembeli balik penuh (F-42)
+class PesananDibatalkanMitra extends PesananEvent {
+  PesananDibatalkanMitra(this.id, {required this.alasan});
+
+  final String id;
+  final String alasan;
+}
+
 // dikirim pas pembeli ganti metode bayar sebelum lunas, tagihannya dibikin ulang
 class MetodeDiganti extends PesananEvent {
   MetodeDiganti(this.id, this.metode);
