@@ -122,7 +122,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                 );
               },
             ),
-<<<<<<< HEAD
+            // NavigasiMelayang: navigasi bawah buat pindah halaman utama
             NavigasiMelayang(
               tabs: _tabs,
               tabAktif: tabAktif,
@@ -130,36 +130,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             ),
           ],
         ),
-=======
-          ),
-        ],
-      ),
-      // NavigationBar: navigasi bawah buat pindah halaman utama
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.white,
-        indicatorColor: Warna.softGreen,
-        selectedIndex: tabAktif,
-        onDestinationSelected: (index) => setState(() => tabAktif = index),
-        destinations: const [
-          // NavigationDestination: satu tombol tab di navigation bar
-          NavigationDestination(
-            // Icon: nampilin ikon bawaan material (Icons.xxx)
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Warna.hijau),
-            label: 'Beranda',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long, color: Warna.hijau),
-            label: 'Pesanan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Warna.hijau),
-            label: 'Akun',
-          ),
-        ],
->>>>>>> origin/main
       ),
     );
   }
