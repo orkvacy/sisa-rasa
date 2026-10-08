@@ -4,6 +4,17 @@ import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
+/// gaya kolom angka di tombol - +. semua garis sama padding dari tema dimatiin,
+/// soalnya padding 16 dari inputDecorationTheme bikin angkanya kedorong keluar kolom
+const isianJumlah = InputDecoration(
+  filled: false,
+  isDense: true,
+  contentPadding: EdgeInsets.zero,
+  border: InputBorder.none,
+  enabledBorder: InputBorder.none,
+  focusedBorder: InputBorder.none,
+);
+
 /// satu baris paket di keranjang, jumlahnya bisa diketik atau pake tombol - +
 class KartuKeranjang extends StatefulWidget {
   const KartuKeranjang({
@@ -76,13 +87,25 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
             children: [
               Text(
                 widget.paket['nama'],
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
+              const SizedBox(height: 2),
               Text(
-                '${rupiah(widget.paket['hargaDiskon'])} / porsi · sisa $sisa',
+                '${rupiah(widget.paket['hargaDiskon'])} / porsi',
                 style: const TextStyle(
-                  fontSize: Teks.kecil,
+                  fontSize: Teks.keterangan,
                   color: Warna.teksPendukung,
+                ),
+              ),
+              // sisa dipisah barisnya biar ga kepotong di tengah kayak "· sisa 3"
+              Text(
+                'Sisa $sisa porsi',
+                style: TextStyle(
+                  fontSize: Teks.kecil,
+                  fontWeight: sisa <= 2 ? FontWeight.w700 : FontWeight.w400,
+                  color: sisa <= 2 ? Warna.mendesak : Warna.teksPendukung,
                 ),
               ),
             ],
@@ -107,7 +130,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
                 icon: const Icon(Icons.remove, size: 20),
               ),
               SizedBox(
-                width: 28,
+                width: 32,
                 // TextField: jumlah porsi, keyboardnya angka
                 child: TextField(
                   controller: jumlahController,
@@ -116,11 +139,11 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   textAlign: TextAlign.center,
                   onChanged: updateJumlah,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
+                  style: const TextStyle(
+                    fontSize: Teks.nama,
+                    fontWeight: FontWeight.w700,
                   ),
+                  decoration: isianJumlah,
                 ),
               ),
               IconButton(

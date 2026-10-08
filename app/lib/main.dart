@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
+import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/router.dart';
@@ -35,6 +36,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
     return MultiBlocProvider(
       providers: [
         // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
+        BlocProvider(create: (context) => AkunCubit()),
         BlocProvider(create: (context) => PaketCubit()),
         BlocProvider(create: (context) => KeranjangCubit()),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya

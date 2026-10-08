@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_event.dart';
+import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/data/pembayaran.dart';
 import 'package:sisa_rasa/data/status_pesanan.dart';
 import 'package:sisa_rasa/theme/teks.dart';
@@ -35,7 +36,11 @@ class _PesananState extends State<Pesanan> {
   @override
   Widget build(BuildContext context) {
     // ambil daftar pesanan dari PesananBloc, tiap ada perubahan status tab ini ikut update
-    final daftarPesanan = context.watch<PesananBloc>().state;
+    // cuma pesanan punya akun yg lagi dipake
+    final daftarPesanan = PesananBloc.milik(
+      context.watch<PesananBloc>().state,
+      context.watch<AkunCubit>().state['id']!,
+    );
     final berlangsung = [
       for (final p in daftarPesanan)
         if (StatusPesanan.berlangsung(p['status'])) p,
@@ -79,30 +84,35 @@ class _PesananState extends State<Pesanan> {
               children: [
                 for (final nama in _segmen)
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => segmen = nama),
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: segmen == nama
-                              ? Colors.white
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          switch (nama) {
-                            'berlangsung' =>
-                              'Berlangsung · ${berlangsung.length}',
-                            'selesai' => 'Selesai',
-                            _ => 'Dibatalkan',
-                          },
-                          style: TextStyle(
-                            fontSize: Teks.keterangan,
-                            fontWeight: FontWeight.w700,
+                    // Semantics: dibaca pembaca layar sebagai tombol, plus tau mana yg kepilih
+                    child: Semantics(
+                      button: true,
+                      selected: segmen == nama,
+                      child: GestureDetector(
+                        onTap: () => setState(() => segmen = nama),
+                        child: Container(
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
                             color: segmen == nama
-                                ? Warna.teks
-                                : Warna.teksPendukung,
+                                ? Colors.white
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            switch (nama) {
+                              'berlangsung' =>
+                                'Berlangsung · ${berlangsung.length}',
+                              'selesai' => 'Selesai',
+                              _ => 'Dibatalkan',
+                            },
+                            style: TextStyle(
+                              fontSize: Teks.keterangan,
+                              fontWeight: FontWeight.w700,
+                              color: segmen == nama
+                                  ? Warna.teks
+                                  : Warna.teksPendukung,
+                            ),
                           ),
                         ),
                       ),
@@ -202,11 +212,22 @@ class _PesananState extends State<Pesanan> {
               ),
               Text(
                 '${pesanan['isi'][0]['jumlah']} × ${pesanan['isi'][0]['nama']}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: Teks.tombol,
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              // isi lebih dari satu paket: sisanya cukup disebut jumlahnya
+              if ((pesanan['isi'] as List).length > 1)
+                Text(
+                  '+${(pesanan['isi'] as List).length - 1} paket lain',
+                  style: const TextStyle(
+                    fontSize: Teks.kecil,
+                    color: Warna.teksPendukung,
+                  ),
+                ),
             ],
           ),
         ),

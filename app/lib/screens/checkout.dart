@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_event.dart';
+import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/data/pembayaran.dart';
@@ -30,6 +31,7 @@ class _CheckoutState extends State<Checkout> {
     // stok ditahan sama PesananBloc, layar ini cukup kirim event
     context.read<PesananBloc>().add(
       PesananDibuat(
+        idAkun: context.read<AkunCubit>().state['id']!,
         keranjang: context.read<KeranjangCubit>().state,
         daftarPaket: context.read<PaketCubit>().state,
         metode: metode,

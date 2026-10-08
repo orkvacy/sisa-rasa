@@ -4,11 +4,14 @@ abstract class PesananEvent {}
 // dikirim pas tombol Bayar di checkout dipencet
 class PesananDibuat extends PesananEvent {
   PesananDibuat({
+    required this.idAkun,
     required this.keranjang,
     required this.daftarPaket,
     required this.metode,
   });
 
+  // pemilik pesanan, biar pas ganti akun daftar pesanannya ikut ganti
+  final String idAkun;
   final Map<String, int> keranjang;
   final List<Map<String, dynamic>> daftarPaket;
   // salah satu dari MetodeBayar (qris, gopay, va)

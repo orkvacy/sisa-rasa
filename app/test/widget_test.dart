@@ -136,6 +136,38 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
+  testWidgets('ganti akun cepat, pesanan akun lain ga ikut keliatan', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
+
+    // Rani bikin pesanan (belum dibayar)
+    await keCheckout(tester);
+    await tester.tap(find.text('Bayar · Rp15.400'));
+    await lewati(tester);
+    await tester.tap(find.byTooltip('Back'));
+    await lewati(tester);
+    expect(find.text('Berlangsung · 1'), findsOneWidget);
+
+    // pindah ke Dimas lewat tombol mode uji di tab akun
+    await tester.tap(find.text('Akun').last);
+    await lewati(tester);
+    await tester.tap(find.text('Ganti akun'));
+    await lewati(tester);
+    // akun mitra udah ada tapi halamannya belum, jadi masih dikunci
+    expect(find.textContaining('halamannya belum ada'), findsOneWidget);
+    await tester.tap(find.text('Dimas Pratama'));
+    await lewati(tester);
+    expect(find.text('Dimas Pratama'), findsOneWidget);
+    expect(find.text('DP'), findsOneWidget);
+
+    await tester.tap(find.text('Pesanan').last);
+    await lewati(tester);
+    expect(find.text('Berlangsung · 0'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('batalin sebelum bayar, porsi balik ke stok', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(const SisaRasaApp());
