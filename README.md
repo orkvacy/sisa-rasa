@@ -57,7 +57,7 @@ balik.
 Jadi prinsipnya: **build sekali, file yang sama dipromosikan.**
 
 ```
-fitur/... ──PR──▶ main ──▶ build otomatis (APK + binary Go)
+feat/...  ──PR──▶ main ──▶ build otomatis (APK + binary Go)
                               │
                               ├─▶ staging     otomatis tiap ada merge ke main
                               └─▶ production  pas dibikin tag versi, file yang SAMA
@@ -68,8 +68,9 @@ fitur/... ──PR──▶ main ──▶ build otomatis (APK + binary Go)
 | Branch | Isinya |
 | --- | --- |
 | `main` | Satu-satunya branch utama. Selalu harus bisa di-build dan lolos tes. |
-| `fitur/<nama>` | Tempat ngerjain satu fitur, dibuat dari `main` lalu di-PR balik ke `main`. Contoh: `fitur/keranjang`, `fitur/login`. |
-| `perbaikan/<nama>` | Sama kayak fitur, tapi buat benerin bug. Contoh: `perbaikan/stok-minus`. |
+| `feat/<nama>` | Tempat ngerjain satu fitur, dibuat dari `main` lalu di-PR balik ke `main`. Contoh: `feat/keranjang`, `feat/login`. |
+| `fix/<nama>` | Sama kayak fitur, tapi buat benerin bug. Contoh: `fix/stok-minus`. |
+| `docs/<nama>` | Khusus ubah dokumen (README, PRD, SRS), tidak nyentuh kode. Contoh: `docs/srs-v1.7`. |
 | `posttest` | Khusus praktikum Pemrograman Piranti Bergerak. Scope-nya beda, ngikutin materi tiap modul, jadi tidak di-merge ke `main`. |
 
 Aturan PR ke `main`:
@@ -124,7 +125,7 @@ Penomoran versinya `vMAJOR.MINOR.PATCH`:
 
 ### Kalau ada bug di production
 
-Perbaikannya tetap lewat `main`: bikin `perbaikan/<nama>` dari `main`, PR,
+Perbaikannya tetap lewat `main`: bikin `fix/<nama>` dari `main`, PR,
 merge, cek di staging, terus bikin tag patch baru (misal `v1.0.1`). Tidak ada
 branch production yang perlu di-merge balik.
 
