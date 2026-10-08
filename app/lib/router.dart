@@ -70,7 +70,7 @@ GoRouter buatRouter() {
               GoRoute(
                 path: Rute.beranda,
                 builder: (context, state) => Beranda(
-                  onBukaPaket: (paket) => context.push(Rute.paket(paket['id'])),
+                  onBukaMitra: (nama) => context.push(Rute.mitra(nama)),
                 ),
                 routes: [
                   layarPenuh(
