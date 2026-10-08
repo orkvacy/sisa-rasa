@@ -136,8 +136,9 @@ branch production yang perlu di-merge balik.
 ## Tech Stack
 
 - Flutter dan Dart, dengan GoRouter, Cubit/BLoC, dan Clean Architecture
-- Go dan SQLite untuk backend
-- Dijalankan di VPS sendiri
+- Go dan PostgreSQL untuk backend
+- Dijalankan di VPS sendiri, PostgreSQL di server yang sama
+  (database `staging` dan `production` dipisah)
 
 ## Keamanan
 
@@ -181,10 +182,11 @@ dipikirin dari awal. Belum semuanya jadi, diterapkan bertahap sesuai SRS.
 - **Token sesi berumur pendek** dan dicabut waktu logout (F-33).
 - **Hak akses dicek di server** di tiap endpoint, bukan cuma disembunyiin di
   aplikasi. Pembeli tidak bisa manggil endpoint mitra atau admin (F-32).
-- **Semua input divalidasi ulang di server** (NF-09). Query ke SQLite pakai
+- **Semua input divalidasi ulang di server** (NF-09). Query ke PostgreSQL pakai
   parameter, tidak pernah gabung string, biar aman dari SQL injection.
-- **Stok dikurangi dalam satu transaksi** biar dua orang yang rebutan porsi
-  terakhir tidak bikin stok minus (NF-07).
+- **Stok dikurangi dalam satu transaksi** dengan baris paketnya dikunci
+  (`SELECT ... FOR UPDATE`), biar dua orang yang rebutan porsi terakhir
+  tidak bikin stok minus (NF-07).
 - **Status lunas cuma dari notifikasi payment gateway** yang tanda tangannya
   sudah diverifikasi, bukan dari laporan aplikasi (NF-10).
 - **Pencairan saldo pakai kunci unik** jadi tidak pernah terkirim dua kali (NF-11).
@@ -196,7 +198,9 @@ dipikirin dari awal. Belum semuanya jadi, diterapkan bertahap sesuai SRS.
 - Sertifikat TLS dari Let's Encrypt di belakang reverse proxy, dengan HSTS.
 - Firewall cuma buka port 80, 443, dan SSH. SSH cuma pakai key, login root
   dimatiin, ditambah fail2ban.
-- Database SQLite di-backup berkala ke tempat terpisah.
+- Port PostgreSQL (5432) tidak dibuka ke luar, cuma bisa diakses server Go
+  di VPS yang sama.
+- Database di-backup tiap hari pakai `pg_dump` (cron) ke tempat terpisah.
 
 ## Struktur folder (sementara)
 
