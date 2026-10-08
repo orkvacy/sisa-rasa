@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
+import 'package:sisa_rasa/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
+import 'package:sisa_rasa/data/dummy_akun.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -12,7 +16,11 @@ class Akun extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daftarPesanan = context.watch<PesananBloc>().state;
+    final akun = context.watch<AkunCubit>().state;
+    final daftarPesanan = PesananBloc.milik(
+      context.watch<PesananBloc>().state,
+      akun['id']!,
+    );
     var porsi = 0;
     var hemat = 0;
     for (final pesanan in daftarPesanan) {
@@ -31,9 +39,21 @@ class Akun extends StatelessWidget {
           NavigasiMelayang.ruangBawah,
         ),
         children: [
-          const Text(
-            'Akun',
-            style: TextStyle(fontSize: Teks.judul, fontWeight: FontWeight.w800),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Akun',
+                  style: TextStyle(
+                    fontSize: Teks.judul,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              // kDebugMode: tombol ini cuma ada pas flutter run / test,
+              // di build rilis (flutter build apk) otomatis ilang
+              if (kDebugMode) const _TombolGantiAkun(),
+            ],
           ),
           const SizedBox(height: 16),
           // Material dipake buat latar kartu, soalnya kalau Container berwarna efek pencet ListTile nya ketutup
@@ -46,21 +66,21 @@ class Akun extends StatelessWidget {
               contentPadding: const EdgeInsets.all(16),
               onTap: () => _BarisMenu.segeraHadir(context, 'Profil'),
               // CircleAvatar: lingkaran isi inisial nama, gantiin foto profil
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 radius: 28,
                 backgroundColor: Warna.softGreen,
                 child: Text(
-                  'RA',
-                  style: TextStyle(
+                  inisial(akun['nama']!),
+                  style: const TextStyle(
                     fontSize: Teks.nama,
                     fontWeight: FontWeight.w800,
                     color: Warna.hijau,
                   ),
                 ),
               ),
-              title: const Text(
-                'Rani Amelia',
-                style: TextStyle(
+              title: Text(
+                akun['nama']!,
+                style: const TextStyle(
                   fontSize: Teks.nama,
                   fontWeight: FontWeight.w800,
                 ),
@@ -68,7 +88,7 @@ class Akun extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('rani.amelia@gmail.com'),
+                  Text(akun['email']!),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -79,9 +99,9 @@ class Akun extends StatelessWidget {
                       color: Warna.softGreen,
                       borderRadius: BorderRadius.circular(99),
                     ),
-                    child: const Text(
-                      'Pembeli',
-                      style: TextStyle(
+                    child: Text(
+                      namaPeran(akun['peran']!),
+                      style: const TextStyle(
                         fontSize: Teks.kecil,
                         fontWeight: FontWeight.w700,
                         color: Warna.hijau,
@@ -255,6 +275,107 @@ class Akun extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// tombol pindah akun cepet selama testing, gantiin logout - login
+class _TombolGantiAkun extends StatelessWidget {
+  const _TombolGantiAkun();
+
+  void _pilih(BuildContext context) {
+    final aktif = context.read<AkunCubit>().state['id'];
+    // showModalBottomSheet: lembar dari bawah, isinya daftar akun uji
+    showModalBottomSheet<void>(
+      context: context,
+      // useRootNavigator: dibuka di atas navigasi melayang, kalau ga bawahnya ketutup
+      useRootNavigator: true,
+      backgroundColor: Colors.white,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 4),
+              child: Text(
+                'Ganti akun',
+                style: TextStyle(
+                  fontSize: Teks.subjudul,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Text(
+                'Khusus mode uji. Keranjang dikosongkan saat pindah akun.',
+                style: TextStyle(
+                  fontSize: Teks.keterangan,
+                  color: Warna.teksPendukung,
+                ),
+              ),
+            ),
+            for (final akun in dummyAkun)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                // halaman mitra belum dibikin, jadi akunnya belum bisa dipilih
+                enabled: akun['peran'] == 'pembeli',
+                leading: CircleAvatar(
+                  backgroundColor: Warna.softGreen,
+                  child: Text(
+                    inisial(akun['nama']!),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: Warna.hijau,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  akun['nama']!,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(
+                  akun['peran'] == 'pembeli'
+                      ? '${namaPeran(akun['peran']!)} · ${akun['email']}'
+                      : '${namaPeran(akun['peran']!)} · halamannya belum ada',
+                ),
+                trailing: akun['id'] == aktif
+                    ? const Icon(Icons.check_circle, color: Warna.hijau)
+                    : null,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  if (akun['id'] == aktif) return;
+                  context.read<KeranjangCubit>().kosongkan();
+                  context.read<AkunCubit>().ganti(akun['id']!);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text('Masuk sebagai ${akun['nama']}')),
+                    );
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => _pilih(context),
+      icon: const Icon(Icons.swap_horiz, size: 18),
+      label: const Text('Ganti akun'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Warna.hijau,
+        side: const BorderSide(color: Warna.garisKontrol),
+        // tema bikin tombol outlined selebar layar, di sini cukup seukuran isinya
+        minimumSize: const Size(0, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
       ),
     );
   }

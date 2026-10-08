@@ -18,6 +18,31 @@ class Keranjang extends StatefulWidget {
 }
 
 class _KeranjangState extends State<Keranjang> {
+  // isi keranjang ga bisa dibalikin, jadi ditanya dulu
+  Future<void> _konfirmasiKosongkan(BuildContext context) async {
+    final yakin = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Kosongkan keranjang?'),
+        content: const Text('Semua paket di keranjang akan dihapus.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: Warna.merah),
+            child: const Text('Kosongkan'),
+          ),
+        ],
+      ),
+    );
+    if (yakin == true && context.mounted) {
+      context.read<KeranjangCubit>().kosongkan();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // context.watch: tiap keranjang / stok berubah, halaman ini digambar ulang
@@ -51,7 +76,7 @@ class _KeranjangState extends State<Keranjang> {
           if (ids.isNotEmpty)
             // TextButton: tombol tulisan doang tanpa latar
             TextButton(
-              onPressed: () => context.read<KeranjangCubit>().kosongkan(),
+              onPressed: () => _konfirmasiKosongkan(context),
               child: const Text(
                 'Kosongkan',
                 style: TextStyle(
@@ -60,6 +85,8 @@ class _KeranjangState extends State<Keranjang> {
                 ),
               ),
             ),
+          // jarak kanan biar tombolnya ga nempel ke pinggir layar
+          const SizedBox(width: 8),
         ],
       ),
       body: ids.isEmpty

@@ -7,6 +7,7 @@ import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/kartu_keranjang.dart';
 import 'package:sisa_rasa/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/widgets/timeline_ambil.dart';
 
@@ -428,10 +429,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               fontSize: Teks.nama,
                               fontWeight: FontWeight.w700,
                             ),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              isDense: true,
-                            ),
+                            decoration: isianJumlah,
                             onChanged: (value) {
                               final parsed = int.tryParse(value);
                               if (parsed != null && parsed > 0) {

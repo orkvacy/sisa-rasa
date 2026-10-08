@@ -36,6 +36,17 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     return null;
   }
 
+  /// pesanan punya satu akun aja, urutannya tetap yg terbaru di depan
+  static List<Map<String, dynamic>> milik(
+    List<Map<String, dynamic>> daftar,
+    String idAkun,
+  ) {
+    return [
+      for (final pesanan in daftar)
+        if (pesanan['idAkun'] == idAkun) pesanan,
+    ];
+  }
+
   // ganti satu pesanan di list tanpa ngubah urutannya
   List<Map<String, dynamic>> _ubah(
     String id,
@@ -97,6 +108,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
 
     final pesanan = {
       'id': id,
+      'idAkun': event.idAkun,
       'status': StatusPesanan.menungguBayar,
       // kode ambil baru dibikin setelah lunas (F-11)
       'kode': null,
