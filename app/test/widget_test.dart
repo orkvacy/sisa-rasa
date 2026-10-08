@@ -161,4 +161,75 @@ void main() {
     expect(find.text('Belum ada dana yang ditarik.'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('halaman mitra: ambil beberapa paket dari mitra yg sama (F-54)', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
+
+    // dari detail sandwich buka halaman Ibis Hotel
+    await tester.tap(find.text('Sandwich Sisa Brunch'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lihat mitra'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paket hari ini'), findsOneWidget);
+    expect(find.text('2 paket'), findsOneWidget);
+    expect(find.text('Petunjuk arah'), findsOneWidget);
+    expect(find.text('Halal bersertifikat'), findsOneWidget);
+
+    // tambah dua paket beda, bar keranjang ngitung keduanya
+    await tester.tap(find.byTooltip('Tambah Sandwich Sisa Brunch'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Tambah Kue Sisa Coffee Break'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Tambah porsi').last);
+    await tester.pump();
+    expect(find.text('3 porsi'), findsOneWidget);
+    expect(find.text('Rp38.000'), findsOneWidget);
+
+    // minus di jumlah 1 = keluarin dari keranjang
+    await tester.tap(find.byTooltip('Hapus dari keranjang'));
+    await tester.pump();
+    expect(find.text('2 porsi'), findsOneWidget);
+    expect(find.text('Rp24.000'), findsWidgets);
+    expect(find.byTooltip('Tambah Sandwich Sisa Brunch'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('tambah cepat dari mitra lain nanya dulu (F-07)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
+
+    // keranjang isi sandwich Ibis Hotel dulu
+    await keCheckout(tester);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // tombol + paket Warung Blok M di beranda
+    final tambah = find.byTooltip('Tambah Paket Ayam Goreng');
+    await tester.scrollUntilVisible(
+      tambah,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(tambah);
+    await tester.pumpAndSettle();
+    expect(find.text('Ganti isi keranjang?'), findsOneWidget);
+
+    // batal: keranjang tetap isi sandwich
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Rp14.000'), findsWidgets);
+
+    // setuju: keranjang diganti paket ayam
+    await tester.tap(tambah);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kosongkan & tambah'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paket Ayam Goreng masuk keranjang'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
 }

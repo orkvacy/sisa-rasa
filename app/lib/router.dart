@@ -8,6 +8,7 @@ import 'package:sisa_rasa/screens/beranda.dart';
 import 'package:sisa_rasa/screens/cari.dart';
 import 'package:sisa_rasa/screens/checkout.dart';
 import 'package:sisa_rasa/screens/detail_paket.dart';
+import 'package:sisa_rasa/screens/halaman_mitra.dart';
 import 'package:sisa_rasa/screens/halaman_utama.dart';
 import 'package:sisa_rasa/screens/keranjang.dart';
 import 'package:sisa_rasa/screens/kode_ambil.dart';
@@ -30,6 +31,10 @@ abstract final class Rute {
   static const keranjang = '/beranda/keranjang';
   static const checkout = '/beranda/checkout';
   static String paket(String id) => '/beranda/paket/$id';
+  // nama mitra dipake sebagai id sementara (data dummy belum punya id mitra),
+  // di-encode biar spasi sama simbol aman di alamat
+  static String mitra(String nama) =>
+      '/beranda/mitra/${Uri.encodeComponent(nama)}';
 
   // pembayaran sama kode ambil nempel di tab pesanan,
   // jadi tombol kembalinya balik ke daftar pesanan
@@ -83,6 +88,11 @@ GoRouter buatRouter() {
                         state.pathParameters['id']!,
                       ),
                     ),
+                  ),
+                  layarPenuh(
+                    'mitra/:nama',
+                    (context, state) =>
+                        HalamanMitra(nama: state.pathParameters['nama']!),
                   ),
                   layarPenuh(
                     'keranjang',

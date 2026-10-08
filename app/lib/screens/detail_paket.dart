@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
-import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/widgets/timeline_ambil.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
@@ -38,68 +39,9 @@ class _DetailPaketState extends State<DetailPaket> {
   Future<void> tambahKeKeranjang() async {
     // context.read: ambil cubit buat manggil fungsinya aja, ga perlu digambar ulang
     final keranjangCubit = context.read<KeranjangCubit>();
-    final keranjang = keranjangCubit.state;
-    final mitraKeranjang = keranjang.isEmpty
-        ? null
-        : context.read<PaketCubit>().cari(keranjang.keys.first)['mitra'];
-    var gantiMitra = false;
-
-    // kalau keranjangnya udah isi paket dari mitra lain, tanya dulu
-    if (mitraKeranjang != null && mitraKeranjang != widget.paket['mitra']) {
-      final ganti = await showModalBottomSheet<bool>(
-        context: context,
-        showDragHandle: true,
-        backgroundColor: Colors.white,
-        builder: (context) => Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Ganti isi keranjang?',
-                style: TextStyle(
-                  fontSize: Teks.subjudul,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Keranjangmu berisi paket dari $mitraKeranjang. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
-                style: const TextStyle(
-                  fontSize: Teks.isi,
-                  height: 1.45,
-                  color: Warna.teksPendukung,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                // FilledButton: tombol utama yg warnanya penuh.
-                // bottom sheet bukan rute halaman, jadi nutupnya tetep pake Navigator.pop sambil ngirim jawaban true
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: FilledButton.styleFrom(backgroundColor: Warna.merah),
-                  child: const Text('Kosongkan & tambah'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Batal'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (ganti != true) return;
-      gantiMitra = true;
-    }
+    // kalau keranjangnya udah isi paket dari mitra lain, tanya dulu (F-07)
+    final gantiMitra = await cekGantiMitra(context, widget.paket);
+    if (gantiMitra == null) return;
 
     keranjangCubit.tambah(widget.paket, jumlah, gantiMitra: gantiMitra);
     if (!mounted) return;
@@ -153,23 +95,44 @@ class _DetailPaketState extends State<DetailPaket> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.storefront_outlined,
-                              size: 18,
-                              color: Warna.teksPendukung,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                '${paket['mitra']} · ${paket['jenisMitra']} · ${paket['jarak']}',
-                                style: const TextStyle(
+                        // diketuk buka halaman mitra, buat liat paket lain dari mitra yg sama (F-54)
+                        InkWell(
+                          onTap: () => context.push(Rute.mitra(paket['mitra'])),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.storefront_outlined,
+                                  size: 18,
                                   color: Warna.teksPendukung,
                                 ),
-                              ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    '${paket['mitra']} · ${paket['jenisMitra']} · ${paket['jarak']}',
+                                    style: const TextStyle(
+                                      color: Warna.teksPendukung,
+                                    ),
+                                  ),
+                                ),
+                                const Text(
+                                  'Lihat mitra',
+                                  style: TextStyle(
+                                    fontSize: Teks.keterangan,
+                                    fontWeight: FontWeight.w700,
+                                    color: Warna.hijau,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  size: 18,
+                                  color: Warna.hijau,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
