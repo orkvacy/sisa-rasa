@@ -14,6 +14,10 @@ Future<void> lewati(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
+/// angka di samping segmen "Berlangsung" tab pesanan
+String jumlahBerlangsung(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const Key('jumlah-berlangsung'))).data!;
+
 int sisaPorsi(WidgetTester tester, String id) {
   // skipOffstage false: halaman utama tetep ada di bawah layar penuh (pembayaran dll)
   final context = tester.element(
@@ -112,22 +116,26 @@ void main() {
     expect(find.textContaining('Mode uji'), findsOneWidget);
     expect(sisaPorsi(tester, 'p1'), 0);
 
-    // cek status -> lunas -> kode ambil
+    // cek status -> lunas -> detail pesanan, tahap Disiapkan
     await tester.tap(find.text('Saya sudah bayar · cek status'));
     await lewati(tester);
     await lewati(tester);
     expect(find.text('Pembayaran berhasil'), findsOneWidget);
-    expect(find.text('Dibayar · Virtual Account BCA'), findsOneWidget);
+    expect(find.text('Pesananmu sedang disiapkan'), findsOneWidget);
     expect(find.textContaining('SR-'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.text('Lunas'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Virtual Account BCA'), findsOneWidget);
 
-    // kode ambil nempel di tab pesanan, jadi balik ke sana
-    await tester.ensureVisible(find.text('Lihat pesanan saya'));
+    // detail nempel di tab pesanan, jadi kembali ke daftar pesanan
+    await tester.tap(find.byTooltip('Kembali'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Lihat pesanan saya'));
-    await tester.pumpAndSettle();
-    expect(find.text('Berlangsung · 1'), findsOneWidget);
-    expect(find.text('Tampilkan kode'), findsOneWidget);
-    expect(find.text('Disiapkan'), findsWidgets);
+    expect(jumlahBerlangsung(tester), '1');
+    expect(find.text('Tampilkan QR'), findsOneWidget);
+    expect(find.text('Disiapkan'), findsOneWidget);
 
     // stok yg udah dibayar ga balik: sandwich tinggal 0, beranda nampilin Habis
     await tester.tap(find.text('Beranda').last);
@@ -148,7 +156,7 @@ void main() {
     await lewati(tester);
     await tester.tap(find.byTooltip('Back'));
     await lewati(tester);
-    expect(find.text('Berlangsung · 1'), findsOneWidget);
+    expect(jumlahBerlangsung(tester), '1');
 
     // pindah ke Dimas lewat tombol mode uji di tab akun
     await tester.tap(find.text('Akun').last);
@@ -164,7 +172,7 @@ void main() {
 
     await tester.tap(find.text('Pesanan').last);
     await lewati(tester);
-    expect(find.text('Berlangsung · 0'), findsOneWidget);
+    expect(jumlahBerlangsung(tester), '0');
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -186,11 +194,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sisaPorsi(tester, 'p1'), 3);
-    expect(find.text('Berlangsung · 0'), findsOneWidget);
+    expect(jumlahBerlangsung(tester), '0');
     await tester.tap(find.text('Dibatalkan').last);
     await tester.pumpAndSettle();
-    expect(find.text('Kamu membatalkan sebelum membayar.'), findsOneWidget);
-    expect(find.text('Belum ada dana yang ditarik.'), findsOneWidget);
+    expect(find.text('Hari ini'), findsOneWidget);
+    expect(
+      find.text(
+        'Kamu membatalkan sebelum membayar. Tidak ada dana yang terpotong.',
+      ),
+      findsOneWidget,
+    );
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -262,6 +275,51 @@ void main() {
     await tester.tap(find.text('Kosongkan & tambah'));
     await tester.pumpAndSettle();
     expect(find.text('Paket Ayam Goreng masuk keranjang'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('pesanan sampai selesai: siap diambil, kode QR, diambil (F-41)', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(const SisaRasaApp());
+
+    await keCheckout(tester);
+    await tester.tap(find.text('Bayar · Rp15.400'));
+    await lewati(tester);
+    await tester.tap(find.text('Saya sudah bayar · cek status'));
+    await lewati(tester);
+    await lewati(tester);
+    expect(find.text('Pesananmu sedang disiapkan'), findsOneWidget);
+
+    // mode uji gantiin aplikasi mitra: tandai siap diambil (F-43)
+    await tester.tap(find.text('Mode uji: tandai siap diambil'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pesananmu siap diambil!'), findsOneWidget);
+
+    // kode QR layar penuh, tunggu snackbar "Pembayaran berhasil" ilang dulu
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tampilkan QR'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tunjukkan ke kasir Ibis Hotel'), findsOneWidget);
+    expect(find.text('1× Sandwich Sisa'), findsOneWidget);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Selesai'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pesananmu siap diambil!'), findsOneWidget);
+
+    // mitra mindai kodenya: pesanan selesai (F-20)
+    await tester.tap(find.text('Mode uji: tandai sudah diambil'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pesanan sudah diambil'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+    expect(jumlahBerlangsung(tester), '0');
+    await tester.tap(find.text('Selesai').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Hari ini'), findsOneWidget);
+    expect(find.text('1 porsi terselamatkan'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 }

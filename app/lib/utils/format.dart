@@ -39,3 +39,41 @@ String sisaWaktu(int menitTujuan) {
 bool sudahBuka(Map<String, dynamic> paket) {
   return paket['mulai'] <= jamSekarang && jamSekarang < paket['tutup'];
 }
+
+const _bulan = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
+];
+
+String _jamMenit(DateTime waktu) =>
+    '${waktu.hour.toString().padLeft(2, '0')}.${waktu.minute.toString().padLeft(2, '0')}';
+
+/// contoh "30 Sep, 17.12", dipake di kartu pesanan
+String tanggalSingkat(DateTime waktu) =>
+    '${waktu.day} ${_bulan[waktu.month - 1]}, ${_jamMenit(waktu)}';
+
+/// contoh "1 Okt 2026, 16.26", dipake di detail pesanan
+String tanggalLengkap(DateTime waktu) =>
+    '${waktu.day} ${_bulan[waktu.month - 1]} ${waktu.year}, ${_jamMenit(waktu)}';
+
+/// judul kelompok di tab pesanan: Hari ini / Kemarin / Minggu ini / Lebih lama
+String kelompokTanggal(DateTime waktu, {DateTime? sekarang}) {
+  final kini = sekarang ?? DateTime.now();
+  final hariIni = DateTime(kini.year, kini.month, kini.day);
+  final hari = DateTime(waktu.year, waktu.month, waktu.day);
+  final selisih = hariIni.difference(hari).inDays;
+  if (selisih <= 0) return 'Hari ini';
+  if (selisih == 1) return 'Kemarin';
+  if (selisih < 7) return 'Minggu ini';
+  return 'Lebih lama';
+}

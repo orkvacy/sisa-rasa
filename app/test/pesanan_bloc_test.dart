@@ -94,4 +94,24 @@ void main() {
     expect(bloc.state.first['status'], StatusPesanan.disiapkan);
     expect(dilepas, isEmpty);
   });
+
+  test('tahapan dari mitra: siap diambil lalu selesai, ga bisa loncat dari belum bayar', () async {
+    final id = await pesanSandwich(1);
+
+    // belum dibayar: ditolak
+    bloc.add(StatusPesananDiubah(id, StatusPesanan.siapDiambil));
+    await Future<void>.delayed(Duration.zero);
+    expect(bloc.state.first['status'], StatusPesanan.menungguBayar);
+
+    bloc.add(PembayaranDicek(id));
+    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.disiapkan);
+    expect(bloc.state.first['dibayarPada'], isA<DateTime>());
+
+    bloc.add(StatusPesananDiubah(id, StatusPesanan.siapDiambil));
+    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.siapDiambil);
+    bloc.add(StatusPesananDiubah(id, StatusPesanan.selesai));
+    await tunggu(bloc, (s) => s.first['status'] == StatusPesanan.selesai);
+    expect(bloc.state.first['diambilPada'], isA<DateTime>());
+    expect(bloc.state.first['nomor'], matches(RegExp(r'^SR-\d{9}$')));
+  });
 }
