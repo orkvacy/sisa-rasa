@@ -90,21 +90,26 @@ void main() {
     expect(find.text('Bayar di tempat'), findsNothing);
     await tester.tap(find.text('Lanjut ke checkout · Rp42.000'));
     await tester.pumpAndSettle();
-    expect(find.text('Rp4.200'), findsOneWidget);
-    expect(find.text('Bayar · Rp46.200'), findsOneWidget);
+    expect(find.text('Rp46.200'), findsWidgets);
+    expect(find.text('Hemat Rp63.000'), findsOneWidget);
 
     // pilih VA, terus pastiin aturan "tidak diambil" (F-56) keliatan sebelum bayar
-    await tester.tap(find.text('Virtual Account BCA'));
+    await tester.ensureVisible(find.text('Virtual Account'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Virtual Account'));
     await tester.pump();
+    expect(find.text('Total · VA BCA'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.textContaining('dananya tidak dikembalikan'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.textContaining('dananya tidak dikembalikan'), findsOneWidget);
+    // biaya layanan 10% dari Rp42.000
+    expect(find.text('Rp4.200'), findsOneWidget);
 
     // bayar, porsinya langsung ditahan
-    await tester.tap(find.text('Bayar · Rp46.200'));
+    await tester.tap(find.text('Bayar sekarang'));
     await lewati(tester);
     expect(find.text('Salin nomor'), findsOneWidget);
     // keterangan mode uji ada di paling bawah, digulir dulu
@@ -152,9 +157,9 @@ void main() {
 
     // Rani bikin pesanan (belum dibayar)
     await keCheckout(tester);
-    await tester.tap(find.text('Bayar · Rp15.400'));
+    await tester.tap(find.text('Bayar sekarang'));
     await lewati(tester);
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Tutup'));
     await lewati(tester);
     expect(jumlahBerlangsung(tester), '1');
 
@@ -181,10 +186,19 @@ void main() {
     await tester.pumpWidget(const SisaRasaApp());
 
     await keCheckout(tester);
-    await tester.tap(find.text('Bayar · Rp15.400'));
+    await tester.tap(find.text('Bayar sekarang'));
     await lewati(tester);
     expect(find.text('Bayar dengan QRIS'), findsOneWidget);
     expect(sisaPorsi(tester, 'p1'), 2);
+
+    // ganti metode sebelum bayar: QRIS -> VA BRI, tagihannya dibikin ulang
+    await tester.tap(find.text('Ganti metode pembayaran'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Virtual Account BRI'));
+    await lewati(tester);
+    await lewati(tester);
+    expect(find.text('Virtual Account BRI'), findsOneWidget);
+    expect(find.text('Salin nomor'), findsOneWidget);
 
     // F-55: batalin lewat dialog konfirmasi
     await tester.tap(find.text('Batalkan pesanan'));
@@ -285,7 +299,7 @@ void main() {
     await tester.pumpWidget(const SisaRasaApp());
 
     await keCheckout(tester);
-    await tester.tap(find.text('Bayar · Rp15.400'));
+    await tester.tap(find.text('Bayar sekarang'));
     await lewati(tester);
     await tester.tap(find.text('Saya sudah bayar · cek status'));
     await lewati(tester);

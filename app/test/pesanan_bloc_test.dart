@@ -114,4 +114,21 @@ void main() {
     expect(bloc.state.first['diambilPada'], isA<DateTime>());
     expect(bloc.state.first['nomor'], matches(RegExp(r'^SR-\d{9}$')));
   });
+
+  test('ganti metode sebelum lunas, tagihan dibikin ulang', () async {
+    final id = await pesanSandwich(1);
+    expect(bloc.state.first['tagihan']['isiQr'], isNotNull);
+
+    bloc.add(MetodeDiganti(id, MetodeBayar.vaMandiri));
+    await tunggu(
+      bloc,
+      (s) =>
+          s.first['metode'] == MetodeBayar.vaMandiri &&
+          (s.first['tagihan'] as Map).containsKey('nomorVa'),
+    );
+    expect(
+      MetodeBayar.nama(bloc.state.first['metode']),
+      'Virtual Account Mandiri',
+    );
+  });
 }
