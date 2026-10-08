@@ -4,23 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/router.dart';
-import 'package:sisa_rasa/screens/akun.dart';
-import 'package:sisa_rasa/screens/beranda.dart';
-import 'package:sisa_rasa/screens/pesanan.dart';
 import 'package:sisa_rasa/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 
 /// halaman induk, yg punya navigation bar (beranda, pesanan, akun)
-/// data paket, keranjang, pesanan udah pindah ke cubit/bloc (lihat main.dart)
-/// di sini tinggal ngurus tab yg aktif sama pindah halaman
-class HalamanUtama extends StatefulWidget {
-  const HalamanUtama({super.key});
+/// isi tiap tab sama tab yg aktif diatur router (StatefulShellRoute di router.dart),
+/// di sini tinggal gambar navigasi melayang sama bar keranjang
+class HalamanUtama extends StatelessWidget {
+  const HalamanUtama({required this.shell, super.key});
 
-  @override
-  State<HalamanUtama> createState() => _HalamanUtamaState();
-}
+  // shell: isi tab yg lagi aktif, plus fungsi buat pindah tab
+  final StatefulNavigationShell shell;
 
-class _HalamanUtamaState extends State<HalamanUtama> {
   static const _tabs = [
     TabNavigasi(
       label: 'Beranda',
@@ -39,43 +34,24 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     ),
   ];
 
-  // 0 beranda, 1 pesanan, 2 akun
-  // cuma dipake di halaman ini, jadi cukup setState, ga perlu cubit
-  int tabAktif = 0;
-
-  void bukaDetail(Map<String, dynamic> paket) {
-    // context.push: buka halaman detail di atas halaman ini, alamatnya pake id paket
-    context.push(Rute.paket(paket['id']));
-  }
-
-  Future<void> bukaKeranjang() async {
-    // snackbar "masuk keranjang" ditutup dulu biar ga nutupin tombol pesan
+  void bukaKeranjang(BuildContext context) {
+    // snackbar "masuk keranjang" ditutup dulu biar ga nutupin tombol checkout
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    // ditungguin, kalau balikannya true berarti pindah ke tab pesanan
-    final lihatPesanan = await context.push<bool>(Rute.keranjang);
-    if (lihatPesanan == true) setState(() => tabAktif = 1);
+    context.push(Rute.keranjang);
   }
 
   @override
   Widget build(BuildContext context) {
+    // 0 beranda, 1 pesanan, 2 akun
+    final tabAktif = shell.currentIndex;
+
     // Scaffold: kerangka halaman, ada body sama bottomNavigationBar
     return Scaffold(
       // extendBody: halaman tab nerusin sampe belakang navigasi melayang,
       // snackbar tetep muncul di atas navigasi karena navigasinya bottomNavigationBar
       extendBody: true,
-      // IndexedStack: cuma nampilin 1 tab, tapi tab lain ga di-reset (scroll nya tetep)
-      body: IndexedStack(
-        index: tabAktif,
-        children: [
-          Beranda(onBukaPaket: bukaDetail),
-          Pesanan(
-            onBukaKode: (pesanan) =>
-                context.push(Rute.kodeAmbil(pesanan['kode'])),
-            onCariPaket: () => setState(() => tabAktif = 0),
-          ),
-          const Akun(),
-        ],
-      ),
+      // shell: tab yg aktif, tab lain ga di-reset (scroll nya tetep)
+      body: shell,
       // bar keranjang sama navigasi melayang numpuk di bawah, latarnya transparan
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.only(bottom: 12),
@@ -106,7 +82,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                     foto: pertama['foto'],
                     jumlahPorsi: porsi,
                     total: total,
-                    onTap: bukaKeranjang,
+                    onTap: () => bukaKeranjang(context),
                   ),
                 );
               },
@@ -115,7 +91,9 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             NavigasiMelayang(
               tabs: _tabs,
               tabAktif: tabAktif,
-              onPilih: (index) => setState(() => tabAktif = index),
+              // pencet tab yg lagi aktif = balik ke halaman awal tab itu
+              onPilih: (index) =>
+                  shell.goBranch(index, initialLocation: index == tabAktif),
             ),
           ],
         ),

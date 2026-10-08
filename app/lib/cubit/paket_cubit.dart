@@ -15,12 +15,24 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   // dipanggil pas pesanan dibuat, sisa porsi dikurangin sesuai isi keranjang
+  // porsinya ditahan buat pembeli selama nunggu dibayar (F-23, F-40)
   void kurangiStok(Map<String, int> keranjang) {
     emit([
       for (final paket in state)
         {
           ...paket,
           'sisaPorsi': paket['sisaPorsi'] - (keranjang[paket['id']] ?? 0),
+        },
+    ]);
+  }
+
+  // kebalikannya, dipanggil pas pesanan batal sebelum dibayar (F-40)
+  void kembalikanStok(Map<String, int> porsiPaket) {
+    emit([
+      for (final paket in state)
+        {
+          ...paket,
+          'sisaPorsi': paket['sisaPorsi'] + (porsiPaket[paket['id']] ?? 0),
         },
     ]);
   }
