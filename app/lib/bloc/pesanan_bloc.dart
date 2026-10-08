@@ -20,6 +20,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     on<PembayaranDicek>(cekPembayaran);
     on<PesananDibatalkan>(batalkanPesanan);
     on<StatusPesananDiubah>(ubahStatus);
+    on<MetodeDiganti>(gantiMetode);
   }
 
   final LayananPembayaran pembayaran;
@@ -219,6 +220,41 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     );
     // F-40: porsi yg tadinya ditahan dibalikin ke stok
     lepasPorsi?.call(Map<String, int>.from(pesanan['porsiPaket']));
+  }
+
+  /// ganti metode bayar selama belum lunas: tagihan lama dibuang, minta yg baru
+  Future<void> gantiMetode(
+    MetodeDiganti event,
+    Emitter<List<Map<String, dynamic>>> emit,
+  ) async {
+    final pesanan = cari(event.id);
+    if (pesanan == null ||
+        pesanan['status'] != StatusPesanan.menungguBayar ||
+        pesanan['metode'] == event.metode) {
+      return;
+    }
+    emit(
+      _ubah(
+        event.id,
+        (lama) => {
+          ...lama,
+          'metode': event.metode,
+          'tagihan': <String, String>{},
+        },
+      ),
+    );
+    final tagihan = await pembayaran.buatTagihan(
+      idPesanan: event.id,
+      metode: event.metode,
+      total: pesanan['total'],
+    );
+    // bisa aja keburu diganti lagi / dibatalin pas nunggu tagihan
+    final sekarang = cari(event.id);
+    if (sekarang?['metode'] != event.metode ||
+        sekarang?['status'] != StatusPesanan.menungguBayar) {
+      return;
+    }
+    emit(_ubah(event.id, (lama) => {...lama, 'tagihan': tagihan}));
   }
 
   /// tahapan yg diubah mitra: disiapkan -> siap diambil (F-43) -> selesai (F-20).

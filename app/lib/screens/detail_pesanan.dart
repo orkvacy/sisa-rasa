@@ -881,7 +881,8 @@ class _BagianRincian extends StatelessWidget {
               ),
               child: Icon(
                 switch (pesanan['metode']) {
-                  MetodeBayar.va => Icons.account_balance_outlined,
+                  final m when MetodeBayar.isVa(m) =>
+                    Icons.account_balance_outlined,
                   MetodeBayar.gopay => Icons.account_balance_wallet_outlined,
                   _ => Icons.qr_code_2,
                 },

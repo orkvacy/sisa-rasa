@@ -4,30 +4,57 @@
 const int persenBiayaLayanan = 10;
 
 /// biaya layanan buat [subtotal] tertentu, dibulatkan ke rupiah terdekat
-int biayaLayanan(int subtotal) =>
-    (subtotal * persenBiayaLayanan / 100).round();
+int biayaLayanan(int subtotal) => (subtotal * persenBiayaLayanan / 100).round();
 
 /// batas bayar F-40, porsi ditahan selama ini sebelum pesanan batal sendiri
 const int menitBatasBayar = 15;
 
-/// metode bayar yg didukung (F-10)
+/// metode bayar yg didukung (F-10).
+/// virtual account ditulis per bank: va_bca, va_mandiri, va_bri, va_bni
 abstract final class MetodeBayar {
   static const qris = 'qris';
   static const gopay = 'gopay';
-  static const va = 'va';
+  static const va = 'va_bca';
+  static const vaMandiri = 'va_mandiri';
+  static const vaBri = 'va_bri';
+  static const vaBni = 'va_bni';
 
+  /// pilihan di checkout, VA cuma satu baris (banknya dipilih belakangan)
   static const semua = [qris, gopay, va];
+
+  /// bank yg bisa dipilih buat virtual account
+  static const bank = [va, vaMandiri, vaBri, vaBni];
+
+  static bool isVa(String metode) => metode.startsWith('va_');
+
+  static String namaBank(String metode) => switch (metode) {
+    vaMandiri => 'Mandiri',
+    vaBri => 'BRI',
+    vaBni => 'BNI',
+    _ => 'BCA',
+  };
 
   static String nama(String metode) => switch (metode) {
     qris => 'QRIS',
     gopay => 'GoPay',
-    _ => 'Virtual Account BCA',
+    _ => 'Virtual Account ${namaBank(metode)}',
   };
 
   static String keterangan(String metode) => switch (metode) {
     qris => 'Semua e-wallet & m-banking',
     gopay => 'Dibuka di aplikasi Gojek',
-    _ => 'Transfer dari m-BCA, KlikBCA, atau ATM',
+    vaMandiri => "Transfer dari Livin' by Mandiri atau ATM",
+    vaBri => 'Transfer dari BRImo atau ATM BRI',
+    vaBni => 'Transfer dari BNI Mobile atau ATM BNI',
+    _ => 'Transfer dari m-BCA, KlikBCA, atau ATM BCA',
+  };
+
+  /// aplikasi bank buat langkah cara bayar VA
+  static String aplikasiBank(String metode) => switch (metode) {
+    vaMandiri => "Livin' by Mandiri atau ATM Mandiri",
+    vaBri => 'BRImo atau ATM BRI',
+    vaBni => 'BNI Mobile atau ATM BNI',
+    _ => 'm-BCA, KlikBCA, atau ATM BCA',
   };
 }
 

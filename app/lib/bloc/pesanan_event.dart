@@ -35,6 +35,14 @@ class PesananDibatalkan extends PesananEvent {
   final bool otomatis;
 }
 
+// dikirim pas pembeli ganti metode bayar sebelum lunas, tagihannya dibikin ulang
+class MetodeDiganti extends PesananEvent {
+  MetodeDiganti(this.id, this.metode);
+
+  final String id;
+  final String metode;
+}
+
 // dikirim mitra pas pesanan siap diambil (F-43) atau sudah diambil (F-20).
 // sementara dipencet dari tombol mode uji di detail pesanan
 class StatusPesananDiubah extends PesananEvent {
