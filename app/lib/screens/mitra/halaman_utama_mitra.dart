@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sisa_rasa/screens/mitra/ketik_kode.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 
 /// induk tab mitra (figma v3): Dasbor, Paket, tombol pindai di tengah, Pesanan, Saldo
@@ -21,7 +21,7 @@ class HalamanUtamaMitra extends StatelessWidget {
           // pencet tab yg lagi aktif = balik ke halaman awal tab itu
           onPilih: (i) =>
               shell.goBranch(i, initialLocation: i == shell.currentIndex),
-          onPindai: () => bukaKetikKode(context),
+          onPindai: () => context.push(Rute.mitraScan),
         ),
       ),
     );
