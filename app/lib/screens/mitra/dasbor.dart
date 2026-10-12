@@ -35,7 +35,10 @@ class Dasbor extends StatelessWidget {
 
     final paket = [
       for (final p in paketCubit.state)
-        if (p['mitra'] == nama && p['tutup'] > jamSekarang) p,
+        if (p['mitra'] == nama &&
+            p['tutup'] > jamSekarang &&
+            p['nonaktif'] != true)
+          p,
     ];
     final jenis = paket.isEmpty ? 'Mitra' : paket.first['jenisMitra'];
     final buka = paketCubit.geraiBuka(nama);

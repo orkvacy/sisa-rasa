@@ -17,7 +17,9 @@ import 'package:sisa_rasa/screens/keranjang.dart';
 import 'package:sisa_rasa/screens/kode_ambil.dart';
 import 'package:sisa_rasa/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/screens/mitra/detail_pesanan_mitra.dart';
+import 'package:sisa_rasa/screens/mitra/form_paket.dart';
 import 'package:sisa_rasa/screens/mitra/halaman_utama_mitra.dart';
+import 'package:sisa_rasa/screens/mitra/paket_mitra.dart';
 import 'package:sisa_rasa/screens/mitra/pesanan_masuk.dart';
 import 'package:sisa_rasa/screens/mitra/segera_hadir.dart';
 import 'package:sisa_rasa/screens/pembayaran.dart';
@@ -59,6 +61,8 @@ abstract final class Rute {
   static const mitraPesanan = '/mitra/pesanan';
   static const mitraSaldo = '/mitra/saldo';
   static const mitraAkun = '/mitra/dasbor/akun';
+  static const mitraPaketBaru = '/mitra/paket/baru';
+  static String mitraUbahPaket(String id) => '/mitra/paket/ubah/$id';
   static String mitraDetailPesanan(String id) => '/mitra/pesanan/detail/$id';
 }
 
@@ -205,10 +209,15 @@ GoRouter buatRouter({required AkunCubit akun}) {
             routes: [
               GoRoute(
                 path: Rute.mitraPaket,
-                builder: (context, state) => const SegeraHadir(
-                  judul: 'Paket',
-                  keterangan: 'Tambah dan ubah paket menyusul. Sisa porsi bisa diubah dari Dasbor.',
-                ),
+                builder: (context, state) => const PaketMitra(),
+                routes: [
+                  layarPenuh('baru', (context, state) => const FormPaket()),
+                  layarPenuh(
+                    'ubah/:id',
+                    (context, state) =>
+                        FormPaket(idPaket: state.pathParameters['id']),
+                  ),
+                ],
               ),
             ],
           ),
