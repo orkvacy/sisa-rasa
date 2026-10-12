@@ -20,7 +20,9 @@ import 'package:sisa_rasa/screens/mitra/detail_pesanan_mitra.dart';
 import 'package:sisa_rasa/screens/mitra/form_paket.dart';
 import 'package:sisa_rasa/screens/mitra/halaman_utama_mitra.dart';
 import 'package:sisa_rasa/screens/mitra/paket_mitra.dart';
+import 'package:sisa_rasa/screens/mitra/ketik_kode.dart';
 import 'package:sisa_rasa/screens/mitra/pesanan_masuk.dart';
+import 'package:sisa_rasa/screens/mitra/scan_kode.dart';
 import 'package:sisa_rasa/screens/mitra/segera_hadir.dart';
 import 'package:sisa_rasa/screens/pembayaran.dart';
 import 'package:sisa_rasa/screens/pesanan.dart';
@@ -62,6 +64,9 @@ abstract final class Rute {
   static const mitraSaldo = '/mitra/saldo';
   static const mitraAkun = '/mitra/dasbor/akun';
   static const mitraPaketBaru = '/mitra/paket/baru';
+  // pindai / ketik kode ambil nempel di tab pesanan mitra
+  static const mitraScan = '/mitra/pesanan/scan';
+  static const mitraKetikKode = '/mitra/pesanan/ketik-kode';
   static String mitraUbahPaket(String id) => '/mitra/paket/ubah/$id';
   static String mitraDetailPesanan(String id) => '/mitra/pesanan/detail/$id';
 }
@@ -227,6 +232,11 @@ GoRouter buatRouter({required AkunCubit akun}) {
                 path: Rute.mitraPesanan,
                 builder: (context, state) => const PesananMasuk(),
                 routes: [
+                  layarPenuh('scan', (context, state) => const ScanKode()),
+                  layarPenuh(
+                    'ketik-kode',
+                    (context, state) => const KetikKode(),
+                  ),
                   layarPenuh(
                     'detail/:id',
                     (context, state) => DetailPesananMitra(

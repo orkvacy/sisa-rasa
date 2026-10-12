@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Sisa Rasa memakai kamera untuk memindai kode ambil pesanan pembeli.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Sisa Rasa menyimpan QR pembayaran ke galeri supaya bisa dibayar dari aplikasi lain.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

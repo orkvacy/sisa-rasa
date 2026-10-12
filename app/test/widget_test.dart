@@ -397,15 +397,33 @@ void main() {
       // mitra cocokkan kode yg disebut pembeli (F-46) -> selesai diambil (F-20)
       await gantiAkun(tester, 'Ibis Hotel');
       await tester.tap(find.byTooltip('Pindai kode ambil'));
+      await tester.pump(const Duration(seconds: 1));
+      // kamera ga ada di tes, jadi lewat Ketik kode.
+      // tunggu snackbar "Masuk sebagai ..." ilang dulu, soalnya nutupin tombolnya
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.text('Ketik kode'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'SR-XXXX');
-      await tester.tap(find.text('Cocokkan kode'));
+      await tester.enterText(find.byType(TextField), 'xxxx');
+      await tester.pump();
+      await tester.tap(find.text('Cek kode'));
       await tester.pumpAndSettle();
-      expect(find.text('Kode SR-XXXX tidak dikenali'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), kode);
-      await tester.tap(find.text('Cocokkan kode'));
+      expect(
+        find.text(
+          'Kode SR-XXXX tidak ditemukan atau sudah dipakai. Cek lagi kode di HP pembeli.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Cek ulang'), findsOneWidget);
+      // ngetik lagi: galatnya ilang, tombolnya balik jadi Cek kode
+      await tester.enterText(find.byType(TextField), kode.substring(3));
+      await tester.pump();
+      await tester.tap(find.text('Cek kode'));
       await tester.pumpAndSettle();
-      expect(find.text('$kode cocok, pesanan selesai diambil'), findsOneWidget);
+      expect(find.text('Kode cocok'), findsOneWidget);
+      await tester.tap(find.text('Serahkan dan selesaikan'));
+      await tester.pumpAndSettle();
+      expect(find.text('$kode selesai diambil'), findsOneWidget);
       // dasbor: 1 porsi terselamatkan
       expect(find.text('1'), findsWidgets);
 
