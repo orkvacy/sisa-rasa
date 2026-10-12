@@ -5,6 +5,7 @@ import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/cubit/saldo_cubit.dart';
 import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/tema.dart';
 
@@ -42,6 +43,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         BlocProvider.value(value: akun),
         BlocProvider(create: (context) => PaketCubit()),
         BlocProvider(create: (context) => KeranjangCubit()),
+        BlocProvider(create: (context) => SaldoCubit()),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya
         BlocProvider(
           create: (context) {

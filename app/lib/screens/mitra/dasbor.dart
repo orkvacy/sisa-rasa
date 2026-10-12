@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/cubit/saldo_cubit.dart';
 import 'package:sisa_rasa/data/dummy_akun.dart';
-import 'package:sisa_rasa/data/pembayaran.dart';
 import 'package:sisa_rasa/data/status_pesanan.dart';
 import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/warna.dart';
@@ -44,16 +44,21 @@ class Dasbor extends StatelessWidget {
     final buka = paketCubit.geraiBuka(nama);
 
     // ringkasan hari ini (F-21): porsi dari pesanan yg udah diambil,
-    // pendapatan bersih dari yg selesai / tidak diambil (F-48)
+    // pendapatan bersih = dana masuk hari ini di riwayat saldo (F-48),
+    // jadi angkanya sama kayak di tab Saldo
     var porsi = 0;
-    var pendapatan = 0;
     for (final p in semuaPesanan) {
       if (p['status'] == StatusPesanan.selesai) porsi += p['porsi'] as int;
-      if (p['status'] == StatusPesanan.selesai ||
-          p['status'] == StatusPesanan.tidakDiambil) {
-        pendapatan += penerimaanBersih(p);
-      }
     }
+    final pendapatan = context
+        .watch<SaldoCubit>()
+        .riwayat(nama, context.watch<PesananBloc>().state)
+        .where(
+          (e) =>
+              e['jenis'] == 'masuk' &&
+              kelompokTanggal(e['waktu']) == 'Hari ini',
+        )
+        .fold<int>(0, (n, e) => n + (e['jumlah'] as int));
     final antrean = [
       for (final p in semuaPesanan)
         if (p['status'] == StatusPesanan.disiapkan ||

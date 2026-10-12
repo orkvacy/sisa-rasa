@@ -306,75 +306,80 @@ class _TombolGantiAkun extends StatelessWidget {
       backgroundColor: Colors.white,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 4),
-              child: Text(
-                'Ganti akun',
-                style: TextStyle(
-                  fontSize: Teks.subjudul,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Text(
-                'Khusus mode uji. Keranjang dikosongkan saat pindah akun.',
-                style: TextStyle(
-                  fontSize: Teks.keterangan,
-                  color: Warna.teksPendukung,
-                ),
-              ),
-            ),
-            for (final akun in dummyAkun)
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                leading: CircleAvatar(
-                  backgroundColor: Warna.softGreen,
-                  child: Text(
-                    inisial(akun['nama']!),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: Warna.hijau,
-                    ),
+        // bisa digulir, layar pendek / landscape ga muat semua akun
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 4),
+                child: Text(
+                  'Ganti akun',
+                  style: TextStyle(
+                    fontSize: Teks.subjudul,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                title: Text(
-                  akun['nama']!,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                subtitle: Text(
-                  '${namaPeran(akun['peran']!)} · ${akun['email']}',
-                ),
-                trailing: akun['id'] == aktif
-                    ? const Icon(Icons.check_circle, color: Warna.hijau)
-                    : null,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  if (akun['id'] == aktif) return;
-                  // diambil dulu sebelum ganti akun: kalau perannya beda,
-                  // router langsung pindah ke halaman peran baru dan layar ini ketutup
-                  final messenger = ScaffoldMessenger.of(context);
-                  final keranjang = context.read<KeranjangCubit>();
-                  final akunCubit = context.read<AkunCubit>();
-                  // halaman akun yg dibuka dari dasbor mitra ditutup dulu,
-                  // biar ga sempet digambar ulang pake akun peran lain
-                  if (GoRouter.of(context).canPop()) context.pop();
-                  keranjang.kosongkan();
-                  akunCubit.ganti(akun['id']!);
-                  messenger
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      SnackBar(content: Text('Masuk sebagai ${akun['nama']}')),
-                    );
-                },
               ),
-            const SizedBox(height: 8),
-          ],
+              const Padding(
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: Text(
+                  'Khusus mode uji. Keranjang dikosongkan saat pindah akun.',
+                  style: TextStyle(
+                    fontSize: Teks.keterangan,
+                    color: Warna.teksPendukung,
+                  ),
+                ),
+              ),
+              for (final akun in dummyAkun)
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                  leading: CircleAvatar(
+                    backgroundColor: Warna.softGreen,
+                    child: Text(
+                      inisial(akun['nama']!),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Warna.hijau,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    akun['nama']!,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    '${namaPeran(akun['peran']!)} · ${akun['email']}',
+                  ),
+                  trailing: akun['id'] == aktif
+                      ? const Icon(Icons.check_circle, color: Warna.hijau)
+                      : null,
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    if (akun['id'] == aktif) return;
+                    // diambil dulu sebelum ganti akun: kalau perannya beda,
+                    // router langsung pindah ke halaman peran baru dan layar ini ketutup
+                    final messenger = ScaffoldMessenger.of(context);
+                    final keranjang = context.read<KeranjangCubit>();
+                    final akunCubit = context.read<AkunCubit>();
+                    // halaman akun yg dibuka dari dasbor mitra ditutup dulu,
+                    // biar ga sempet digambar ulang pake akun peran lain
+                    if (GoRouter.of(context).canPop()) context.pop();
+                    keranjang.kosongkan();
+                    akunCubit.ganti(akun['id']!);
+                    messenger
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        SnackBar(
+                          content: Text('Masuk sebagai ${akun['nama']}'),
+                        ),
+                      );
+                  },
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );
