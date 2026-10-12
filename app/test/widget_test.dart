@@ -66,6 +66,7 @@ Future<void> keCheckout(WidgetTester tester, {String jumlah = '1'}) async {
 }
 
 void main() {
+  tesKelolaPaket();
   testWidgets('beranda: flash sale, mitra sekitar, navigasi melayang', (
     tester,
   ) async {
@@ -416,6 +417,96 @@ void main() {
       await tester.tap(find.text('Selesai').last);
       await tester.pumpAndSettle();
       expect(find.text('1 porsi terselamatkan'), findsOneWidget);
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
+}
+
+void tesKelolaPaket() {
+  testWidgets(
+    'mitra kelola paket: terbitkan, validasi harga, nonaktif, hapus',
+    (tester) async {
+      // lebih lebar: dialog pemilih jam butuh ruang buat tombol OK nya
+      await tester.binding.setSurfaceSize(const Size(800, 1300));
+      await tester.pumpWidget(const SisaRasaApp());
+      await gantiAkun(tester, 'Ibis Hotel');
+
+      await tester.tap(find.text('Paket').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Semua 2'), findsOneWidget);
+
+      // F-15: paket baru, isian kosong ditolak
+      await tester.tap(find.text('Paket baru'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terbitkan paket'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nama paket wajib diisi.'), findsOneWidget);
+
+      await tester.enterText(
+        find.byType(TextField).at(0),
+        'Nasi Kuning Sisa Sarapan',
+      );
+      await tester.tap(find.text('Nasi & lauk'));
+      await tester.ensureVisible(find.text('Harga asli'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(2), '30000');
+      // F-16: diskon ga boleh >= harga asli
+      await tester.enterText(find.byType(TextField).at(3), '30000');
+      await tester.ensureVisible(find.byTooltip('Tambah porsi'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Tambah porsi'));
+      await tester.tap(find.byTooltip('Tambah porsi'));
+      await tester.pump();
+      expect(find.byKey(const Key('jumlah-porsi')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('jumlah-porsi'))).data,
+        '3',
+      );
+      // jam ambil: pakai jam awal yg ditawarin (buka 16.20, tutup 18.20)
+      await tester.ensureVisible(find.text('Buka'));
+      await tester.tap(find.text('Buka'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tutup'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terbitkan paket'));
+      await tester.pumpAndSettle();
+      expect(find.text('Harus lebih murah dari harga asli.'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Harga diskon'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(3), '12000');
+      await tester.tap(find.text('Terbitkan paket'));
+      await tester.pumpAndSettle();
+      expect(find.text('Semua 3'), findsOneWidget);
+      expect(find.text('Nasi Kuning Sisa Sarapan'), findsOneWidget);
+
+      // F-45: nonaktifin paket baru, ga keliatan pembeli
+      final baris = find
+          .ancestor(
+            of: find.text('Nasi Kuning Sisa Sarapan'),
+            matching: find.byType(Material),
+          )
+          .first;
+      await tester.tap(
+        find.descendant(of: baris, matching: find.byType(Switch)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Nonaktif 1'), findsOneWidget);
+
+      // F-18: ubah lalu hapus pakai konfirmasi
+      await tester.tap(find.text('Nasi Kuning Sisa Sarapan'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ubah paket'), findsOneWidget);
+      await tester.ensureVisible(find.text('Hapus paket'));
+      await tester.tap(find.text('Hapus paket'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hapus'));
+      await tester.pumpAndSettle();
+      expect(find.text('Semua 2'), findsOneWidget);
       await tester.binding.setSurfaceSize(null);
     },
   );

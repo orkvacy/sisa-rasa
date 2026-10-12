@@ -47,10 +47,8 @@ class _BerandaState extends State<Beranda> {
     // paket yg masih bisa dipesan: belum lewat jam tutup, masih ada porsinya (F-25),
     // terus disaring sesuai chip kategori (F-03)
     final tampil = daftarPaket.where((paket) {
-      return paket['tutup'] > jamSekarang &&
+      return PaketCubit.tampilUntukPembeli(paket) &&
           (paket['sisaPorsi'] as int) > 0 &&
-          // gerai yg lagi ditutup mitra ga ditampilin (F-51)
-          paket['geraiTutup'] != true &&
           (kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih);
     }).toList();
 
