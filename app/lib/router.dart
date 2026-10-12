@@ -6,6 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/akun.dart';
+import 'package:sisa_rasa/screens/auth/daftar.dart';
+import 'package:sisa_rasa/screens/auth/ketentuan.dart';
+import 'package:sisa_rasa/screens/auth/masuk.dart';
+import 'package:sisa_rasa/screens/auth/sambutan.dart';
 import 'package:sisa_rasa/screens/beranda.dart';
 import 'package:sisa_rasa/screens/cari.dart';
 import 'package:sisa_rasa/screens/checkout.dart';
@@ -36,6 +40,18 @@ import 'package:sisa_rasa/screens/pesanan.dart';
 /// pindah halaman pake context.push(Rute.xxx), balik pake context.pop(),
 /// context.go(Rute.xxx) dipake kalau semua layar di belakangnya mau ditutup
 abstract final class Rute {
+  // layar umum, kebuka sebelum masuk (layar 12, 13 di SRS)
+  static const sambutan = '/sambutan';
+  static const masuk = '/masuk';
+  static const daftar = '/daftar';
+  static const ketentuan = '/ketentuan';
+
+  /// masuk / daftar, abis itu balik ke [dari] (dipake tamu yg mau checkout)
+  static String masukLalu(String dari) =>
+      '$masuk?dari=${Uri.encodeComponent(dari)}';
+  static String daftarLalu(String? dari) =>
+      dari == null ? daftar : '$daftar?dari=${Uri.encodeComponent(dari)}';
+
   static const beranda = '/beranda';
   static const pesanan = '/pesanan';
   static const akun = '/akun';
@@ -101,11 +117,38 @@ GoRouter buatRouter({required AkunCubit akun}) {
   return GoRouter(
     navigatorKey: akar,
     refreshListenable: _DengarAkun(akun.stream),
-    // F-26 / F-32: halaman yg kebuka ditentuin peran akun yg lagi masuk.
-    // mitra ga bisa buka halaman pembeli, pembeli ga bisa buka halaman mitra
     redirect: (context, state) {
+      final lokasi = state.matchedLocation;
+      // ketentuan boleh dibuka siapa aja, termasuk dari form daftar
+      if (lokasi == Rute.ketentuan) return null;
+      final layarUmum =
+          lokasi == Rute.sambutan ||
+          lokasi == Rute.masuk ||
+          lokasi == Rute.daftar;
+
+      // belum masuk dan belum milih "Lihat paket dulu"
+      if (akun.state.isEmpty) return layarUmum ? null : Rute.sambutan;
+
+      // tamu cuma boleh lihat-lihat. pesanan, akun, checkout harus masuk dulu,
+      // abis masuk langsung dibalikin ke halaman yg tadi dituju
+      if (akun.tamu) {
+        if (lokasi == Rute.sambutan) return Rute.beranda;
+        final perluAkun =
+            lokasi.startsWith(Rute.pesanan) ||
+            lokasi.startsWith(Rute.akun) ||
+            lokasi == Rute.checkout ||
+            lokasi.startsWith('/mitra');
+        if (perluAkun) return Rute.masukLalu(state.uri.toString());
+        return null;
+      }
+
+      // udah masuk: layar sambutan / masuk / daftar ga perlu lagi
+      if (layarUmum) return state.uri.queryParameters['dari'] ?? Rute.beranda;
+
+      // F-26 / F-32: halaman yg kebuka ditentuin peran akun yg lagi masuk.
+      // mitra ga bisa buka halaman pembeli, pembeli ga bisa buka halaman mitra
       final mitra = akun.state['peran'] == 'mitra';
-      final diHalamanMitra = state.matchedLocation.startsWith('/mitra');
+      final diHalamanMitra = lokasi.startsWith('/mitra');
       if (mitra && !diHalamanMitra) return Rute.mitraDasbor;
       if (!mitra && diHalamanMitra) return Rute.beranda;
       return null;
@@ -113,6 +156,24 @@ GoRouter buatRouter({required AkunCubit akun}) {
     initialLocation: Rute.beranda,
     routes: [
       GoRoute(path: '/', redirect: (context, state) => Rute.beranda),
+      GoRoute(
+        path: Rute.sambutan,
+        builder: (context, state) => const Sambutan(),
+      ),
+      GoRoute(
+        path: Rute.masuk,
+        builder: (context, state) =>
+            Masuk(dari: state.uri.queryParameters['dari']),
+      ),
+      GoRoute(
+        path: Rute.daftar,
+        builder: (context, state) =>
+            Daftar(dari: state.uri.queryParameters['dari']),
+      ),
+      GoRoute(
+        path: Rute.ketentuan,
+        builder: (context, state) => const Ketentuan(),
+      ),
       // StatefulShellRoute: tab bawah, isi tiap tab ga ke-reset pas pindah tab
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HalamanUtama(shell: shell),

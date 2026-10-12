@@ -6,15 +6,25 @@ import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/cubit/saldo_cubit.dart';
+import 'package:sisa_rasa/data/layanan_akun.dart';
 import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/tema.dart';
 
-void main() {
-  runApp(const SisaRasaApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // sesi yg tersimpan dicek dulu sebelum layar pertama digambar,
+  // biar yg udah masuk ga sempet liat layar Sambutan
+  final akun = AkunCubit(layanan: AkunTiruan());
+  await akun.pulihkan();
+  runApp(SisaRasaApp(akun: akun));
 }
 
 class SisaRasaApp extends StatefulWidget {
-  const SisaRasaApp({super.key});
+  /// [akun] boleh kosong (di tes), nanti dibikin sendiri dan mulai dari [akunAwal]
+  const SisaRasaApp({this.akun, this.akunAwal = const {}, super.key});
+
+  final AkunCubit? akun;
+  final Map<String, String> akunAwal;
 
   @override
   State<SisaRasaApp> createState() => _SisaRasaAppState();
@@ -22,7 +32,8 @@ class SisaRasaApp extends StatefulWidget {
 
 class _SisaRasaAppState extends State<SisaRasaApp> {
   // akun dibikin di sini (bukan di BlocProvider) soalnya router butuh dengerin akunnya
-  final akun = AkunCubit();
+  late final akun =
+      widget.akun ?? AkunCubit(layanan: AkunTiruan(), awal: widget.akunAwal);
   // router dibikin sekali aja, kalau di build bakal ke-reset tiap digambar ulang
   late final GoRouter router = buatRouter(akun: akun);
 

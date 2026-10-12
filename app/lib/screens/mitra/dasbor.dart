@@ -28,8 +28,9 @@ class Dasbor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final akun = context.watch<AkunCubit>().state;
-    final String nama = akun['nama']!;
+    // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
+    final nama = context.watch<AkunCubit>().state['nama'];
+    if (nama == null) return const SizedBox.shrink();
     final paketCubit = context.watch<PaketCubit>();
     final semuaPesanan = pesananMitra(context, nama);
 

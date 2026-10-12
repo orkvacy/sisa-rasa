@@ -6,6 +6,7 @@ import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/data/dummy_akun.dart';
+import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/teks.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
@@ -17,7 +18,9 @@ class Akun extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
     final akun = context.watch<AkunCubit>().state;
+    if (akun['id'] == null) return const SizedBox.shrink();
     final daftarPesanan = PesananBloc.milik(
       context.watch<PesananBloc>().state,
       akun['id']!,
@@ -275,14 +278,19 @@ class Akun extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
-            child: const Column(
+            child: Column(
               children: [
-                _BarisMenu(ikon: Icons.help_outline, judul: 'Bantuan'),
+                const _BarisMenu(ikon: Icons.help_outline, judul: 'Bantuan'),
                 _BarisMenu(
                   ikon: Icons.description_outlined,
                   judul: 'Ketentuan & privasi',
+                  onTap: () => context.push(Rute.ketentuan),
                 ),
-                _BarisMenu(ikon: Icons.logout, judul: 'Keluar'),
+                _BarisMenu(
+                  ikon: Icons.logout,
+                  judul: 'Keluar',
+                  onTap: () => _keluar(context),
+                ),
               ],
             ),
           ),
@@ -290,6 +298,35 @@ class Akun extends StatelessWidget {
       ),
     );
   }
+}
+
+/// F-33: konfirmasi dulu, terus token sesinya dicabut
+Future<void> _keluar(BuildContext context) async {
+  final yakin = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Keluar dari akun?'),
+      content: const Text(
+        'Pesanan aktifmu tetap tersimpan. Masuk lagi untuk melihat kodenya.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          style: TextButton.styleFrom(foregroundColor: Warna.merah),
+          child: const Text('Keluar'),
+        ),
+      ],
+    ),
+  );
+  if (yakin != true || !context.mounted) return;
+  // keranjang ga ikut ke akun berikutnya yg masuk di HP ini
+  context.read<KeranjangCubit>().kosongkan();
+  // router langsung pindah ke Sambutan begitu akunnya kosong
+  await context.read<AkunCubit>().keluar();
 }
 
 /// tombol pindah akun cepet selama testing, gantiin logout - login
@@ -402,13 +439,21 @@ class _TombolGantiAkun extends StatelessWidget {
   }
 }
 
-/// satu baris menu, halamannya belum ada jadi cuma munculin snackbar
+/// satu baris menu di tab akun
 class _BarisMenu extends StatelessWidget {
-  const _BarisMenu({required this.ikon, required this.judul, this.nilai});
+  const _BarisMenu({
+    required this.ikon,
+    required this.judul,
+    this.nilai,
+    this.onTap,
+  });
 
   final IconData ikon;
   final String judul;
   final String? nilai;
+
+  /// kosong = halamannya belum ada, cuma munculin snackbar
+  final VoidCallback? onTap;
 
   static void segeraHadir(BuildContext context, String menu) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -429,7 +474,7 @@ class _BarisMenu extends StatelessWidget {
           const Icon(Icons.chevron_right, color: Warna.teksPendukung),
         ],
       ),
-      onTap: () => segeraHadir(context, judul),
+      onTap: onTap ?? () => segeraHadir(context, judul),
     );
   }
 }
