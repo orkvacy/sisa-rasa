@@ -39,9 +39,12 @@ class _PesananState extends State<Pesanan> {
   @override
   Widget build(BuildContext context) {
     // cuma pesanan punya akun yg lagi dipake, tiap ada perubahan status tab ini ikut update
+    // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
+    final idAkun = context.watch<AkunCubit>().state['id'];
+    if (idAkun == null) return const SizedBox.shrink();
     final daftarPesanan = PesananBloc.milik(
       context.watch<PesananBloc>().state,
-      context.watch<AkunCubit>().state['id']!,
+      idAkun,
     );
     final berlangsung = [
       for (final p in daftarPesanan)

@@ -32,7 +32,9 @@ class _PaketMitraState extends State<PaketMitra> {
 
   @override
   Widget build(BuildContext context) {
-    final mitra = context.watch<AkunCubit>().state['nama']!;
+    // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
+    final mitra = context.watch<AkunCubit>().state['nama'];
+    if (mitra == null) return const SizedBox.shrink();
     final semua = [
       for (final p in context.watch<PaketCubit>().state)
         if (p['mitra'] == mitra) p,

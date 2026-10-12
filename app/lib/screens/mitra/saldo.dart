@@ -24,7 +24,9 @@ class _SaldoState extends State<Saldo> {
 
   @override
   Widget build(BuildContext context) {
-    final String mitra = context.watch<AkunCubit>().state['nama']!;
+    // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
+    final mitra = context.watch<AkunCubit>().state['nama'];
+    if (mitra == null) return const SizedBox.shrink();
     final saldoCubit = context.watch<SaldoCubit>();
     final rekening = saldoCubit.rekening(mitra);
     final riwayat = saldoCubit.riwayat(
