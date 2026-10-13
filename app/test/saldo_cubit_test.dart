@@ -1,19 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sisa_rasa/cubit/saldo_cubit.dart';
-import 'package:sisa_rasa/data/status_pesanan.dart';
+import 'package:sisa_rasa/data/repositories/saldo_lokal.dart';
+import 'package:sisa_rasa/presentation/cubit/saldo_cubit.dart';
+import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
+import 'package:sisa_rasa/domain/aturan/saldo.dart';
 
 void main() {
   // rabu siang, biar "minggu ini" nyakup kemarin juga
   final sekarang = DateTime(2026, 10, 14, 16, 20);
   late SaldoCubit cubit;
 
-  setUp(() => cubit = SaldoCubit(sekarang: sekarang));
+  setUp(() async {
+    cubit = SaldoCubit(layanan: SaldoLokal(sekarang: sekarang));
+    await cubit.muat('Ibis Hotel');
+  });
   tearDown(() => cubit.close());
 
   Map<String, dynamic> pesanan(String status, {int subtotal = 20000}) => {
     'mitra': 'Ibis Hotel',
     'kode': 'SR-AB12',
     'idAkun': 'u1',
+    'namaPembeli': 'Rani A.',
     'status': status,
     'subtotal': subtotal,
     'dibuat': sekarang,

@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sisa_rasa/cubit/paket_cubit.dart';
-import 'package:sisa_rasa/data/dummy_akun.dart';
+import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/data/sumber/dummy_akun.dart';
+import 'package:sisa_rasa/injection.dart';
 import 'package:sisa_rasa/main.dart';
-import 'package:sisa_rasa/screens/halaman_utama.dart';
-import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/screens/halaman_utama.dart';
+import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
 
 /// hitung mundur batas bayar jalan tiap detik, jadi selama layarnya kebuka
 /// pumpAndSettle ga akan pernah "tenang". di bagian itu pake pump biasa
@@ -69,7 +70,11 @@ Future<void> keCheckout(WidgetTester tester, {String jumlah = '1'}) async {
 
 void main() {
   // secure storage di tes pake penyimpanan tiruan, isinya kosong tiap tes
-  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+  setUp(() async {
+    FlutterSecureStorage.setMockInitialValues({});
+    await sl.reset();
+    daftarkanDependensi();
+  });
 
   tesKelolaPaket();
   testWidgets('beranda: flash sale, mitra sekitar, navigasi melayang', (
@@ -77,6 +82,8 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     expect(find.text('Sore ini'), findsOneWidget);
     // Ibis Hotel tutup 17.00, kurang dari sejam dari 16.20 -> masuk Flash sale (F-53)
@@ -106,6 +113,8 @@ void main() {
   testWidgets('pindah tab lewat navigasi melayang', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     await tester.tap(find.text('Pesanan').last);
     await tester.pumpAndSettle();
@@ -122,6 +131,8 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // kolom jumlah hanya menerima angka dan dibatasi sisa porsi (3)
     await keDetailSandwich(tester);
@@ -202,6 +213,8 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // Rani bikin pesanan (belum dibayar)
     await keCheckout(tester);
@@ -232,6 +245,8 @@ void main() {
   testWidgets('batalin sebelum bayar, porsi balik ke stok', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     await keCheckout(tester);
     await tester.tap(find.text('Bayar sekarang'));
@@ -274,6 +289,8 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // dari kartu Flash sale buka halaman Ibis Hotel
     await tester.tap(find.text('Ibis Hotel'));
@@ -305,6 +322,8 @@ void main() {
   testWidgets('tambah cepat dari mitra lain nanya dulu (F-07)', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // keranjang isi sandwich Ibis Hotel dulu, lalu balik ke beranda
     await keCheckout(tester);
@@ -352,6 +371,8 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // Rani pesan + bayar sandwich Ibis Hotel
     await keCheckout(tester);
@@ -451,6 +472,8 @@ void tesKelolaPaket() {
       // lebih lebar: dialog pemilih jam butuh ruang buat tombol OK nya
       await tester.binding.setSurfaceSize(const Size(800, 1300));
       await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+      // paket dimuat async dari repository, tunggu satu frame
+      await tester.pump();
       await gantiAkun(tester, 'Ibis Hotel');
 
       await tester.tap(find.text('Paket').last);
@@ -538,6 +561,8 @@ void tesKelolaPaket() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
     await gantiAkun(tester, 'Ibis Hotel');
 
     await tester.tap(find.text('Saldo').last);
@@ -575,6 +600,8 @@ void tesKelolaPaket() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    // paket dimuat async dari repository, tunggu satu frame
+    await tester.pump();
 
     // Rani pesan + bayar dulu, sebelum dibayar chat belum ada
     await keCheckout(tester);

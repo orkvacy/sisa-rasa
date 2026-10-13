@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sisa_rasa/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
+import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 
 void main() {
   late PaketCubit cubit;
 
-  setUp(() => cubit = PaketCubit());
+  setUp(() async {
+    cubit = PaketCubit(layanan: PaketLokal());
+    await cubit.muat();
+  });
   tearDown(() => cubit.close());
 
   Map<String, dynamic> isian({int porsi = 5, int tutup = 18 * 60}) => {
