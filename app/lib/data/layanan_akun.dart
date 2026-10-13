@@ -32,31 +32,63 @@ abstract class LayananAkun {
 
   /// F-33: token dicabut, ga bisa dipake lagi
   Future<void> keluar(String token);
+
+  /// F-61 langkah 1: kirim kode OTP ke email. sengaja ga ngasih tau
+  /// emailnya terdaftar atau ga, biar ga bisa dipake nebak email orang.
+  /// lempar GagalAkun kalau minta ulang sebelum [jedaKirimUlang] lewat
+  Future<void> mintaKodeReset(String email);
+
+  /// F-61 langkah 2: cocokin kode, balikin tiket sekali pakai buat langkah 3
+  Future<String> cekKodeReset(String email, String kode);
+
+  /// F-61 langkah 3: ganti kata sandi, semua sesi lama akun ini ikut dicabut
+  Future<void> aturSandiBaru(String tiket, String sandi);
 }
+
+/// F-61: kode OTP berlaku 10 menit, cuma bisa dipake sekali
+const berlakuKodeReset = Duration(minutes: 10);
+
+/// jeda sebelum boleh minta kode lagi
+const jedaKirimUlang = Duration(seconds: 60);
+
+/// salah masukin kode lebih dari ini, kodenya hangus
+const batasSalahKode = 5;
 
 /// pengganti server selama backend belum ada.
 /// kata sandi di sini cuma buat simulasi server: di versi asli kata sandi
 /// cuma ada di server dalam bentuk hash bcrypt, aplikasi ga pernah nyimpen (F-31).
 /// akun yg didaftarin ilang pas aplikasi ditutup
 class AkunTiruan implements LayananAkun {
-  AkunTiruan() {
+  AkunTiruan({DateTime Function()? jam}) : _jam = jam ?? DateTime.now {
     for (final akun in dummyAkun) {
       _akun[akun['email']!] = {...akun, 'sandi': sandiUji};
     }
   }
 
+  /// jam bisa diganti di tes, buat ngecek kode kedaluwarsa
+  final DateTime Function() _jam;
+
   final _akun = <String, Map<String, String>>{};
-  // token tiruan = "acak.email", jadi masih kebaca walau aplikasi dibuka ulang.
+  // token tiruan = "acak.versi.email", jadi masih kebaca walau aplikasi dibuka ulang.
   // token asli dari server ga boleh bisa ditebak isinya kayak gini
   final _dicabut = <String>{};
+  // naik tiap ganti kata sandi, token versi lama ga berlaku lagi
+  final _versiSesi = <String, int>{};
+  final _kodeReset = <String, Map<String, dynamic>>{};
+  final _tiket = <String, String>{}; // tiket -> email
   final _acak = Random.secure();
 
+  /// khusus mode uji: email belum beneran dikirim, kodenya ditampilin di layar
+  String? kodeUji(String email) => _kodeReset[rapikanEmail(email)]?['kode'];
+
+  String _hex(int panjang) => List.generate(
+    panjang,
+    (_) => _acak.nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
+
   Map<String, String> _bukaSesi(Map<String, String> akun) {
-    final acak = List.generate(
-      32,
-      (_) => _acak.nextInt(256).toRadixString(16).padLeft(2, '0'),
-    ).join();
-    final token = '$acak.${akun['email']}';
+    final email = akun['email']!;
+    final token = '${_hex(32)}.${_versiSesi[email] ?? 0}.$email';
     return {..._tanpaSandi(akun), 'token': token};
   }
 
@@ -104,14 +136,87 @@ class AkunTiruan implements LayananAkun {
 
   @override
   Future<Map<String, String>?> sesi(String token) async {
-    if (_dicabut.contains(token) || !token.contains('.')) return null;
-    final akun = _akun[token.substring(token.indexOf('.') + 1)];
-    if (akun == null) return null;
+    if (_dicabut.contains(token)) return null;
+    final bagian = token.split('.');
+    if (bagian.length < 3) return null;
+    final versi = int.tryParse(bagian[1]);
+    final email = bagian.sublist(2).join('.');
+    final akun = _akun[email];
+    if (akun == null || versi != (_versiSesi[email] ?? 0)) return null;
     return {..._tanpaSandi(akun), 'token': token};
   }
 
   @override
   Future<void> keluar(String token) async => _dicabut.add(token);
+
+  @override
+  Future<void> mintaKodeReset(String email) async {
+    final kunci = rapikanEmail(email);
+    final lama = _kodeReset[kunci];
+    if (lama != null) {
+      final boleh = (lama['dikirim'] as DateTime).add(jedaKirimUlang);
+      if (_jam().isBefore(boleh)) {
+        final sisa = boleh.difference(_jam()).inSeconds + 1;
+        throw GagalAkun('Tunggu $sisa detik sebelum minta kode lagi.');
+      }
+    }
+    // email ga terdaftar: diem aja, layar tetep bilang "kode dikirim"
+    if (!_akun.containsKey(kunci)) return;
+    _kodeReset[kunci] = {
+      'kode': (_acak.nextInt(900000) + 100000).toString(),
+      'dikirim': _jam(),
+      'salah': 0,
+    };
+  }
+
+  @override
+  Future<String> cekKodeReset(String email, String kode) async {
+    final kunci = rapikanEmail(email);
+    final data = _kodeReset[kunci];
+    const salah = GagalAkun('Kode salah atau sudah kedaluwarsa.');
+    if (data == null) throw salah;
+    final habis = (data['dikirim'] as DateTime).add(berlakuKodeReset);
+    if (!_jam().isBefore(habis)) {
+      _kodeReset.remove(kunci);
+      throw salah;
+    }
+    if (data['kode'] != kode) {
+      data['salah'] = (data['salah'] as int) + 1;
+      if (data['salah'] >= batasSalahKode) {
+        _kodeReset.remove(kunci);
+        throw const GagalAkun('Terlalu banyak percobaan. Minta kode baru.');
+      }
+      throw salah;
+    }
+    // sekali pakai: abis cocok, kodenya langsung dihapus
+    _kodeReset.remove(kunci);
+    final tiket = _hex(16);
+    _tiket[tiket] = kunci;
+    return tiket;
+  }
+
+  @override
+  Future<void> aturSandiBaru(String tiket, String sandi) async {
+    final email = _tiket.remove(tiket);
+    if (email == null) {
+      throw const GagalAkun('Sesi atur ulang sudah habis. Ulangi dari awal.');
+    }
+    if (sandi.length < panjangSandiMinimal) {
+      throw const GagalAkun('Kata sandi minimal 8 karakter.');
+    }
+    _akun[email] = {..._akun[email]!, 'sandi': sandi};
+    // semua HP yg masih masuk ke akun ini dikeluarin
+    _versiSesi[email] = (_versiSesi[email] ?? 0) + 1;
+  }
+}
+
+/// "rani.amelia@gmail.com" -> "rani•••@gmail.com", buat ditampilin di layar kode
+String samarkanEmail(String email) {
+  final rapi = rapikanEmail(email);
+  final at = rapi.indexOf('@');
+  if (at <= 0) return rapi;
+  final depan = rapi.substring(0, at);
+  return '${depan.substring(0, min(4, depan.length))}•••${rapi.substring(at)}';
 }
 
 String rapikanEmail(String email) => email.trim().toLowerCase();
