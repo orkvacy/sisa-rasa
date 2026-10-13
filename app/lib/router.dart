@@ -8,6 +8,7 @@ import 'package:sisa_rasa/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/screens/akun.dart';
 import 'package:sisa_rasa/screens/auth/daftar.dart';
 import 'package:sisa_rasa/screens/auth/ketentuan.dart';
+import 'package:sisa_rasa/screens/auth/lupa_sandi.dart';
 import 'package:sisa_rasa/screens/auth/masuk.dart';
 import 'package:sisa_rasa/screens/auth/sambutan.dart';
 import 'package:sisa_rasa/screens/beranda.dart';
@@ -46,6 +47,7 @@ abstract final class Rute {
   static const masuk = '/masuk';
   static const daftar = '/daftar';
   static const ketentuan = '/ketentuan';
+  static const lupaSandi = '/lupa-sandi';
 
   /// masuk / daftar, abis itu balik ke [dari] (dipake tamu yg mau checkout)
   static String masukLalu(String dari) =>
@@ -129,7 +131,8 @@ GoRouter buatRouter({required AkunCubit akun}) {
       final layarUmum =
           lokasi == Rute.sambutan ||
           lokasi == Rute.masuk ||
-          lokasi == Rute.daftar;
+          lokasi == Rute.daftar ||
+          lokasi == Rute.lupaSandi;
 
       // belum masuk dan belum milih "Lihat paket dulu"
       if (akun.state.isEmpty) return layarUmum ? null : Rute.sambutan;
@@ -174,6 +177,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
         path: Rute.daftar,
         builder: (context, state) =>
             Daftar(dari: state.uri.queryParameters['dari']),
+      ),
+      GoRoute(
+        path: Rute.lupaSandi,
+        builder: (context, state) => LupaSandi(email: state.extra as String?),
       ),
       GoRoute(
         path: Rute.ketentuan,

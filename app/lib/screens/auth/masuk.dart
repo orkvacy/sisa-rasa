@@ -56,6 +56,27 @@ class _MasukState extends State<Masuk> {
     }
   }
 
+  /// F-61: email dioper lewat extra, bukan alamat, biar ga nongol di URL
+  Future<void> lupaSandi() async {
+    final hasil = await context.push<String>(
+      Rute.lupaSandi,
+      extra: email.text.trim(),
+    );
+    if (hasil == null || !mounted) return;
+    setState(() {
+      email.text = hasil;
+      sandi.clear();
+      galatMasuk = null;
+    });
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Kata sandi diganti. Masuk dengan kata sandi baru.'),
+        ),
+      );
+  }
+
   void kembali() {
     if (context.canPop()) {
       context.pop();
@@ -124,13 +145,7 @@ class _MasukState extends State<Masuk> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    const SnackBar(
-                      content: Text('Atur ulang kata sandi menyusul'),
-                    ),
-                  ),
+                onPressed: lupaSandi,
                 style: TextButton.styleFrom(
                   foregroundColor: Warna.hijau,
                   textStyle: const TextStyle(
