@@ -402,6 +402,7 @@ class _FormPaketState extends State<FormPaket> {
                 style: TextButton.styleFrom(
                   foregroundColor: Warna.merah,
                   textStyle: const TextStyle(
+                    fontFamily: 'PlusJakartaSans',
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),

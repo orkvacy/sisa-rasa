@@ -151,6 +151,7 @@ class _ScanKodeState extends State<ScanKode> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     shape: const StadiumBorder(),
                     textStyle: const TextStyle(
+                      fontFamily: 'PlusJakartaSans',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),

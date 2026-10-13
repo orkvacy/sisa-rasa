@@ -366,6 +366,7 @@ class _KartuTutup extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
               shape: const StadiumBorder(),
               textStyle: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
