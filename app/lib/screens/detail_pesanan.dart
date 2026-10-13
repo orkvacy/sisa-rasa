@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/cubit/percakapan_cubit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/bloc/pesanan_event.dart';
@@ -10,6 +11,7 @@ import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/widgets/bagian_pesanan.dart';
 import 'package:sisa_rasa/widgets/hitung_mundur.dart';
 
@@ -317,6 +319,13 @@ class _BagianLokasi extends StatelessWidget {
           judul: 'Ambil sendiri',
           teks: 'Hari ini, ${jam(pesanan['mulai'])} – ${jam(pesanan['tutup'])}',
         ),
+        if (keadaanPercakapan(pesanan) != 'tidakAda') ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: TombolPercakapan(pesanan: pesanan, peran: 'pembeli'),
+          ),
+        ],
       ],
     );
   }

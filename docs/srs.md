@@ -2,7 +2,7 @@
 
 **Spesifikasi Kebutuhan Perangkat Lunak**
 
-**Versi:** 1.6 - 2 Oktober 2026
+**Versi:** 1.7 - 14 Oktober 2026
 
 > Dokumen terkait: [PRD.md](PRD.md) (latar belakang produk dan alasannya)
 
@@ -167,7 +167,27 @@ Notifikasi masuk lingkup karena alur aplikasi ini bergantung pada waktu: batas
 bayar 15 menit, status siap diambil, dan jam tutup ambil. Tanpa notifikasi,
 pembeli harus terus membuka aplikasi dan pesanan rawan tidak diambil.
 
-### 3.6 Admin
+### 3.6 Percakapan
+
+| ID | Kebutuhan | Prioritas |
+| --- | --- | --- |
+| F-67 | Pembeli dan mitra dapat saling mengirim pesan teks dalam satu percakapan untuk setiap pesanan. Percakapan terbuka sejak pesanan dibayar sampai 2 jam setelah pesanan selesai, tidak diambil, atau dibatalkan. Setelah itu percakapan hanya dapat dibaca | S |
+| F-68 | Pesan baru muncul di layar lawan bicara tanpa memuat ulang selama aplikasinya terbuka, dan riwayat percakapan tetap tersimpan saat dibuka kembali | S |
+| F-69 | Pengguna dapat mengirim pesan cepat bertemplat sesuai perannya, misalnya "Saya sudah sampai" dari pembeli dan "Pesanan sudah siap" dari mitra | S |
+| F-70 | Pengguna melihat jumlah pesan yang belum dibaca pada pesanan yang bersangkutan, dan setiap pesan menunjukkan status terkirim atau sudah dibaca | S |
+| F-71 | Pengguna menerima notifikasi pesan baru saat aplikasi ditutup, lewat jalur notifikasi yang sama dengan NF-12 | O |
+| F-72 | Pengguna dapat melaporkan percakapan yang melanggar, dan admin dapat meninjau laporan tersebut | O |
+
+Percakapan diikat ke pesanan, bukan obrolan bebas antarpengguna, supaya hanya
+dipakai untuk urusan pengambilan. Pembeli datang sendiri membawa kode ambil,
+jadi percakapan cukup untuk kabar singkat seperti terlambat atau sudah sampai.
+Kode ambil tetap diperiksa lewat pindai atau ketik kode (F-20, F-46), bukan
+lewat percakapan.
+
+F-71 dan F-72 sengaja ditunda. Selama F-71 belum dikerjakan, pesan baru hanya
+terlihat saat aplikasi dibuka.
+
+### 3.7 Admin
 
 Dikerjakan paling akhir, setelah seluruh kebutuhan W dan S tuntas.
 
@@ -210,12 +230,14 @@ tersebut seluruh akun masih berupa data uji, bukan mitra sungguhan.
 | NF-14 | Token sesi disimpan di `flutter_secure_storage`, tidak di `SharedPreferences` | Periksa kode penyimpanan token |
 | NF-15 | Aplikasi memakai SSL pinning terhadap public key server, dengan satu pin cadangan | Jalankan lewat proxy dengan sertifikat palsu, permintaan harus gagal |
 | NF-16 | Tidak ada rahasia (server key payment gateway, kunci server FCM, dan sejenisnya) di dalam kode aplikasi | Cari string kunci di hasil build APK, tidak ditemukan |
+| NF-17 | Percakapan (F-67) memakai WebSocket di atas TLS (`wss://`) dengan token sesi, dan server hanya mengizinkan pembeli serta mitra dari pesanan tersebut membaca dan mengirim pesan | Buka percakapan pesanan milik akun lain, server menolak |
+| NF-18 | Saat koneksi percakapan terputus, aplikasi menyambung ulang sendiri dan mengambil pesan yang terlewat. Setiap pesan membawa ID unik dari aplikasi, sehingga pesan yang terkirim ulang tidak tercatat dua kali | Kirim pesan, putuskan jaringan sebelum balasan server diterima, sambungkan lagi, pesan hanya muncul sekali |
 
 ---
 
 ## 5. Pemetaan kebutuhan ke layar
 
-Dua puluh dua layar utama.
+Dua puluh tiga layar utama.
 
 | # | Layar | Peran | Kebutuhan |
 | --- | --- | --- | --- |
@@ -226,6 +248,7 @@ Dua puluh dua layar utama.
 | 4 | Checkout | Pembeli | F-09, F-10, F-56 |
 | 5 | Pembayaran (QRIS / GoPay / VA) | Pembeli | F-10, F-40 |
 | 6 | Status Pesanan (berisi kode ambil) | Pembeli | F-11, F-41, F-42, F-55, F-56 |
+| 6a | Percakapan Pesanan (dibuka dari Status Pesanan dan detail pesanan mitra) | Pembeli, Mitra | F-67, F-68, F-69, F-70 |
 | 7 | Pesanan Saya | Pembeli | F-12, F-52 |
 | 8 | Setelan | Umum | F-27, F-33, F-60 |
 | 8a | Profil dan keamanan akun | Umum | F-62, F-63 |
@@ -258,7 +281,8 @@ pembaruan dokumen ini.
 - Saldo, poin, dan voucher
 - Pelacakan lokasi pembeli secara langsung. Jarak cukup dari lokasi perkiraan (F-66), dan petunjuk arah membuka aplikasi peta
 - Skor higienis mitra
-- Percakapan antara pembeli dan mitra, rating, dan ulasan. Notifikasi status pesanan masuk lingkup (3.5)
+- Rating dan ulasan. Notifikasi status pesanan masuk lingkup (3.5)
+- Percakapan di luar pesanan (misalnya bertanya sebelum membeli), panggilan suara, serta kirim foto atau berkas di percakapan. Percakapan per pesanan masuk lingkup (3.6)
 
 ---
 
@@ -267,6 +291,7 @@ pembaruan dokumen ini.
 | Versi | Tanggal | Perubahan |
 | --- | --- | --- |
 | 1.0 | 19 Sep 2026 | Versi awal, dipisahkan dari PRD |
+| 1.7 | 14 Okt 2026 | Percakapan per pesanan antara pembeli dan mitra masuk lingkup (F-67–F-72, NF-17, NF-18, layar 6a). Notifikasi pesan saat aplikasi ditutup (F-71) dan pelaporan percakapan (F-72) ditunda sebagai O. Admin bergeser jadi 3.7 |
 | 1.6 | 2 Okt 2026 | Notifikasi masuk lingkup (F-57–F-60, NF-12). Aturan pesanan tidak diambil sampai jam tutup (F-56) dan pembatalan oleh pembeli (F-55). Pengembalian dana jadi W (F-42). Akun: lupa kata sandi, hapus akun, ubah profil, ketentuan dan privasi (F-61–F-63, F-65). Profil usaha mitra (F-64), jarak dari lokasi perkiraan (F-66), label halal dan alergen (F-02, F-15). Keamanan aplikasi (NF-13–NF-16). B-06 dan F-25 diperjelas |
 | 1.5 | 2 Okt 2026 | Beranda berpusat pada mitra: daftar mitra diurutkan dari jam tutup ambil terdekat (F-01 diubah), Flash sale untuk mitra yang tutup kurang dari 1 jam (F-53), halaman mitra untuk memilih paket dan membeli satuan (F-54). Slot ambil (mulai dan tutup) disederhanakan jadi jam tutup ambil saja (F-15, F-25). F-07 disesuaikan karena keranjang melekat pada satu mitra |
 | 1.4 | 1 Okt 2026 | Pesanan Saya: filter Berlangsung, Selesai, Dibatalkan (F-12 diubah, jadi W), pintasan QR, petunjuk arah, dan hubungi mitra (F-52) |

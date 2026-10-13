@@ -9,6 +9,7 @@ import 'package:sisa_rasa/data/pembayaran.dart';
 import 'package:sisa_rasa/data/status_pesanan.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/widgets/bagian_pesanan.dart';
 
 /// detail satu pesanan dari sisi mitra (figma v3: mitra/detail pesanan, F-19, F-20, F-43).
@@ -76,6 +77,11 @@ class DetailPesananMitra extends StatelessWidget {
                               teks: pesanan['dibayarPada'] == null
                                   ? 'Belum dibayar'
                                   : 'Dibayar ${tanggalSingkat(pesanan['dibayarPada'])}',
+                              kanan: TombolPercakapan(
+                                pesanan: pesanan,
+                                peran: 'mitra',
+                                ringkas: true,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             BarisIkon(
