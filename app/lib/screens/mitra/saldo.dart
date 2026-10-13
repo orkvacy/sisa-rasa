@@ -276,6 +276,7 @@ class _KartuSaldo extends StatelessWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
                   textStyle: const TextStyle(
+                    fontFamily: 'PlusJakartaSans',
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),

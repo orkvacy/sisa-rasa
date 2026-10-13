@@ -430,7 +430,10 @@ class _KetikKodeState extends State<KetikKode> {
               label: const Text('Pindai pakai kamera'),
               style: TextButton.styleFrom(
                 foregroundColor: Warna.hijau,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                textStyle: const TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

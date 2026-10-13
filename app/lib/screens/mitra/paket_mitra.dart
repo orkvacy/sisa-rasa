@@ -83,6 +83,7 @@ class _PaketMitraState extends State<PaketMitra> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   textStyle: const TextStyle(
+                    fontFamily: 'PlusJakartaSans',
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),

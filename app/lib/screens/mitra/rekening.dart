@@ -184,6 +184,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
                 borderRadius: BorderRadius.circular(16),
               ),
               textStyle: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),

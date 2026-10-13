@@ -163,7 +163,9 @@ class SisaRasaTema {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radiusKontrol),
           ),
+          // fontFamily ditulis lagi: textStyle tombol ga ikut fontFamily dari ThemeData
           textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
             fontSize: 16,
             height: 20 / 16,
             fontWeight: FontWeight.w700,
@@ -178,7 +180,9 @@ class SisaRasaTema {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radiusKontrol),
           ),
+          // fontFamily ditulis lagi: textStyle tombol ga ikut fontFamily dari ThemeData
           textStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
             fontSize: 16,
             height: 20 / 16,
             fontWeight: FontWeight.w700,

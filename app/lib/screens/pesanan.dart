@@ -627,7 +627,11 @@ class _TombolGaris extends StatelessWidget {
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        textStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
