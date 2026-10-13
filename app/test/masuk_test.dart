@@ -102,8 +102,8 @@ void main() {
     (tester) async {
       await buka(tester);
       await tester.ensureVisible(find.text('Lihat paket dulu'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Lihat paket dulu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Lihat paket dulu'));
       await tester.pumpAndSettle();
       expect(find.text('Flash sale'), findsOneWidget);
 

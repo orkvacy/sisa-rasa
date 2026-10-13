@@ -8,6 +8,7 @@ import 'package:sisa_rasa/data/status_pesanan.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 import 'package:sisa_rasa/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/utils/format.dart';
+import 'package:sisa_rasa/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/widgets/hitung_mundur.dart';
 import 'package:sisa_rasa/widgets/navigasi_melayang.dart';
 import 'package:sisa_rasa/widgets/pil_status.dart';
@@ -323,7 +324,7 @@ class _PesananState extends State<Pesanan> {
     ];
   }
 
-  /// sudah dibayar: kode QR, petunjuk arah, hubungi mitra (F-52)
+  /// sudah dibayar: kode QR, petunjuk arah, chat mitra (F-52, F-67)
   List<Widget> _bawahAktif(Map<String, dynamic> pesanan) {
     return [
       const SizedBox(height: 12),
@@ -344,12 +345,9 @@ class _PesananState extends State<Pesanan> {
             ),
           ),
           const SizedBox(width: 8),
+          // F-67: chat mitra, tombol teleponnya ada di layar chat
           Expanded(
-            child: _TombolGaris(
-              ikon: Icons.call_outlined,
-              teks: 'Hubungi mitra',
-              onPressed: () => hubungiMitra(context, pesanan['mitra']),
-            ),
+            child: TombolPercakapan(pesanan: pesanan, peran: 'pembeli'),
           ),
         ],
       ),

@@ -570,4 +570,65 @@ void tesKelolaPaket() {
     expect(find.text('a.n. IBIS HOTEL'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
+  testWidgets('chat pembeli dan mitra per pesanan (F-67 s.d. F-70)', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+
+    // Rani pesan + bayar dulu, sebelum dibayar chat belum ada
+    await keCheckout(tester);
+    await tester.tap(find.text('Bayar sekarang'));
+    await lewati(tester);
+    await tester.tap(find.text('Saya sudah bayar · cek status'));
+    await lewati(tester);
+    await lewati(tester);
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+
+    // pesan cepat dari kartu pesanan
+    await tester.tap(find.text('Chat mitra'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Belum ada pesan'), findsOneWidget);
+    await tester.tap(find.text('Saya sudah sampai'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Saya sudah sampai'), findsNWidgets(2));
+    expect(find.byIcon(Icons.done), findsOneWidget);
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+
+    // mitra liat ada 1 pesan baru di kartu pesanan masuk
+    await gantiAkun(tester, 'Ibis Hotel');
+    await tester.tap(find.text('Pesanan').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Chat pembeli, 1 pesan baru'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rani A.'), findsOneWidget);
+    // tunggu snackbar "Masuk sebagai ..." ilang, soalnya nutupin kolom ketik
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Oke, ditunggu');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Kirim'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Oke, ditunggu'), findsOneWidget);
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Chat pembeli'), findsOneWidget);
+
+    // Rani: balasan masuk, pesannya sendiri udah dibaca mitra
+    await gantiAkun(tester, 'Rani Amelia');
+    await tester.tap(find.text('Pesanan').last);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: find.byType(Badge), matching: find.text('1')),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Chat mitra'));
+    await tester.pumpAndSettle();
+    expect(find.text('Oke, ditunggu'), findsOneWidget);
+    expect(find.byIcon(Icons.done_all), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
 }

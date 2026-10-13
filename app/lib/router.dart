@@ -30,6 +30,7 @@ import 'package:sisa_rasa/screens/mitra/rekening.dart';
 import 'package:sisa_rasa/screens/mitra/saldo.dart';
 import 'package:sisa_rasa/screens/mitra/scan_kode.dart';
 import 'package:sisa_rasa/screens/pembayaran.dart';
+import 'package:sisa_rasa/screens/percakapan.dart';
 import 'package:sisa_rasa/screens/pesanan.dart';
 
 /// semua alamat halaman dikumpulin di sini (NF-05),
@@ -74,6 +75,9 @@ abstract final class Rute {
   /// kode QR layar penuh, dibuka dari pesanan yg kodenya ini
   static String kodeAmbil(String kode) => '/pesanan/kode-ambil/$kode';
 
+  /// percakapan sama mitra soal pesanan ini (F-67)
+  static String percakapan(String id) => '/pesanan/chat/$id';
+
   // sisi mitra (layar 9-11b di SRS), cuma kebuka kalau akun yg masuk perannya mitra
   static const mitraDasbor = '/mitra/dasbor';
   static const mitraPaket = '/mitra/paket';
@@ -87,6 +91,7 @@ abstract final class Rute {
   static const mitraKetikKode = '/mitra/pesanan/ketik-kode';
   static String mitraUbahPaket(String id) => '/mitra/paket/ubah/$id';
   static String mitraDetailPesanan(String id) => '/mitra/pesanan/detail/$id';
+  static String mitraPercakapan(String id) => '/mitra/pesanan/chat/$id';
 }
 
 /// GoRouter dengerin AkunCubit lewat ini, biar pas ganti akun redirect-nya jalan lagi
@@ -246,6 +251,11 @@ GoRouter buatRouter({required AkunCubit akun}) {
                     (context, state) =>
                         KodeAmbil(kode: state.pathParameters['kode']!),
                   ),
+                  layarPenuh(
+                    'chat/:id',
+                    (context, state) =>
+                        Percakapan(idPesanan: state.pathParameters['id']!),
+                  ),
                 ],
               ),
             ],
@@ -305,6 +315,11 @@ GoRouter buatRouter({required AkunCubit akun}) {
                     (context, state) => DetailPesananMitra(
                       idPesanan: state.pathParameters['id']!,
                     ),
+                  ),
+                  layarPenuh(
+                    'chat/:id',
+                    (context, state) =>
+                        Percakapan(idPesanan: state.pathParameters['id']!),
                   ),
                 ],
               ),

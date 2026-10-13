@@ -10,6 +10,7 @@ import 'package:sisa_rasa/data/status_pesanan.dart';
 import 'package:sisa_rasa/router.dart';
 import 'package:sisa_rasa/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/theme/warna.dart';
+import 'package:sisa_rasa/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/utils/format.dart';
 
 /// pesanan masuk mitra (figma v3: mitra/pesanan, F-19, F-20, F-43, F-47)
@@ -264,6 +265,11 @@ class _KartuPesanan extends StatelessWidget {
                         color: Warna.teks,
                       ),
                     ),
+                  ),
+                  TombolPercakapan(
+                    pesanan: pesanan,
+                    peran: 'mitra',
+                    ringkas: true,
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
