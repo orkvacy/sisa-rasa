@@ -49,12 +49,15 @@ class _DetailPaketState extends State<DetailPaket> {
         context: context,
         showDragHandle: true,
         backgroundColor: Colors.white,
+        // Padding: jarak isi bottom sheet
         builder: (context) => Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          // Column: isi konfirmasi disusun ke bawah
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // judul konfirmasi
               const Text(
                 'Ganti isi keranjang?',
                 style: TextStyle(
@@ -62,7 +65,9 @@ class _DetailPaketState extends State<DetailPaket> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+              // jarak
               const SizedBox(height: 8),
+              // penjelasan kenapa keranjang harus dikosongin
               Text(
                 'Keranjangmu berisi paket dari $mitraKeranjang. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
                 style: const TextStyle(
@@ -71,7 +76,9 @@ class _DetailPaketState extends State<DetailPaket> {
                   color: Warna.teksPendukung,
                 ),
               ),
+              // jarak
               const SizedBox(height: 20),
+              // SizedBox: biar tombolnya selebar layar
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -79,15 +86,20 @@ class _DetailPaketState extends State<DetailPaket> {
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(backgroundColor: Warna.merah),
+                  // tulisan tombol kosongkan
                   child: const Text('Kosongkan & tambah'),
                 ),
               ),
+              // jarak
               const SizedBox(height: 8),
+              // tombol batal selebar layar
               SizedBox(
                 width: double.infinity,
                 height: 52,
+                // OutlinedButton: tombol batal
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context, false),
+                  // tulisan batal
                   child: const Text('Batal'),
                 ),
               ),
@@ -103,7 +115,9 @@ class _DetailPaketState extends State<DetailPaket> {
     if (!mounted) return;
     // snackbar dinaikin 88 biar munculnya di atas bar keranjang, ga nutupin
     ScaffoldMessenger.of(context).showSnackBar(
+      // SnackBar: notif paket udah masuk keranjang
       SnackBar(
+        // isi notif
         content: Text('${widget.paket['nama']} masuk keranjang'),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 88),
@@ -121,11 +135,15 @@ class _DetailPaketState extends State<DetailPaket> {
     final int total = paket['totalPorsi'];
     final habis = sisa == 0;
 
+    // Scaffold: kerangka halaman detail
     return Scaffold(
       backgroundColor: Colors.white,
+      // Column: isi di atas, bar tombol di bawah
       body: Column(
         children: [
+          // Expanded: isi detail ngisi sisa layar
           Expanded(
+            // SingleChildScrollView: isi detail bisa di scroll
             child: SingleChildScrollView(
               // Stack: foto paling belakang, lembar putih nutupin bawah foto,
               // tombol back sama favorit numpuk paling depan
@@ -148,18 +166,24 @@ class _DetailPaketState extends State<DetailPaket> {
                         top: Radius.circular(28),
                       ),
                     ),
+                    // Column: info paket disusun ke bawah
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Row: icon toko + nama mitra
                         Row(
                           children: [
+                            // icon toko
                             const Icon(
                               Icons.storefront_outlined,
                               size: 18,
                               color: Warna.teksPendukung,
                             ),
+                            // jarak
                             const SizedBox(width: 6),
+                            // Expanded biar nama mitra ga overflow
                             Expanded(
+                              // mitra, jenis, jarak
                               child: Text(
                                 '${paket['mitra']} · ${paket['jenisMitra']} · ${paket['jarak']}',
                                 style: const TextStyle(
@@ -169,7 +193,9 @@ class _DetailPaketState extends State<DetailPaket> {
                             ),
                           ],
                         ),
+                        // jarak
                         const SizedBox(height: 6),
+                        // nama paket
                         Text(
                           paket['nama'],
                           style: const TextStyle(
@@ -178,10 +204,13 @@ class _DetailPaketState extends State<DetailPaket> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
+                        // jarak
                         const SizedBox(height: 8),
+                        // Row: harga diskon sama harga asli sebaris
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
+                            // harga diskon
                             Text(
                               rupiah(paket['hargaDiskon']),
                               style: const TextStyle(
@@ -189,9 +218,12 @@ class _DetailPaketState extends State<DetailPaket> {
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
+                            // jarak
                             const SizedBox(width: 8),
+                            // Padding: harga asli diturunin dikit biar sejajar
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
+                              // harga asli dicoret
                               child: Text(
                                 rupiah(paket['hargaAsli']),
                                 style: const TextStyle(
@@ -203,6 +235,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             ),
                           ],
                         ),
+                        // jarak
                         const SizedBox(height: 8),
                         // pil hemat
                         Container(
@@ -214,6 +247,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             color: Warna.softGreen,
                             borderRadius: BorderRadius.circular(99),
                           ),
+                          // tulisan hemat berapa
                           child: Text(
                             'Hemat ${rupiah(paket['hargaAsli'] - paket['hargaDiskon'])}',
                             style: const TextStyle(
@@ -223,7 +257,9 @@ class _DetailPaketState extends State<DetailPaket> {
                             ),
                           ),
                         ),
+                        // jarak
                         const SizedBox(height: 16),
+                        // deskripsi paket
                         Text(
                           paket['deskripsi'],
                           style: const TextStyle(
@@ -232,13 +268,16 @@ class _DetailPaketState extends State<DetailPaket> {
                             color: Warna.teksPendukung,
                           ),
                         ),
+                        // jarak
                         const SizedBox(height: 20),
 
                         // meter 10 kotak, yg ijo = porsi yg udah keselamatin
                         Row(
                           children: [
                             for (var i = 0; i < 10; i++) ...[
+                              // Expanded: tiap kotak meter lebarnya sama
                               Expanded(
+                                // Container: satu kotak meter
                                 child: Container(
                                   height: 8,
                                   decoration: BoxDecoration(
@@ -252,11 +291,14 @@ class _DetailPaketState extends State<DetailPaket> {
                                   ),
                                 ),
                               ),
+                              // jarak antar kotak
                               if (i < 9) const SizedBox(width: 4),
                             ],
                           ],
                         ),
+                        // jarak
                         const SizedBox(height: 6),
+                        // keterangan porsi yg udah diselamatin
                         Text(
                           habis
                               ? 'Semua $total porsi sudah diselamatkan'
@@ -266,6 +308,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             color: Warna.teksPendukung,
                           ),
                         ),
+                        // jarak
                         const SizedBox(height: 20),
 
                         // kotak jam ambil
@@ -275,12 +318,16 @@ class _DetailPaketState extends State<DetailPaket> {
                             color: Warna.latar,
                             borderRadius: BorderRadius.circular(20),
                           ),
+                          // Column: isi kotak jam ambil
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Row: tulisan ambil hari ini + pil hitung mundur
                               Row(
                                 children: [
+                                  // Expanded: dorong pil ke kanan
                                   const Expanded(
+                                    // tulisan ambil hari ini
                                     child: Text(
                                       'Ambil hari ini',
                                       style: TextStyle(
@@ -298,14 +345,18 @@ class _DetailPaketState extends State<DetailPaket> {
                                       color: Warna.mendesakLembut,
                                       borderRadius: BorderRadius.circular(99),
                                     ),
+                                    // Row: icon jam + sisa waktu
                                     child: Row(
                                       children: [
+                                        // icon jam
                                         const Icon(
                                           Icons.schedule,
                                           size: 14,
                                           color: Warna.mendesak,
                                         ),
+                                        // jarak
                                         const SizedBox(width: 4),
+                                        // sisa waktu buka / tutup
                                         Text(
                                           sudahBuka(paket)
                                               ? 'Tutup ${sisaWaktu(paket['tutup'])} lagi'
@@ -321,7 +372,9 @@ class _DetailPaketState extends State<DetailPaket> {
                                   ),
                                 ],
                               ),
+                              // jarak
                               const SizedBox(height: 8),
+                              // jam ambil
                               Text(
                                 '${jam(paket['mulai'])} – ${jam(paket['tutup'])}',
                                 style: const TextStyle(
@@ -329,34 +382,47 @@ class _DetailPaketState extends State<DetailPaket> {
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
+                              // jarak
                               const SizedBox(height: 14),
+                              // timeline jam ambil
                               TimelineAmbil(paket: paket),
                             ],
                           ),
                         ),
+                        // jarak
                         const SizedBox(height: 16),
+                        // Row: icon lokasi + alamat
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // icon lokasi
                             const Icon(
                               Icons.place_outlined,
                               size: 20,
                               color: Warna.hijau,
                             ),
+                            // jarak
                             const SizedBox(width: 8),
+                            // alamat mitra
                             Expanded(child: Text(paket['alamat'])),
                           ],
                         ),
+                        // jarak
                         const SizedBox(height: 10),
+                        // Row: icon bayar + info bayar
                         const Row(
                           children: [
+                            // icon bayar
                             Icon(
                               Icons.payments_outlined,
                               size: 20,
                               color: Warna.hijau,
                             ),
+                            // jarak
                             SizedBox(width: 8),
+                            // Expanded biar tulisannya turun baris
                             Expanded(
+                              // info bayar di tempat
                               child: Text(
                                 'Tunjukkan kode ambil di kasir, bayar di tempat.',
                               ),
@@ -370,12 +436,15 @@ class _DetailPaketState extends State<DetailPaket> {
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 8,
                     left: 16,
+                    // CircleAvatar: latar bulet putih buat tombol back
                     child: CircleAvatar(
                       radius: 22,
                       backgroundColor: Colors.white,
+                      // IconButton: tombol back
                       child: IconButton(
                         tooltip: 'Kembali',
                         onPressed: () => Navigator.pop(context),
+                        // icon panah kiri
                         icon: const Icon(Icons.arrow_back, color: Warna.teks),
                       ),
                     ),
@@ -384,20 +453,25 @@ class _DetailPaketState extends State<DetailPaket> {
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 8,
                     right: 16,
+                    // latar bulet buat tombol favorit
                     child: CircleAvatar(
                       radius: 22,
                       backgroundColor: Colors.white,
+                      // IconButton: tombol simpan mitra
                       child: IconButton(
                         tooltip: 'Simpan mitra',
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
+                            // notif favorit belum ada
                             const SnackBar(
+                              // isi notif
                               content: Text(
                                 'Mitra favorit belum tersedia di versi ini',
                               ),
                             ),
                           );
                         },
+                        // icon hati
                         icon: const Icon(
                           Icons.favorite_border,
                           color: Warna.teks,
@@ -429,25 +503,31 @@ class _DetailPaketState extends State<DetailPaket> {
                 ),
               ],
             ),
+            // Row: pengatur porsi + tombol tambah
             child: Row(
               children: [
                 if (!habis) ...[
+                  // Container: kotak pengatur porsi
                   Container(
                     height: 52,
                     decoration: BoxDecoration(
                       border: Border.all(color: Warna.garisKontrol),
                       borderRadius: BorderRadius.circular(14),
                     ),
+                    // Row: tombol kurang, angka, tombol tambah
                     child: Row(
                       children: [
+                        // IconButton: kurangi porsi
                         IconButton(
                           tooltip: 'Kurangi porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah > 1
                               ? () => aturJumlah(jumlah - 1)
                               : null,
+                          // icon minus
                           icon: const Icon(Icons.remove),
                         ),
+                        // SizedBox: lebar kolom angka porsi
                         SizedBox(
                           width: 32,
                           // TextField: jumlah porsi, keyboard angka
@@ -475,22 +555,28 @@ class _DetailPaketState extends State<DetailPaket> {
                             },
                           ),
                         ),
+                        // IconButton: tambah porsi
                         IconButton(
                           tooltip: 'Tambah porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah < sisa
                               ? () => aturJumlah(jumlah + 1)
                               : null,
+                          // icon plus
                           icon: const Icon(Icons.add),
                         ),
                       ],
                     ),
                   ),
+                  // jarak
                   const SizedBox(width: 12),
                 ],
+                // Expanded: tombol tambah ngisi sisa lebar
                 Expanded(
+                  // tinggi tombol
                   child: SizedBox(
                     height: 52,
+                    // FilledButton: tombol masuk keranjang, mati kalau habis
                     child: FilledButton(
                       onPressed: habis ? null : tambahKeKeranjang,
                       style: FilledButton.styleFrom(
@@ -502,6 +588,7 @@ class _DetailPaketState extends State<DetailPaket> {
                       ),
                       // FittedBox: tulisannya ngecil dikit kalau ga muat, biar ga turun baris
                       child: FittedBox(
+                        // tulisan tombol
                         child: Text(
                           habis
                               ? 'Porsi habis'

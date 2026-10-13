@@ -14,8 +14,10 @@ class KartuPaketBesar extends StatelessWidget {
   Widget build(BuildContext context) {
     final int sisa = paket['sisaPorsi'];
 
+    // GestureDetector: kartu bisa dipencet buat buka detail
     return GestureDetector(
       onTap: onTap,
+      // Container: kotak putih kartu
       child: Container(
         decoration: BoxDecoration(
           color: Warna.kartu,
@@ -28,16 +30,20 @@ class KartuPaketBesar extends StatelessWidget {
             ),
           ],
         ),
+        // Column: foto atas, info bawah
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Padding: jarak foto dari pinggir kartu
             Padding(
               padding: const EdgeInsets.all(6),
               // Stack: foto di bawah, label diskon sama sisa porsi di atasnya
               child: Stack(
                 children: [
+                  // ClipRRect: sudut foto dibikin bulet
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
+                    // Image.asset: foto paket
                     child: Image.asset(
                       paket['foto'],
                       width: double.infinity,
@@ -49,6 +55,7 @@ class KartuPaketBesar extends StatelessWidget {
                   Positioned(
                     top: 10,
                     left: 10,
+                    // Container: label persen diskon
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -58,6 +65,7 @@ class KartuPaketBesar extends StatelessWidget {
                         color: Warna.kartu,
                         borderRadius: BorderRadius.circular(99),
                       ),
+                      // persen diskon
                       child: Text(
                         '−${persenDiskon(paket['hargaAsli'], paket['hargaDiskon'])}%',
                         style: const TextStyle(
@@ -71,6 +79,7 @@ class KartuPaketBesar extends StatelessWidget {
                   Positioned(
                     top: 10,
                     right: 10,
+                    // Container: label sisa porsi
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -80,6 +89,7 @@ class KartuPaketBesar extends StatelessWidget {
                         color: sisa <= 3 ? Warna.mendesakLembut : Warna.kartu,
                         borderRadius: BorderRadius.circular(99),
                       ),
+                      // sisa porsi / habis
                       child: Text(
                         sisa == 0 ? 'Habis' : 'Sisa $sisa',
                         style: TextStyle(
@@ -93,11 +103,14 @@ class KartuPaketBesar extends StatelessWidget {
                 ],
               ),
             ),
+            // Padding: jarak info paket
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 6, 14, 14),
+              // Column: info paket disusun ke bawah
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // mitra + jarak
                   Text(
                     '${paket['mitra']} · ${paket['jarak']}',
                     style: const TextStyle(
@@ -105,7 +118,9 @@ class KartuPaketBesar extends StatelessWidget {
                       color: Warna.teksPendukung,
                     ),
                   ),
+                  // jarak
                   const SizedBox(height: 2),
+                  // nama paket
                   Text(
                     paket['nama'],
                     style: const TextStyle(
@@ -113,9 +128,12 @@ class KartuPaketBesar extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  // jarak
                   const SizedBox(height: 8),
+                  // Row: harga, harga coret, jam tutup
                   Row(
                     children: [
+                      // harga diskon
                       Text(
                         rupiah(paket['hargaDiskon']),
                         style: const TextStyle(
@@ -123,9 +141,11 @@ class KartuPaketBesar extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
+                      // jarak
                       const SizedBox(width: 6),
                       // Expanded: harga coret ngisi tengah, jam tutup kedorong ke kanan
                       Expanded(
+                        // harga asli dicoret
                         child: Text(
                           rupiah(paket['hargaAsli']),
                           maxLines: 1,
@@ -137,12 +157,15 @@ class KartuPaketBesar extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // icon jam
                       const Icon(
                         Icons.schedule,
                         size: 15,
                         color: Warna.mendesak,
                       ),
+                      // jarak
                       const SizedBox(width: 4),
+                      // jam tutup
                       Text(
                         's/d ${jam(paket['tutup'])}',
                         style: const TextStyle(

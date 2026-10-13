@@ -22,8 +22,10 @@ class BarKeranjang extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // GestureDetector: seluruh bar bisa dipencet buat buka keranjang
     return GestureDetector(
       onTap: onTap,
+      // Container: latar ijo bar keranjang
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 8, 14, 8),
         decoration: BoxDecoration(
@@ -38,10 +40,13 @@ class BarKeranjang extends StatelessWidget {
             ),
           ],
         ),
+        // Row: foto, info, tulisan keranjang sebaris
         child: Row(
           children: [
+            // ClipRRect: sudut foto dibikin bulet
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
+              // Image.asset: foto paket pertama
               child: Image.asset(
                 foto,
                 width: 44,
@@ -49,11 +54,15 @@ class BarKeranjang extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+            // jarak
             const SizedBox(width: 12),
+            // Expanded: info ngisi sisa lebar
             Expanded(
+              // Column: jumlah porsi + total
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // jumlah porsi sama mitra
                   Text(
                     '$jumlahPorsi porsi · $mitra',
                     style: const TextStyle(
@@ -61,6 +70,7 @@ class BarKeranjang extends StatelessWidget {
                       color: Colors.white70,
                     ),
                   ),
+                  // total harga
                   Text(
                     rupiah(total),
                     style: const TextStyle(
@@ -72,6 +82,7 @@ class BarKeranjang extends StatelessWidget {
                 ],
               ),
             ),
+            // tulisan keranjang
             const Text(
               'Keranjang',
               style: TextStyle(
@@ -79,6 +90,7 @@ class BarKeranjang extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
+            // panah kanan
             const Icon(Icons.chevron_right, color: Colors.white),
           ],
         ),

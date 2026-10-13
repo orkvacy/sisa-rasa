@@ -57,8 +57,10 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
   Widget build(BuildContext context) {
     final int sisa = widget.paket['sisaPorsi'];
 
+    // Row: foto, info, pengatur porsi sebaris
     return Row(
       children: [
+        // ClipRRect: sudut foto dibikin bulet
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           // Image.asset: foto kecil paketnya
@@ -69,15 +71,20 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
             fit: BoxFit.cover,
           ),
         ),
+        // jarak
         const SizedBox(width: 12),
+        // Expanded: info ngisi sisa lebar
         Expanded(
+          // Column: nama + harga
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // nama paket
               Text(
                 widget.paket['nama'],
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
+              // harga per porsi + sisa
               Text(
                 '${rupiah(widget.paket['hargaDiskon'])} / porsi · sisa $sisa',
                 style: const TextStyle(
@@ -88,6 +95,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
             ],
           ),
         ),
+        // jarak
         const SizedBox(width: 8),
         // Container: kotak buat tombol - , angka, tombol +
         Container(
@@ -96,16 +104,20 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
             border: Border.all(color: Warna.garisKontrol),
             borderRadius: BorderRadius.circular(12),
           ),
+          // Row: tombol -, angka, tombol +
           child: Row(
             children: [
+              // IconButton: kurangi porsi
               IconButton(
                 tooltip: 'Kurangi porsi',
                 visualDensity: VisualDensity.compact,
                 onPressed: widget.jumlah > 1
                     ? () => widget.onJumlahBerubah(widget.jumlah - 1)
                     : null,
+                // icon minus
                 icon: const Icon(Icons.remove, size: 20),
               ),
+              // SizedBox: lebar kolom angka
               SizedBox(
                 width: 28,
                 // TextField: jumlah porsi, keyboardnya angka
@@ -123,12 +135,14 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
                   ),
                 ),
               ),
+              // IconButton: tambah porsi
               IconButton(
                 tooltip: 'Tambah porsi',
                 visualDensity: VisualDensity.compact,
                 onPressed: widget.jumlah < sisa
                     ? () => widget.onJumlahBerubah(widget.jumlah + 1)
                     : null,
+                // icon plus
                 icon: const Icon(Icons.add, size: 20),
               ),
             ],

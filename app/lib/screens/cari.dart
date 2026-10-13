@@ -27,18 +27,21 @@ class _CariState extends State<Cari> {
       return paket['tutup'] > jamSekarang && teks.contains(searchQuery);
     }).toList();
 
+    // Scaffold: kerangka halaman cari
     return Scaffold(
       // AppBar: bar atas, tombol back nya udah otomatis Navigator.pop
       appBar: AppBar(
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
+        // TextField: kolom ketik pencarian
         title: TextField(
           autofocus: true,
           onChanged: (value) =>
               setState(() => searchQuery = value.toLowerCase()),
           decoration: InputDecoration(
             hintText: 'Cari paket atau mitra',
+            // icon kaca pembesar
             prefixIcon: const Icon(Icons.search),
             filled: true,
             fillColor: Colors.white,
@@ -53,14 +56,18 @@ class _CariState extends State<Cari> {
             ),
           ),
         ),
+        // jarak kanan appbar
         actions: const [SizedBox(width: 16)],
       ),
+      // ListView: hasil pencarian bisa di scroll
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           if (hasil.isEmpty)
+            // jarak atas pesan kosong
             const Padding(
               padding: EdgeInsets.only(top: 48),
+              // pesan kalau ga ketemu
               child: Text(
                 'Tidak ada paket yang cocok. Coba nama paket atau nama mitra lain.',
                 textAlign: TextAlign.center,
@@ -68,7 +75,9 @@ class _CariState extends State<Cari> {
               ),
             ),
           for (final paket in hasil) ...[
+            // kartu hasil cari
             KartuPaket(paket: paket, onTap: () => widget.onBukaPaket(paket)),
+            // jarak antar kartu
             const SizedBox(height: 12),
           ],
         ],

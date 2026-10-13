@@ -7,6 +7,7 @@ import 'package:sisa_rasa/screens/halaman_utama.dart';
 import 'package:sisa_rasa/theme/warna.dart';
 
 void main() {
+  // jalanin aplikasinya, mulai dari SisaRasaApp
   runApp(const SisaRasaApp());
 }
 
@@ -21,7 +22,9 @@ class SisaRasaApp extends StatelessWidget {
       providers: [
         // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
         BlocProvider(create: (context) => PaketCubit()),
+        // cubit keranjang, isinya id paket sama jumlahnya
         BlocProvider(create: (context) => KeranjangCubit()),
+        // bloc pesanan, nyimpen daftar pesanan yg udah dibuat
         BlocProvider(create: (context) => PesananBloc()),
       ],
       // MaterialApp: akar aplikasi, ngatur judul, tema, sama halaman awal

@@ -30,6 +30,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     // Navigator.push: buka halaman detail di atas halaman ini
     Navigator.push(
       context,
+      // buka halaman detail paket
       MaterialPageRoute(builder: (context) => DetailPaket(paket: paket)),
     );
   }
@@ -40,6 +41,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     // ditungguin, kalau balikannya true berarti pindah ke tab pesanan
     final lihatPesanan = await Navigator.push<bool>(
       context,
+      // buka halaman keranjang
       MaterialPageRoute(builder: (context) => const Keranjang()),
     );
     if (lihatPesanan == true) setState(() => tabAktif = 1);
@@ -56,16 +58,20 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           IndexedStack(
             index: tabAktif,
             children: [
+              // tab 0: beranda
               Beranda(onBukaPaket: bukaDetail),
+              // tab 1: daftar pesanan
               Pesanan(
                 onBukaKode: (pesanan) => Navigator.push(
                   context,
                   MaterialPageRoute(
+                    // buka kode ambil pesanan yg dipilih
                     builder: (context) => KodeAmbil(pesanan: pesanan),
                   ),
                 ),
                 onCariPaket: () => setState(() => tabAktif = 0),
               ),
+              // tab 2: akun
               const Akun(),
             ],
           ),
@@ -93,6 +99,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                       (paketCubit.cari(id)['hargaDiskon'] as int) *
                       keranjang[id]!;
                 }
+                // bar keranjang ngambang di bawah
                 return BarKeranjang(
                   foto: pertama['foto'],
                   mitra: pertama['mitra'],
@@ -116,16 +123,23 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           NavigationDestination(
             // Icon: nampilin ikon bawaan material (Icons.xxx)
             icon: Icon(Icons.home_outlined),
+            // icon beranda pas dipilih
             selectedIcon: Icon(Icons.home, color: Warna.hijau),
             label: 'Beranda',
           ),
+          // tab pesanan
           NavigationDestination(
+            // icon pesanan
             icon: Icon(Icons.receipt_long_outlined),
+            // icon pesanan pas dipilih
             selectedIcon: Icon(Icons.receipt_long, color: Warna.hijau),
             label: 'Pesanan',
           ),
+          // tab akun
           NavigationDestination(
+            // icon akun
             icon: Icon(Icons.person_outline),
+            // icon akun pas dipilih
             selectedIcon: Icon(Icons.person, color: Warna.hijau),
             label: 'Akun',
           ),

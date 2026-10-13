@@ -30,14 +30,18 @@ class _PesananState extends State<Pesanan> {
     // semua pesanan di versi ini masih nunggu diambil, jadi masuknya ke aktif
     final daftar = tabAktif ? daftarPesanan : <Map<String, dynamic>>[];
 
+    // SafeArea: biar ga ketutup status bar
     return SafeArea(
+      // ListView: daftar pesanan bisa di scroll
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // judul halaman
           const Text(
             'Pesanan',
             style: TextStyle(fontSize: Teks.judul, fontWeight: FontWeight.w800),
           ),
+          // jarak
           const SizedBox(height: 16),
           // segmen aktif / selesai
           Container(
@@ -46,12 +50,16 @@ class _PesananState extends State<Pesanan> {
               color: Warna.garis,
               borderRadius: BorderRadius.circular(14),
             ),
+            // Row: dua tombol segmen sebelahan
             child: Row(
               children: [
                 for (final aktif in [true, false])
+                  // Expanded: lebar segmen dibagi rata
                   Expanded(
+                    // GestureDetector: segmen bisa dipencet
                     child: GestureDetector(
                       onTap: () => setState(() => tabAktif = aktif),
+                      // Container: bentuk segmen, warnanya ganti kalau aktif
                       child: Container(
                         height: 40,
                         alignment: Alignment.center,
@@ -61,6 +69,7 @@ class _PesananState extends State<Pesanan> {
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        // nama segmen
                         child: Text(
                           aktif ? 'Aktif · ${daftarPesanan.length}' : 'Selesai',
                           style: TextStyle(
@@ -76,20 +85,26 @@ class _PesananState extends State<Pesanan> {
               ],
             ),
           ),
+          // jarak
           const SizedBox(height: 16),
 
           // kalau belum ada pesanan
           if (daftar.isEmpty)
+            // Padding: jarak atas isi kosong
             Padding(
               padding: const EdgeInsets.only(top: 48),
+              // Column: icon, tulisan, tombol disusun ke bawah
               child: Column(
                 children: [
+                  // icon struk
                   const Icon(
                     Icons.receipt_long_outlined,
                     size: 56,
                     color: Warna.teksPendukung,
                   ),
+                  // jarak
                   const SizedBox(height: 12),
+                  // pesan kalau belum ada pesanan
                   Text(
                     tabAktif
                         ? 'Belum ada pesanan aktif'
@@ -99,16 +114,21 @@ class _PesananState extends State<Pesanan> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  // jarak
                   const SizedBox(height: 4),
+                  // keterangan pesanan nanti muncul di sini
                   const Text(
                     'Pesanan yang kamu buat akan muncul di sini beserta kode ambilnya.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Warna.teksPendukung),
                   ),
                   if (tabAktif) ...[
+                    // jarak
                     const SizedBox(height: 16),
+                    // OutlinedButton: pindah ke beranda
                     OutlinedButton(
                       onPressed: widget.onCariPaket,
+                      // tulisan tombol
                       child: const Text('Cari paket'),
                     ),
                   ],
@@ -117,6 +137,7 @@ class _PesananState extends State<Pesanan> {
             ),
 
           for (final pesanan in daftar) ...[
+            // Container: kartu satu pesanan
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -130,13 +151,17 @@ class _PesananState extends State<Pesanan> {
                   ),
                 ],
               ),
+              // Column: isi kartu pesanan
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Row: foto + info mitra
                   Row(
                     children: [
+                      // ClipRRect: sudut foto dibikin bulet
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
+                        // Image.asset: foto paket
                         child: Image.asset(
                           pesanan['foto'],
                           width: 52,
@@ -144,11 +169,15 @@ class _PesananState extends State<Pesanan> {
                           fit: BoxFit.cover,
                         ),
                       ),
+                      // jarak
                       const SizedBox(width: 12),
+                      // Expanded: info ngisi sisa lebar
                       Expanded(
+                        // Column: nama mitra + isi pesanan
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // nama mitra
                             Text(
                               pesanan['mitra'],
                               style: const TextStyle(
@@ -156,6 +185,7 @@ class _PesananState extends State<Pesanan> {
                                 color: Warna.teksPendukung,
                               ),
                             ),
+                            // isi pesanan
                             Text(
                               '${pesanan['isi'][0]['jumlah']} × ${pesanan['isi'][0]['nama']}',
                               style: const TextStyle(
@@ -168,20 +198,24 @@ class _PesananState extends State<Pesanan> {
                       ),
                     ],
                   ),
+                  // jarak
                   const SizedBox(height: 16),
                   // langkah status: dipesan -> siap diambil -> selesai
                   Row(
                     children: [
+                      // langkah 1: dipesan
                       _LangkahStatus(
                         nama: 'Dipesan',
                         waktu: jam(pesanan['dipesan']),
                         status: 'lewat',
                       ),
+                      // langkah 2: siap diambil
                       _LangkahStatus(
                         nama: 'Siap diambil',
                         waktu: jam(pesanan['mulai']),
                         status: 'berikutnya',
                       ),
+                      // langkah 3: selesai
                       const _LangkahStatus(
                         nama: 'Selesai',
                         waktu: '—',
@@ -190,19 +224,25 @@ class _PesananState extends State<Pesanan> {
                       ),
                     ],
                   ),
+                  // jarak
                   const SizedBox(height: 14),
+                  // Container: kotak kode + total
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Warna.latar,
                       borderRadius: BorderRadius.circular(14),
                     ),
+                    // Row: kode kiri, total kanan
                     child: Row(
                       children: [
+                        // Expanded: dorong total ke kanan
                         Expanded(
+                          // Column: kode + sisa waktu
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // kode ambil
                               Text(
                                 pesanan['kode'],
                                 style: const TextStyle(
@@ -211,6 +251,7 @@ class _PesananState extends State<Pesanan> {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
+                              // sisa waktu ambil
                               Text(
                                 // kalau jam ambilnya udah mulai, yg ditampilin sisa waktu sampe tutup
                                 sudahBuka(pesanan)
@@ -225,6 +266,7 @@ class _PesananState extends State<Pesanan> {
                             ],
                           ),
                         ),
+                        // total bayar
                         Text(
                           rupiah(pesanan['total']),
                           style: const TextStyle(
@@ -235,7 +277,9 @@ class _PesananState extends State<Pesanan> {
                       ],
                     ),
                   ),
+                  // jarak
                   const SizedBox(height: 14),
+                  // SizedBox: tombol selebar kartu
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -248,7 +292,9 @@ class _PesananState extends State<Pesanan> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
+                      // icon qr
                       icon: const Icon(Icons.qr_code_2),
+                      // tulisan tombol
                       label: const Text(
                         'Tampilkan kode',
                         style: TextStyle(fontWeight: FontWeight.w700),
@@ -258,9 +304,11 @@ class _PesananState extends State<Pesanan> {
                 ],
               ),
             ),
+            // jarak antar kartu
             const SizedBox(height: 12),
           ],
           if (tabAktif && daftar.isNotEmpty)
+            // catatan pesanan selesai
             const Text(
               'Pesanan yang sudah diambil pindah ke Selesai.',
               textAlign: TextAlign.center,
@@ -292,12 +340,16 @@ class _LangkahStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Expanded: tiap langkah lebarnya sama
     return Expanded(
+      // Column: titik + nama + waktu
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Row: titik + garis ke langkah berikutnya
           Row(
             children: [
+              // Container: titik bulet langkah
               Container(
                 width: 18,
                 height: 18,
@@ -310,11 +362,14 @@ class _LangkahStatus extends StatelessWidget {
                   ),
                 ),
                 child: status == 'lewat'
+                    // icon centang kalau udah lewat
                     ? const Icon(Icons.check, size: 12, color: Colors.white)
                     : null,
               ),
               if (!terakhir)
+                // Expanded: garis ngisi sisa lebar
                 Expanded(
+                  // Container: garis penghubung
                   child: Container(
                     height: 2,
                     color: status == 'lewat' ? Warna.hijau : Warna.garis,
@@ -322,7 +377,9 @@ class _LangkahStatus extends StatelessWidget {
                 ),
             ],
           ),
+          // jarak
           const SizedBox(height: 6),
+          // nama langkah
           Text(
             nama,
             style: TextStyle(
@@ -331,6 +388,7 @@ class _LangkahStatus extends StatelessWidget {
               color: status == 'belum' ? Warna.teksPendukung : Warna.teks,
             ),
           ),
+          // waktu langkah
           Text(
             waktu,
             style: const TextStyle(

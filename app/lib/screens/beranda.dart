@@ -69,7 +69,9 @@ class _BerandaState extends State<Beranda> {
           // Row: nyusun widget ke samping (horizontal)
           Row(
             children: [
+              // icon lokasi
               const Icon(Icons.place_outlined, size: 20),
+              // jarak
               const SizedBox(width: 6),
               // Text: nampilin tulisan
               const Text(
@@ -79,18 +81,21 @@ class _BerandaState extends State<Beranda> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              // icon panah bawah
               const Icon(Icons.keyboard_arrow_down),
               // Spacer: ngisi ruang kosong, jadi tombol di kanannya kedorong ke ujung
               const Spacer(),
               // IconButton: icon cari, pindah ke halaman cari
               IconButton(
                 tooltip: 'Cari paket',
+                // icon cari
                 icon: const Icon(Icons.search),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
+                          // buka halaman cari
                           Cari(onBukaPaket: widget.onBukaPaket),
                     ),
                   );
@@ -99,11 +104,13 @@ class _BerandaState extends State<Beranda> {
               // icon favorit, halamannya belum ada
               IconButton(
                 tooltip: 'Mitra favorit',
+                // icon favorit
                 icon: const Icon(Icons.favorite_border),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     // SnackBar: pesan kecil yg muncul sebentar di bawah layar
                     const SnackBar(
+                      // isi notif
                       content: Text(
                         'Mitra favorit belum tersedia di versi ini',
                       ),
@@ -113,6 +120,7 @@ class _BerandaState extends State<Beranda> {
               ),
             ],
           ),
+          // jarak
           const SizedBox(height: 12),
           // judul ikut jam, sebelum jam 6 sore "Sore ini"
           Text(
@@ -123,7 +131,9 @@ class _BerandaState extends State<Beranda> {
               fontWeight: FontWeight.w800,
             ),
           ),
+          // jarak
           const SizedBox(height: 6),
+          // ringkasan jumlah porsi sama dapur
           Text(
             '$totalPorsi porsi dari $jumlahDapur dapur di sekitarmu, siap diambil sebelum mereka tutup.',
             style: const TextStyle(
@@ -132,16 +142,20 @@ class _BerandaState extends State<Beranda> {
               color: Warna.teksPendukung,
             ),
           ),
+          // jarak
           const SizedBox(height: 16),
 
           // SingleChildScrollView: chip kategori bisa digeser ke samping
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            // Row: chip kategori dijejer ke samping
             child: Row(
               children: [
                 for (final nama in kategori) ...[
+                  // GestureDetector: chip bisa dipencet buat ganti kategori
                   GestureDetector(
                     onTap: () => setState(() => kategoriDipilih = nama),
+                    // Container: bentuk chip nya, warnanya ganti kalau dipilih
                     child: Container(
                       height: 40,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -157,6 +171,7 @@ class _BerandaState extends State<Beranda> {
                               : Warna.garis,
                         ),
                       ),
+                      // nama kategori
                       child: Text(
                         nama,
                         style: TextStyle(
@@ -168,11 +183,13 @@ class _BerandaState extends State<Beranda> {
                       ),
                     ),
                   ),
+                  // jarak antar chip
                   const SizedBox(width: 8),
                 ],
               ],
             ),
           ),
+          // jarak
           const SizedBox(height: 20),
 
           // kalau kategori yg dipilih ga ada paketnya
@@ -183,12 +200,15 @@ class _BerandaState extends State<Beranda> {
               // Column: nyusun widget ke bawah (vertical)
               child: Column(
                 children: [
+                  // icon piring kosong
                   const Icon(
                     Icons.restaurant_outlined,
                     size: 56,
                     color: Warna.teksPendukung,
                   ),
+                  // jarak
                   const SizedBox(height: 12),
+                  // pesan kalau paketnya kosong
                   Text(
                     'Belum ada paket ${kategoriDipilih.toLowerCase()} sore ini',
                     textAlign: TextAlign.center,
@@ -197,16 +217,20 @@ class _BerandaState extends State<Beranda> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  // jarak
                   const SizedBox(height: 4),
+                  // keterangan kapan paket muncul
                   const Text(
                     'Paket biasanya muncul menjelang sore, setelah mitra menghitung sisa jualannya.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Warna.teksPendukung),
                   ),
+                  // jarak
                   const SizedBox(height: 16),
                   // OutlinedButton: tombol yg cuma ada garis pinggirnya
                   OutlinedButton(
                     onPressed: () => setState(() => kategoriDipilih = 'Semua'),
+                    // tulisan tombol
                     child: const Text('Lihat semua kategori'),
                   ),
                 ],
@@ -215,32 +239,40 @@ class _BerandaState extends State<Beranda> {
 
           // kelompok "Sekarang" pake kartu gede
           if (sekarang.isNotEmpty) ...[
+            // judul grup "Sekarang"
             _HeaderJam(
               judul: 'Sekarang',
               keterangan: 'Tutup paling cepat ${jam(sekarang.first['tutup'])}',
               sudahBuka: true,
             ),
             for (final paket in sekarang) ...[
+              // kartu paket versi besar
               KartuPaketBesar(
                 paket: paket,
                 onTap: () => widget.onBukaPaket(paket),
               ),
+              // jarak antar kartu
               const SizedBox(height: 12),
             ],
+            // jarak
             const SizedBox(height: 8),
           ],
 
           // kelompok per jam pake kartu kecil
           for (final jamMulai in urutanJam) ...[
+            // judul grup per jam buka
             _HeaderJam(
               judul: jam(jamMulai),
               keterangan:
                   'Buka ${sisaWaktu(nanti[jamMulai]!.first['mulai'])} lagi',
             ),
             for (final paket in nanti[jamMulai]!) ...[
+              // kartu paket versi kecil
               KartuPaket(paket: paket, onTap: () => widget.onBukaPaket(paket)),
+              // jarak antar kartu
               const SizedBox(height: 12),
             ],
+            // jarak
             const SizedBox(height: 8),
           ],
         ],
@@ -263,10 +295,13 @@ class _HeaderJam extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Padding: kasih jarak bawah judul grup
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
+      // Row: judul, titik, keterangan sebaris
       child: Row(
         children: [
+          // judul grup jam
           Text(
             judul,
             style: const TextStyle(
@@ -276,7 +311,9 @@ class _HeaderJam extends StatelessWidget {
           ),
           // titik ijo tanda udah buka
           if (sudahBuka) ...[
+            // jarak
             const SizedBox(width: 8),
+            // Container: titik bulet kecil
             Container(
               width: 8,
               height: 8,
@@ -286,9 +323,11 @@ class _HeaderJam extends StatelessWidget {
               ),
             ),
           ],
+          // jarak
           const SizedBox(width: 12),
           // Expanded biar keterangannya turun baris kalau layarnya sempit
           Expanded(
+            // keterangan grup
             child: Text(
               keterangan,
               textAlign: TextAlign.right,

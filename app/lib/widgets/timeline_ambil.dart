@@ -22,21 +22,28 @@ class TimelineAmbil extends StatelessWidget {
         ? [paket['mulai'], jamSekarang, paket['tutup']]
         : [jamSekarang, paket['mulai'], paket['tutup']];
 
+    // Column: garis timeline atas, label bawah
     return Column(
       children: [
+        // Row: titik sama garis timeline
         Row(
           children: [
+            // titik pertama (jam buka / sekarang)
             _Titik(jenis: buka ? 'penuh' : 'sekarang'),
+            // Expanded: garis dari titik pertama ke kedua
             Expanded(
               child: buka
+                  // kalau udah buka garisnya ijo full
                   ? Container(height: 4, color: Warna.hijau)
                   // LayoutBuilder: ngitung muat berapa titik kecil buat garis putus2
                   : LayoutBuilder(
                       builder: (context, ukuran) {
+                        // Row: titik2 kecil dibagi rata
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             for (var i = 0; i < ukuran.maxWidth ~/ 6; i++)
+                              // Container: satu titik kecil
                               Container(
                                 width: 2,
                                 height: 2,
@@ -47,16 +54,23 @@ class TimelineAmbil extends StatelessWidget {
                       },
                     ),
             ),
+            // titik kedua
             _Titik(jenis: buka ? 'sekarang' : 'cincin'),
+            // garis ijo ke titik tutup
             Expanded(child: Container(height: 4, color: Warna.hijau)),
+            // titik jam tutup
             const _Titik(jenis: 'penuh'),
           ],
         ),
+        // jarak
         const SizedBox(height: 6),
+        // Row: label tiap titik
         Row(
           children: [
             for (var i = 0; i < 3; i++)
+              // Expanded: tiap label lebarnya sama
               Expanded(
+                // Column: nama label + jam
                 child: Column(
                   crossAxisAlignment: i == 0
                       ? CrossAxisAlignment.start
@@ -64,6 +78,7 @@ class TimelineAmbil extends StatelessWidget {
                       ? CrossAxisAlignment.center
                       : CrossAxisAlignment.end,
                   children: [
+                    // nama label
                     Text(
                       label[i],
                       style: const TextStyle(
@@ -71,6 +86,7 @@ class TimelineAmbil extends StatelessWidget {
                         color: Warna.teksPendukung,
                       ),
                     ),
+                    // jam nya
                     Text(
                       jam(waktu[i]),
                       style: const TextStyle(
@@ -96,6 +112,7 @@ class _Titik extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Container: titik bulet, ukurannya beda tiap jenis
     return Container(
       width: jenis == 'sekarang' ? 12 : 16,
       height: jenis == 'sekarang' ? 12 : 16,

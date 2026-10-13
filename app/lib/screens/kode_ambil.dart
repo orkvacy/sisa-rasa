@@ -18,11 +18,15 @@ class KodeAmbil extends StatelessWidget {
   Widget build(BuildContext context) {
     final List isi = pesanan['isi'];
 
+    // Scaffold: kerangka halaman kode ambil, latarnya ijo
     return Scaffold(
       backgroundColor: Warna.momen,
+      // SafeArea: biar ga ketutup status bar
       body: SafeArea(
+        // SingleChildScrollView: bisa di scroll kalau hp nya pendek
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+          // Column: isi halaman disusun ke bawah
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -32,6 +36,7 @@ class KodeAmbil extends StatelessWidget {
                 // Navigator.pop ngirim false, berarti ga pindah tab
                 child: TextButton(
                   onPressed: () => Navigator.pop(context, false),
+                  // tulisan selesai
                   child: const Text(
                     'Selesai',
                     style: TextStyle(
@@ -42,11 +47,16 @@ class KodeAmbil extends StatelessWidget {
                   ),
                 ),
               ),
+              // Row: icon centang + judul
               Row(
                 children: [
+                  // icon centang
                   const Icon(Icons.check_circle, color: Colors.white, size: 30),
+                  // jarak
                   const SizedBox(width: 10),
+                  // Expanded biar judulnya ga overflow
                   Expanded(
+                    // judul, beda kalau pesanan baru
                     child: Text(
                       pesananBaru ? 'Pesanan dibuat' : 'Kode ambil',
                       style: const TextStyle(
@@ -58,7 +68,9 @@ class KodeAmbil extends StatelessWidget {
                   ),
                 ],
               ),
+              // jarak
               const SizedBox(height: 8),
+              // petunjuk tunjukin kode ke kasir
               Text(
                 'Tunjukkan kode ini di kasir ${pesanan['mitra']} saat jam ambil. Bayar di tempat.',
                 style: const TextStyle(
@@ -67,11 +79,13 @@ class KodeAmbil extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
+              // jarak
               const SizedBox(height: 20),
 
               // Stack: tiket putih di belakang, 2 lingkaran ijo di pinggir biar keliatan kayak sobekan
               Stack(
                 children: [
+                  // Container: tiket putih
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -85,10 +99,13 @@ class KodeAmbil extends StatelessWidget {
                         ),
                       ],
                     ),
+                    // Column: bagian qr, garis sobekan, rincian
                     child: Column(
                       children: [
+                        // SizedBox: tinggi bagian atas tiket, dipake buat posisi bolong
                         SizedBox(
                           height: tinggiAtas,
+                          // Column: qr + kode di tengah
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -98,7 +115,9 @@ class KodeAmbil extends StatelessWidget {
                                 size: 150,
                                 backgroundColor: Colors.white,
                               ),
+                              // jarak
                               const SizedBox(height: 8),
+                              // kode ambil
                               Text(
                                 pesanan['kode'],
                                 style: const TextStyle(
@@ -108,6 +127,7 @@ class KodeAmbil extends StatelessWidget {
                                   letterSpacing: 3,
                                 ),
                               ),
+                              // keterangan kode
                               const Text(
                                 'Atau sebutkan kode ini ke kasir',
                                 style: TextStyle(
@@ -121,10 +141,13 @@ class KodeAmbil extends StatelessWidget {
                         // garis putus2 tempat sobekan
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
+                          // Row: titik2 garis sobekan
                           child: Row(
                             children: [
                               for (var i = 0; i < 30; i++)
+                                // Expanded: tiap potongan garis lebarnya sama
                                 Expanded(
+                                  // Container: satu potongan garis
                                   child: Container(
                                     height: 1.5,
                                     color: i.isEven
@@ -135,19 +158,24 @@ class KodeAmbil extends StatelessWidget {
                             ],
                           ),
                         ),
+                        // Padding: jarak rincian pesanan
                         Padding(
                           padding: const EdgeInsets.all(20),
+                          // Column: baris2 rincian
                           child: Column(
                             children: [
+                              // baris rincian mitra
                               _BarisRincian(
                                 label: 'Mitra',
                                 nilai: pesanan['mitra'],
                               ),
+                              // baris rincian jam ambil
                               _BarisRincian(
                                 label: 'Ambil',
                                 nilai:
                                     'Hari ini, ${jam(pesanan['mulai'])}–${jam(pesanan['tutup'])}',
                               ),
+                              // baris rincian isi pesanan
                               _BarisRincian(
                                 label: 'Isi',
                                 nilai: isi
@@ -157,10 +185,14 @@ class KodeAmbil extends StatelessWidget {
                                     )
                                     .join('\n'),
                               ),
+                              // jarak
                               const SizedBox(height: 4),
+                              // Row: total bayar
                               Row(
                                 children: [
+                                  // Expanded: dorong total ke kanan
                                   const Expanded(
+                                    // label bayar
                                     child: Text(
                                       'Bayar di tempat',
                                       style: TextStyle(
@@ -168,6 +200,7 @@ class KodeAmbil extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  // total bayar
                                   Text(
                                     rupiah(pesanan['total']),
                                     style: const TextStyle(
@@ -187,6 +220,7 @@ class KodeAmbil extends StatelessWidget {
                   const Positioned(
                     left: -12,
                     top: tinggiAtas - 11,
+                    // CircleAvatar: bulet warna latar, keliatan kayak bolong
                     child: CircleAvatar(
                       radius: 12,
                       backgroundColor: Warna.momen,
@@ -196,6 +230,7 @@ class KodeAmbil extends StatelessWidget {
                   const Positioned(
                     right: -12,
                     top: tinggiAtas - 11,
+                    // bulet bolong kanan
                     child: CircleAvatar(
                       radius: 12,
                       backgroundColor: Warna.momen,
@@ -203,13 +238,19 @@ class KodeAmbil extends StatelessWidget {
                   ),
                 ],
               ),
+              // jarak
               const SizedBox(height: 16),
+              // Row: icon daun + info porsi
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // icon daun
                   const Icon(Icons.eco_outlined, color: Colors.white),
+                  // jarak
                   const SizedBox(width: 10),
+                  // Expanded biar tulisannya turun baris
                   Expanded(
+                    // info porsi ke berapa yg diselamatin
                     child: Text(
                       'Porsi ke-${1283 + (pesanan['porsi'] as int)} yang diselamatkan di Samarinda bulan ini.',
                       style: const TextStyle(color: Colors.white70),
@@ -217,7 +258,9 @@ class KodeAmbil extends StatelessWidget {
                   ),
                 ],
               ),
+              // jarak
               const SizedBox(height: 20),
+              // SizedBox: tombol selebar layar
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -231,6 +274,7 @@ class KodeAmbil extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+                  // tulisan tombol
                   child: const Text(
                     'Lihat pesanan saya',
                     style: TextStyle(
@@ -257,19 +301,25 @@ class _BarisRincian extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Padding: jarak antar baris rincian
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
+      // Row: label kiri, nilai kanan
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // SizedBox: lebar kolom label
           SizedBox(
             width: 72,
+            // label rincian
             child: Text(
               label,
               style: const TextStyle(color: Warna.teksPendukung),
             ),
           ),
+          // Expanded: nilai ngisi sisa lebar
           Expanded(
+            // nilai rincian
             child: Text(
               nilai,
               textAlign: TextAlign.right,
