@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sisa_rasa/bloc/pesanan_bloc.dart';
-import 'package:sisa_rasa/bloc/pesanan_event.dart';
-import 'package:sisa_rasa/data/dummy_deals.dart';
-import 'package:sisa_rasa/data/pembayaran.dart';
-import 'package:sisa_rasa/data/status_pesanan.dart';
+import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
+import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
+import 'package:sisa_rasa/data/sumber/dummy_deals.dart';
+import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
+import 'package:sisa_rasa/data/repositories/pembayaran_tiruan.dart';
+import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
 
 /// nunggu sampe state bloc memenuhi [cek]
 Future<void> tunggu(
@@ -34,6 +35,7 @@ void main() {
     bloc.add(
       PesananDibuat(
         idAkun: 'u1',
+        namaPembeli: 'Rani Amelia',
         keranjang: {'p1': jumlah},
         daftarPaket: dummyDeals,
         metode: MetodeBayar.qris,

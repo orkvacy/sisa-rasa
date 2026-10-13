@@ -210,6 +210,31 @@ app/       aplikasi Flutter
 backend/   server Go
 ```
 
+Isi `app/lib` mengikuti Clean Architecture. Arah ketergantungannya cuma satu:
+`presentation` → `domain` ← `data`.
+
+```
+lib/
+  main.dart         titik masuk aplikasi
+  injection.dart    GetIt, satu-satunya tempat milih implementasi (tiruan / API)
+  core/             tema dan format angka/tanggal, dipakai semua lapisan
+  domain/
+    aturan/         aturan bisnis: biaya layanan, komisi, status pesanan, batas OTP
+    repositories/   kontrak layanan (abstract), mis. LayananPaket, LayananAkun
+  data/
+    sumber/         data contoh (dummy) selama backend belum ada
+    repositories/   implementasi kontrak: *Tiruan / *Lokal, nanti *Api
+  presentation/
+    bloc/ cubit/    state management
+    screens/        layar
+    widgets/        komponen yang dipakai beberapa layar
+    router.dart     semua rute GoRouter
+```
+
+Pas backend Go jadi, cukup bikin implementasi baru di `data/repositories/`
+lalu ganti barisnya di `injection.dart`. Berkas di `presentation/` tidak perlu
+diubah. Aturan ini dijaga `test/arsitektur_test.dart`.
+
 ## Dokumentasi
 
 - [PRD](docs/PRD.md) - latar belakang produk dan alasan perancangannya

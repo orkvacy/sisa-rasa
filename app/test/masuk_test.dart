@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sisa_rasa/cubit/akun_cubit.dart';
-import 'package:sisa_rasa/data/dummy_akun.dart';
-import 'package:sisa_rasa/data/layanan_akun.dart';
+import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/data/sumber/dummy_akun.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
+import 'package:sisa_rasa/injection.dart';
 import 'package:sisa_rasa/main.dart';
+import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 
 void main() {
-  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+  setUp(() async {
+    FlutterSecureStorage.setMockInitialValues({});
+    await sl.reset();
+    daftarkanDependensi();
+  });
 
   Future<void> buka(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));

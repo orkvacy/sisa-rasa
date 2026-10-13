@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sisa_rasa/cubit/percakapan_cubit.dart';
-import 'package:sisa_rasa/data/layanan_percakapan.dart';
-import 'package:sisa_rasa/data/status_pesanan.dart';
+import 'package:sisa_rasa/data/repositories/percakapan_tiruan.dart';
+import 'package:sisa_rasa/presentation/cubit/percakapan_cubit.dart';
+import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
+import 'package:sisa_rasa/domain/aturan/percakapan.dart';
 
 /// server tiruan yg bisa disuruh gagal, buat nguji kirim ulang (NF-18)
 class _ServerRewel extends PercakapanTiruan {
