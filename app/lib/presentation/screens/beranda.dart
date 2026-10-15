@@ -30,13 +30,267 @@ class _BerandaState extends State<Beranda> {
     'Minuman',
   ];
   String kategoriDipilih = 'Semua';
+  String areaDipilih = 'Samarinda Ulu';
+  String urutanDipilih = 'Jam tutup terdekat';
+  bool filterHalal = false;
+  bool filterMejaBerbagi = false;
+  final Set<String> mitraFavorit = {};
 
-  void _segeraHadir(String fitur) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('$fitur belum tersedia di versi ini')),
-      );
+  void _pilihArea(BuildContext context) {
+    const daftarArea = [
+      'Samarinda Ulu',
+      'Samarinda Kota',
+      'Sungai Kunjang',
+      'Samarinda Seberang',
+      'Sungai Pinang',
+      'Palaran',
+      'Sambutan',
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Warna.kartu,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Pilih Area Pengambilan',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Warna.teks,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Daftar mitra dan jarak akan disesuaikan dengan area yang kamu pilih.',
+                style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
+              ),
+              const SizedBox(height: 12),
+              for (final area in daftarArea)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    area,
+                    style: TextStyle(
+                      fontWeight: area == areaDipilih
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: area == areaDipilih ? Warna.hijau : Warna.teks,
+                    ),
+                  ),
+                  trailing: area == areaDipilih
+                      ? const Icon(Icons.check, color: Warna.hijau)
+                      : null,
+                  onTap: () {
+                    setState(() => areaDipilih = area);
+                    Navigator.pop(sheetContext);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _urutkanDanSaring(BuildContext context) {
+    var tempUrutan = urutanDipilih;
+    var tempHalal = filterHalal;
+    var tempMejaBerbagi = filterMejaBerbagi;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Warna.kartu,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setModalState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Urutkan & Saring',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Urutkan berdasarkan',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final opsi in [
+                      'Jam tutup terdekat',
+                      'Harga termurah',
+                    ])
+                      ChoiceChip(
+                        label: Text(opsi),
+                        selected: tempUrutan == opsi,
+                        onSelected: (val) {
+                          if (val) setModalState(() => tempUrutan = opsi);
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Saring paket',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Hanya yang berlabel Halal'),
+                  subtitle: const Text('Tampilkan paket dengan konfirmasi halal mitra'),
+                  value: tempHalal,
+                  onChanged: (val) => setModalState(() => tempHalal = val),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Meja Berbagi (Donasi)'),
+                  subtitle: const Text('Paket yang ikut program donasi sisa makanan'),
+                  value: tempMejaBerbagi,
+                  onChanged: (val) => setModalState(() => tempMejaBerbagi = val),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      urutanDipilih = tempUrutan;
+                      filterHalal = tempHalal;
+                      filterMejaBerbagi = tempMejaBerbagi;
+                    });
+                    Navigator.pop(sheetContext);
+                  },
+                  child: const Text('Terapkan'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _bukaFavorit(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Warna.kartu,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.favorite, color: Warna.merah),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Mitra Favorit',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Warna.teks,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${mitraFavorit.length} tersimpan',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Warna.teksPendukung,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (mitraFavorit.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 40,
+                          color: Warna.teksPendukung,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'Belum ada mitra favorit',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Warna.teks,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Simpan mitra langgananmu untuk akses cepat.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Warna.teksPendukung,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                for (final nama in mitraFavorit)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: Warna.softGreen,
+                      child: Icon(Icons.storefront, color: Warna.hijau),
+                    ),
+                    title: Text(
+                      nama,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      onPressed: () {
+                        setState(() => mitraFavorit.remove(nama));
+                        Navigator.pop(sheetContext);
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      widget.onBukaMitra(nama);
+                    },
+                  ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -45,15 +299,26 @@ class _BerandaState extends State<Beranda> {
     final daftarPaket = context.watch<PaketCubit>().state;
 
     // paket yg masih bisa dipesan: belum lewat jam tutup, masih ada porsinya (F-25),
-    // terus disaring sesuai chip kategori (F-03)
+    // terus disaring sesuai chip kategori (F-03), halal, dan meja berbagi
     final tampil = daftarPaket.where((paket) {
+      final cocokKategori =
+          kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih;
+      final cocokHalal = !filterHalal || paket['halal'] == true;
+      final cocokMejaBerbagi =
+          !filterMejaBerbagi || paket['mejaBerbagi'] == true;
       return PaketCubit.tampilUntukPembeli(paket) &&
           (paket['sisaPorsi'] as int) > 0 &&
-          (kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih);
+          cocokKategori &&
+          cocokHalal &&
+          cocokMejaBerbagi;
     }).toList();
 
-    final semuaMitra = _kelompokkanMitra(tampil)
-      ..sort((a, b) => a.tutup.compareTo(b.tutup));
+    final semuaMitra = _kelompokkanMitra(tampil);
+    if (urutanDipilih == 'Harga termurah') {
+      semuaMitra.sort((a, b) => a.hargaTermurah.compareTo(b.hargaTermurah));
+    } else {
+      semuaMitra.sort((a, b) => a.tutup.compareTo(b.tutup));
+    }
     // F-53: tutup kurang dari 1 jam lagi masuk Flash sale, ga diulang di bawah
     final flashSale = [
       for (final mitra in semuaMitra)
@@ -82,26 +347,26 @@ class _BerandaState extends State<Beranda> {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => _segeraHadir('Pilih area'),
+                  onTap: () => _pilihArea(context),
                   borderRadius: BorderRadius.circular(12),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.place_outlined, size: 20, color: Warna.teks),
-                        SizedBox(width: 6),
+                        const Icon(Icons.place_outlined, size: 20, color: Warna.teks),
+                        const SizedBox(width: 6),
                         Text(
-                          'Samarinda Ulu',
-                          style: TextStyle(
+                          areaDipilih,
+                          style: const TextStyle(
                             fontSize: 16,
                             height: 22 / 16,
                             fontWeight: FontWeight.w700,
                             color: Warna.teks,
                           ),
                         ),
-                        SizedBox(width: 6),
-                        Icon(
+                        const SizedBox(width: 6),
+                        const Icon(
                           Icons.keyboard_arrow_down,
                           size: 18,
                           color: Warna.teks,
@@ -113,8 +378,11 @@ class _BerandaState extends State<Beranda> {
                 const Spacer(),
                 IconButton(
                   tooltip: 'Mitra favorit',
-                  icon: const Icon(Icons.favorite_border, color: Warna.teks),
-                  onPressed: () => _segeraHadir('Mitra favorit'),
+                  icon: Icon(
+                    mitraFavorit.isNotEmpty ? Icons.favorite : Icons.favorite_border,
+                    color: mitraFavorit.isNotEmpty ? Warna.merah : Warna.teks,
+                  ),
+                  onPressed: () => _bukaFavorit(context),
                 ),
               ],
             ),
@@ -169,7 +437,7 @@ class _BerandaState extends State<Beranda> {
                   height: 48,
                   child: IconButton(
                     tooltip: 'Urutkan dan saring',
-                    onPressed: () => _segeraHadir('Urutkan dan saring'),
+                    onPressed: () => _urutkanDanSaring(context),
                     icon: const Icon(Icons.tune, size: 22, color: Warna.teks),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white,

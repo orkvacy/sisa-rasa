@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
-import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/kartu_paket.dart';
 
 /// halaman cari, dibuka dari icon cari di beranda
@@ -24,7 +23,9 @@ class _CariState extends State<Cari> {
     final daftarPaket = context.watch<PaketCubit>().state;
     final hasil = daftarPaket.where((paket) {
       final teks = '${paket['nama']} ${paket['mitra']}'.toLowerCase();
-      return paket['tutup'] > jamSekarang && teks.contains(searchQuery);
+      return PaketCubit.tampilUntukPembeli(paket) &&
+          (paket['sisaPorsi'] as int) > 0 &&
+          teks.contains(searchQuery);
     }).toList();
 
     return Scaffold(

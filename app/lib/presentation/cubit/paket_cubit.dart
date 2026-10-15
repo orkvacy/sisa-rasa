@@ -17,7 +17,10 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   Map<String, dynamic> cari(String id) {
-    return state.firstWhere((paket) => paket['id'] == id);
+    return state.firstWhere(
+      (paket) => paket['id'] == id,
+      orElse: () => const <String, dynamic>{},
+    );
   }
 
   // dipanggil pas pesanan dibuat, sisa porsi dikurangin sesuai isi keranjang

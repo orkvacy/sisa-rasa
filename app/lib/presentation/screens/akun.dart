@@ -74,7 +74,7 @@ class Akun extends StatelessWidget {
             // ListTile: baris siap pakai, ada leading (kiri), title, subtitle, trailing (kanan)
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
-              onTap: () => _BarisMenu.segeraHadir(context, 'Profil'),
+              onTap: () => _ubahProfil(context, akun['nama']!),
               // CircleAvatar: lingkaran isi inisial nama, gantiin foto profil
               leading: CircleAvatar(
                 radius: 28,
@@ -218,15 +218,19 @@ class Akun extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
-            child: const Column(
+            child: Column(
               children: [
-                _BarisMenu(ikon: Icons.person_outline, judul: 'Profil'),
                 _BarisMenu(
+                  ikon: Icons.person_outline,
+                  judul: 'Profil',
+                  onTap: () => _ubahProfil(context, akun['nama']!),
+                ),
+                const _BarisMenu(
                   ikon: Icons.mail_outline,
                   judul: 'Email',
                   nilai: 'Terverifikasi',
                 ),
-                _BarisMenu(ikon: Icons.lock_outline, judul: 'Kata sandi'),
+                const _BarisMenu(ikon: Icons.lock_outline, judul: 'Kata sandi'),
               ],
             ),
           ),
@@ -246,14 +250,15 @@ class Akun extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
-            child: const Column(
+            child: Column(
               children: [
                 _BarisMenu(
                   ikon: Icons.dark_mode_outlined,
                   judul: 'Tampilan',
                   nilai: 'Ikuti sistem',
+                  onTap: () => _pilihTampilan(context),
                 ),
-                _BarisMenu(
+                const _BarisMenu(
                   ikon: Icons.favorite_border,
                   judul: 'Mitra favorit',
                   nilai: '3',
@@ -290,11 +295,155 @@ class Akun extends StatelessWidget {
                   judul: 'Keluar',
                   onTap: () => _keluar(context),
                 ),
+                _BarisMenu(
+                  ikon: Icons.delete_outline,
+                  judul: 'Hapus akun',
+                  warnaIkon: Warna.merah,
+                  onTap: () => _hapusAkun(context),
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+Future<void> _ubahProfil(BuildContext context, String namaSekarang) async {
+  final controller = TextEditingController(text: namaSekarang);
+  final formKey = GlobalKey<FormState>();
+
+  final simpan = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Ubah Nama Profil'),
+      content: Form(
+        key: formKey,
+        child: TextFormField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Nama Lengkap',
+            hintText: 'Masukkan nama baru',
+          ),
+          validator: (v) =>
+              (v == null || v.trim().isEmpty) ? 'Nama tidak boleh kosong' : null,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (formKey.currentState?.validate() == true) {
+              Navigator.pop(dialogContext, true);
+            }
+          },
+          child: const Text('Simpan'),
+        ),
+      ],
+    ),
+  );
+
+  if (simpan == true && context.mounted) {
+    context.read<AkunCubit>().ubahNama(controller.text);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Nama profil berhasil diperbarui')),
+    );
+  }
+}
+
+Future<void> _pilihTampilan(BuildContext context) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Warna.kartu,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Pilih Tema Tampilan',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Warna.teks,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.brightness_auto, color: Warna.teks),
+              title: const Text('Ikuti sistem'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Tema diatur mengikuti sistem')),
+                );
+              },
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.light_mode_outlined, color: Warna.teks),
+              title: const Text('Mode terang'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mode terang aktif')),
+                );
+              },
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.dark_mode_outlined, color: Warna.teks),
+              title: const Text('Mode gelap'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mode gelap aktif')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> _hapusAkun(BuildContext context) async {
+  final yakin = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Hapus Akun Permanen?'),
+      content: const Text(
+        'Seluruh data profilmu akan dihapus. Riwayat transaksi yang wajib disimpan akan dianonimkan (F-62). Tindakan ini tidak dapat dibatalkan.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          style: TextButton.styleFrom(foregroundColor: Warna.merah),
+          child: const Text('Hapus Akun'),
+        ),
+      ],
+    ),
+  );
+  if (yakin != true || !context.mounted) return;
+  context.read<KeranjangCubit>().kosongkan();
+  await context.read<AkunCubit>().keluar();
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Akun berhasil dihapus.')),
     );
   }
 }
@@ -446,12 +595,14 @@ class _BarisMenu extends StatelessWidget {
     required this.ikon,
     required this.judul,
     this.nilai,
+    this.warnaIkon,
     this.onTap,
   });
 
   final IconData ikon;
   final String judul;
   final String? nilai;
+  final Color? warnaIkon;
 
   /// kosong = halamannya belum ada, cuma munculin snackbar
   final VoidCallback? onTap;
@@ -465,7 +616,7 @@ class _BarisMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(ikon, color: Warna.teks),
+      leading: Icon(ikon, color: warnaIkon ?? Warna.teks),
       title: Text(judul),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
