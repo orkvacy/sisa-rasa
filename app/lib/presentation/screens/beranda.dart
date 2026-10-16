@@ -30,73 +30,13 @@ class _BerandaState extends State<Beranda> {
     'Minuman',
   ];
   String kategoriDipilih = 'Semua';
-  String areaDipilih = 'Samarinda Ulu';
   String urutanDipilih = 'Jam tutup terdekat';
   bool filterHalal = false;
   bool filterMejaBerbagi = false;
-  final Set<String> mitraFavorit = {};
 
-  void _pilihArea(BuildContext context) {
-    const daftarArea = [
-      'Samarinda Ulu',
-      'Samarinda Kota',
-      'Sungai Kunjang',
-      'Samarinda Seberang',
-      'Sungai Pinang',
-      'Palaran',
-      'Sambutan',
-    ];
-
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Warna.kartu,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Pilih Area Pengambilan',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Warna.teks,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Daftar mitra dan jarak akan disesuaikan dengan area yang kamu pilih.',
-                style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
-              ),
-              const SizedBox(height: 12),
-              for (final area in daftarArea)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    area,
-                    style: TextStyle(
-                      fontWeight: area == areaDipilih
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: area == areaDipilih ? Warna.hijau : Warna.teks,
-                    ),
-                  ),
-                  trailing: area == areaDipilih
-                      ? const Icon(Icons.check, color: Warna.hijau)
-                      : null,
-                  onTap: () {
-                    setState(() => areaDipilih = area);
-                    Navigator.pop(sheetContext);
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void _segeraHadir(String fitur) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Fitur $fitur segera hadir.')));
   }
 
   void _urutkanDanSaring(BuildContext context) {
@@ -139,10 +79,7 @@ class _BerandaState extends State<Beranda> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final opsi in [
-                      'Jam tutup terdekat',
-                      'Harga termurah',
-                    ])
+                    for (final opsi in ['Jam tutup terdekat', 'Harga termurah'])
                       ChoiceChip(
                         label: Text(opsi),
                         selected: tempUrutan == opsi,
@@ -165,16 +102,21 @@ class _BerandaState extends State<Beranda> {
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Hanya yang berlabel Halal'),
-                  subtitle: const Text('Tampilkan paket dengan konfirmasi halal mitra'),
+                  subtitle: const Text(
+                    'Tampilkan paket dengan konfirmasi halal mitra',
+                  ),
                   value: tempHalal,
                   onChanged: (val) => setModalState(() => tempHalal = val),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Meja Berbagi (Donasi)'),
-                  subtitle: const Text('Paket yang ikut program donasi sisa makanan'),
+                  subtitle: const Text(
+                    'Paket yang ikut program donasi sisa makanan',
+                  ),
                   value: tempMejaBerbagi,
-                  onChanged: (val) => setModalState(() => tempMejaBerbagi = val),
+                  onChanged: (val) =>
+                      setModalState(() => tempMejaBerbagi = val),
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
@@ -190,103 +132,6 @@ class _BerandaState extends State<Beranda> {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _bukaFavorit(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Warna.kartu,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.favorite, color: Warna.merah),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Mitra Favorit',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Warna.teks,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${mitraFavorit.length} tersimpan',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Warna.teksPendukung,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (mitraFavorit.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 40,
-                          color: Warna.teksPendukung,
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          'Belum ada mitra favorit',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Warna.teks,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Simpan mitra langgananmu untuk akses cepat.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Warna.teksPendukung,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                for (final nama in mitraFavorit)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: Warna.softGreen,
-                      child: Icon(Icons.storefront, color: Warna.hijau),
-                    ),
-                    title: Text(
-                      nama,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 20),
-                      onPressed: () {
-                        setState(() => mitraFavorit.remove(nama));
-                        Navigator.pop(sheetContext);
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      widget.onBukaMitra(nama);
-                    },
-                  ),
-            ],
           ),
         ),
       ),
@@ -347,26 +192,26 @@ class _BerandaState extends State<Beranda> {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () => _pilihArea(context),
+                  onTap: () => _segeraHadir('Pilih area'),
                   borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.place_outlined, size: 20, color: Warna.teks),
-                        const SizedBox(width: 6),
+                        Icon(Icons.place_outlined, size: 20, color: Warna.teks),
+                        SizedBox(width: 6),
                         Text(
-                          areaDipilih,
-                          style: const TextStyle(
+                          'Samarinda Ulu',
+                          style: TextStyle(
                             fontSize: 16,
                             height: 22 / 16,
                             fontWeight: FontWeight.w700,
                             color: Warna.teks,
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(
+                        SizedBox(width: 6),
+                        Icon(
                           Icons.keyboard_arrow_down,
                           size: 18,
                           color: Warna.teks,
@@ -378,11 +223,8 @@ class _BerandaState extends State<Beranda> {
                 const Spacer(),
                 IconButton(
                   tooltip: 'Mitra favorit',
-                  icon: Icon(
-                    mitraFavorit.isNotEmpty ? Icons.favorite : Icons.favorite_border,
-                    color: mitraFavorit.isNotEmpty ? Warna.merah : Warna.teks,
-                  ),
-                  onPressed: () => _bukaFavorit(context),
+                  icon: const Icon(Icons.favorite_border, color: Warna.teks),
+                  onPressed: () => _segeraHadir('Mitra favorit'),
                 ),
               ],
             ),

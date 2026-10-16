@@ -81,52 +81,52 @@ class SisaRasaTema {
   static const _radiusKontrol = 16.0;
 
   static ThemeData terang() => _bangun(
-        ColorScheme(
-          brightness: Brightness.light,
-          primary: const Color(0xFF1A382B), // accent/leaf
-          onPrimary: const Color(0xFFFFFFFF), // accent/on
-          primaryContainer: const Color(0xFFE2E9E3), // accent/soft
-          onPrimaryContainer: const Color(0xFF1A382B),
-          secondary: const Color(0xFF5E5A53),
-          onSecondary: const Color(0xFFFFFFFF),
-          error: const Color(0xFFB3261E), // signal/error
-          onError: const Color(0xFFFFFFFF),
-          surface: const Color(0xFFF6F3EE), // bg/ground
-          onSurface: const Color(0xFF1D1C19), // text/primary
-          onSurfaceVariant: const Color(0xFF5E5A53), // text/secondary
-          surfaceContainerLowest: const Color(0xFFFFFFFF), // bg/surface
-          inverseSurface: const Color(0xFF1D1C19), // bg/inverse
-          onInverseSurface: const Color(0xFFFFFFFF), // text/inverse
-          outline: const Color(0xFF8F887D), // line/control
-          outlineVariant: const Color(0xFFE4DED4), // line/default
-          scrim: const Color(0xFF1D1C19), // bg/scrim
-        ),
-        SisaRasaColors.terang,
-      );
+    ColorScheme(
+      brightness: Brightness.light,
+      primary: const Color(0xFF1A382B), // accent/leaf
+      onPrimary: const Color(0xFFFFFFFF), // accent/on
+      primaryContainer: const Color(0xFFE2E9E3), // accent/soft
+      onPrimaryContainer: const Color(0xFF1A382B),
+      secondary: const Color(0xFF5E5A53),
+      onSecondary: const Color(0xFFFFFFFF),
+      error: const Color(0xFFB3261E), // signal/error
+      onError: const Color(0xFFFFFFFF),
+      surface: const Color(0xFFF6F3EE), // bg/ground
+      onSurface: const Color(0xFF1D1C19), // text/primary
+      onSurfaceVariant: const Color(0xFF5E5A53), // text/secondary
+      surfaceContainerLowest: const Color(0xFFFFFFFF), // bg/surface
+      inverseSurface: const Color(0xFF1D1C19), // bg/inverse
+      onInverseSurface: const Color(0xFFFFFFFF), // text/inverse
+      outline: const Color(0xFF8F887D), // line/control
+      outlineVariant: const Color(0xFFE4DED4), // line/default
+      scrim: const Color(0xFF1D1C19), // bg/scrim
+    ),
+    SisaRasaColors.terang,
+  );
 
   static ThemeData gelap() => _bangun(
-        ColorScheme(
-          brightness: Brightness.dark,
-          primary: const Color(0xFF7FC3A0),
-          onPrimary: const Color(0xFF0F1A14),
-          primaryContainer: const Color(0xFF1E2C25),
-          onPrimaryContainer: const Color(0xFF7FC3A0),
-          secondary: const Color(0xFFB3ADA4),
-          onSecondary: const Color(0xFF171513),
-          error: const Color(0xFFF2B8B5),
-          onError: const Color(0xFF171513),
-          surface: const Color(0xFF171513),
-          onSurface: const Color(0xFFF2EFEA),
-          onSurfaceVariant: const Color(0xFFB3ADA4),
-          surfaceContainerLowest: const Color(0xFF1B211E),
-          inverseSurface: const Color(0xFFF2EFEA),
-          onInverseSurface: const Color(0xFF1B211E),
-          outline: const Color(0xFF7A746B),
-          outlineVariant: const Color(0xFF34302B),
-          scrim: const Color(0xFF000000),
-        ),
-        SisaRasaColors.gelap,
-      );
+    ColorScheme(
+      brightness: Brightness.dark,
+      primary: const Color(0xFF7FC3A0),
+      onPrimary: const Color(0xFF0F1A14),
+      primaryContainer: const Color(0xFF1E2C25),
+      onPrimaryContainer: const Color(0xFF7FC3A0),
+      secondary: const Color(0xFFB3ADA4),
+      onSecondary: const Color(0xFF171513),
+      error: const Color(0xFFF2B8B5),
+      onError: const Color(0xFF171513),
+      surface: const Color(0xFF171513),
+      onSurface: const Color(0xFFF2EFEA),
+      onSurfaceVariant: const Color(0xFFB3ADA4),
+      surfaceContainerLowest: const Color(0xFF1B211E),
+      inverseSurface: const Color(0xFFF2EFEA),
+      onInverseSurface: const Color(0xFF1B211E),
+      outline: const Color(0xFF7A746B),
+      outlineVariant: const Color(0xFF34302B),
+      scrim: const Color(0xFF000000),
+    ),
+    SisaRasaColors.gelap,
+  );
 
   static ThemeData _bangun(ColorScheme cs, SisaRasaColors ekstensi) {
     return ThemeData(
@@ -192,7 +192,10 @@ class SisaRasaTema {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: cs.surfaceContainerLowest,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: _garisIsian(cs.outline),
         enabledBorder: _garisIsian(cs.outline),
         focusedBorder: _garisIsian(cs.primary, lebar: 2),
@@ -272,7 +275,12 @@ class SisaRasaTema {
     return TextTheme(
       displaySmall: gaya(36, 40, FontWeight.w800, -0.035), // judul layar
       headlineMedium: gaya(28, 34, FontWeight.w800, -0.03), // judul app bar
-      headlineSmall: gaya(26, 32, FontWeight.w800, -0.03), // header jam, judul detail
+      headlineSmall: gaya(
+        26,
+        32,
+        FontWeight.w800,
+        -0.03,
+      ), // header jam, judul detail
       titleLarge: gaya(28, 32, FontWeight.w800, -0.02), // harga besar
       titleMedium: gaya(18, 24, FontWeight.w800, -0.015), // judul bagian
       titleSmall: gaya(16, 22, FontWeight.w700, -0.01), // nama kartu

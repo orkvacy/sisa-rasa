@@ -76,12 +76,6 @@ class AkunCubit extends Cubit<Map<String, String>> {
   void ganti(String id) {
     emit(layanan.akunUji.firstWhere((akun) => akun['id'] == id));
   }
-
-  /// F-63: Pengguna dapat mengubah nama profil
-  void ubahNama(String namaBaru) {
-    if (state.isEmpty || !sudahMasuk) return;
-    emit({...state, 'nama': namaBaru.trim()});
-  }
 }
 
 String namaPeran(String peran) => switch (peran) {
