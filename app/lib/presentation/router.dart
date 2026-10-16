@@ -25,6 +25,7 @@ import 'package:sisa_rasa/presentation/screens/mitra/detail_pesanan_mitra.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/form_paket.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/halaman_utama_mitra.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/paket_mitra.dart';
+import 'package:sisa_rasa/presentation/screens/mitra/profil_usaha.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/ketik_kode.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/pesanan_masuk.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/rekening.dart';
@@ -86,6 +87,7 @@ abstract final class Rute {
   static const mitraPesanan = '/mitra/pesanan';
   static const mitraSaldo = '/mitra/saldo';
   static const mitraAkun = '/mitra/dasbor/akun';
+  static const mitraProfilUsaha = '/mitra/dasbor/profil-usaha';
   static const mitraPaketBaru = '/mitra/paket/baru';
   static const mitraRekening = '/mitra/saldo/rekening';
   // pindai / ketik kode ambil nempel di tab pesanan mitra
@@ -286,7 +288,13 @@ GoRouter buatRouter({required AkunCubit akun}) {
               GoRoute(
                 path: Rute.mitraDasbor,
                 builder: (context, state) => const Dasbor(),
-                routes: [layarPenuh('akun', (context, state) => const Akun())],
+                routes: [
+                  layarPenuh('akun', (context, state) => const Akun()),
+                  layarPenuh(
+                    'profil-usaha',
+                    (context, state) => const ProfilUsaha(),
+                  ),
+                ],
               ),
             ],
           ),

@@ -69,6 +69,29 @@ class KartuPaket extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (paket['mejaBerbagi'] == true)
+                  Positioned(
+                    bottom: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Warna.hijau,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'Meja Berbagi',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: Warna.kartu,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(width: 12),

@@ -30,13 +30,112 @@ class _BerandaState extends State<Beranda> {
     'Minuman',
   ];
   String kategoriDipilih = 'Semua';
+  String urutanDipilih = 'Jam tutup terdekat';
+  bool filterHalal = false;
+  bool filterMejaBerbagi = false;
 
   void _segeraHadir(String fitur) {
     ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('$fitur belum tersedia di versi ini')),
-      );
+        .showSnackBar(SnackBar(content: Text('Fitur $fitur segera hadir.')));
+  }
+
+  void _urutkanDanSaring(BuildContext context) {
+    var tempUrutan = urutanDipilih;
+    var tempHalal = filterHalal;
+    var tempMejaBerbagi = filterMejaBerbagi;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Warna.kartu,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setModalState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Urutkan & Saring',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Urutkan berdasarkan',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final opsi in ['Jam tutup terdekat', 'Harga termurah'])
+                      ChoiceChip(
+                        label: Text(opsi),
+                        selected: tempUrutan == opsi,
+                        onSelected: (val) {
+                          if (val) setModalState(() => tempUrutan = opsi);
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Saring paket',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Hanya yang berlabel Halal'),
+                  subtitle: const Text(
+                    'Tampilkan paket dengan konfirmasi halal mitra',
+                  ),
+                  value: tempHalal,
+                  onChanged: (val) => setModalState(() => tempHalal = val),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Meja Berbagi (Donasi)'),
+                  subtitle: const Text(
+                    'Paket yang ikut program donasi sisa makanan',
+                  ),
+                  value: tempMejaBerbagi,
+                  onChanged: (val) =>
+                      setModalState(() => tempMejaBerbagi = val),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      urutanDipilih = tempUrutan;
+                      filterHalal = tempHalal;
+                      filterMejaBerbagi = tempMejaBerbagi;
+                    });
+                    Navigator.pop(sheetContext);
+                  },
+                  child: const Text('Terapkan'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -45,15 +144,26 @@ class _BerandaState extends State<Beranda> {
     final daftarPaket = context.watch<PaketCubit>().state;
 
     // paket yg masih bisa dipesan: belum lewat jam tutup, masih ada porsinya (F-25),
-    // terus disaring sesuai chip kategori (F-03)
+    // terus disaring sesuai chip kategori (F-03), halal, dan meja berbagi
     final tampil = daftarPaket.where((paket) {
+      final cocokKategori =
+          kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih;
+      final cocokHalal = !filterHalal || paket['halal'] == true;
+      final cocokMejaBerbagi =
+          !filterMejaBerbagi || paket['mejaBerbagi'] == true;
       return PaketCubit.tampilUntukPembeli(paket) &&
           (paket['sisaPorsi'] as int) > 0 &&
-          (kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih);
+          cocokKategori &&
+          cocokHalal &&
+          cocokMejaBerbagi;
     }).toList();
 
-    final semuaMitra = _kelompokkanMitra(tampil)
-      ..sort((a, b) => a.tutup.compareTo(b.tutup));
+    final semuaMitra = _kelompokkanMitra(tampil);
+    if (urutanDipilih == 'Harga termurah') {
+      semuaMitra.sort((a, b) => a.hargaTermurah.compareTo(b.hargaTermurah));
+    } else {
+      semuaMitra.sort((a, b) => a.tutup.compareTo(b.tutup));
+    }
     // F-53: tutup kurang dari 1 jam lagi masuk Flash sale, ga diulang di bawah
     final flashSale = [
       for (final mitra in semuaMitra)
@@ -169,7 +279,7 @@ class _BerandaState extends State<Beranda> {
                   height: 48,
                   child: IconButton(
                     tooltip: 'Urutkan dan saring',
-                    onPressed: () => _segeraHadir('Urutkan dan saring'),
+                    onPressed: () => _urutkanDanSaring(context),
                     icon: const Icon(Icons.tune, size: 22, color: Warna.teks),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white,
