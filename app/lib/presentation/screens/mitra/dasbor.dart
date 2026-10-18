@@ -76,27 +76,39 @@ class Dasbor extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.storefront_outlined,
-                          size: 16,
-                          color: Warna.teksPendukung,
-                        ),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            '$nama · $jenis',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                    InkWell(
+                      onTap: () => context.push(Rute.mitraProfilUsaha),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.storefront_outlined,
+                              size: 16,
                               color: Warna.teksPendukung,
                             ),
-                          ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                '$nama · $jenis',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Warna.teksPendukung,
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 16,
+                              color: Warna.teksPendukung,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

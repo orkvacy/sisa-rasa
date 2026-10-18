@@ -1,4 +1,3 @@
-
 class Teks {
   static const double judulBesar = 30;
 
