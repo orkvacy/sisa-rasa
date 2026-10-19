@@ -8,6 +8,7 @@ import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_keranjang.dart';
 
 /// beranda pembeli (figma v3: pembeli/beranda - mitra).
 /// isinya daftar mitra, bukan paket: Flash sale buat yg tutup kurang dari 1 jam (F-53),
@@ -24,9 +25,10 @@ class Beranda extends StatefulWidget {
 class _BerandaState extends State<Beranda> {
   final kategori = [
     'Semua',
-    'Nasi & lauk',
-    'Roti & kue',
+    'Hidangan utama',
+    'Pastry & roti',
     'Buffet hotel',
+    'Dessert',
     'Minuman',
   ];
   String kategoriDipilih = 'Semua';
@@ -36,7 +38,8 @@ class _BerandaState extends State<Beranda> {
 
   void _segeraHadir(String fitur) {
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Fitur $fitur segera hadir.')));
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('Fitur $fitur segera hadir.')));
   }
 
   void _urutkanDanSaring(BuildContext context) {
@@ -181,10 +184,8 @@ class _BerandaState extends State<Beranda> {
 
     return SafeArea(
       child: ListView(
-        // bawahnya dikasih jarak gede biar item terakhir ga ketutup navigasi + bar keranjang
-        padding: const EdgeInsets.only(
-          bottom: NavigasiMelayang.ruangBawahKeranjang,
-        ),
+        // bawahnya dikasih jarak biar item terakhir ga ketutup navigasi melayang
+        padding: const EdgeInsets.only(bottom: NavigasiMelayang.ruangBawah),
         children: [
           // bilah atas: area ambil + favorit
           Padding(
@@ -221,6 +222,7 @@ class _BerandaState extends State<Beranda> {
                   ),
                 ),
                 const Spacer(),
+                const TombolKeranjang(),
                 IconButton(
                   tooltip: 'Mitra favorit',
                   icon: const Icon(Icons.favorite_border, color: Warna.teks),

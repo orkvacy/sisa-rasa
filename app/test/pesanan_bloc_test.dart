@@ -54,10 +54,10 @@ void main() {
 
     expect(pesanan['status'], StatusPesanan.menungguBayar);
     expect(pesanan['kode'], isNull);
-    // biaya layanan 10% dari 28.000
-    expect(pesanan['biayaLayanan'], 2800);
-    expect(pesanan['total'], 28000 + 2800);
-    expect(pesanan['hemat'], (35000 - 14000) * 2);
+    // biaya layanan 10% dari 68.000
+    expect(pesanan['biayaLayanan'], 6800);
+    expect(pesanan['total'], 68000 + 6800);
+    expect(pesanan['hemat'], (85000 - 34000) * 2);
     expect(ditahan, [
       {'p1': 2},
     ]);

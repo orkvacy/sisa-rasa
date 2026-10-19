@@ -83,7 +83,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
         'jenisMitra': gerai?['jenisMitra'] ?? 'Mitra',
         'alamat': gerai?['alamat'] ?? '',
         'jarak': gerai?['jarak'] ?? '',
-        'foto': gerai?['foto'] ?? 'assets/images/shinchann.jpg',
+        'foto': gerai?['foto'] ?? 'assets/images/paket/buffet_hotel.jpg',
         'geraiTutup': gerai?['geraiTutup'] ?? false,
         ...isian,
         'id': id,

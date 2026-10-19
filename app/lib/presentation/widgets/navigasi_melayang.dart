@@ -26,9 +26,6 @@ class NavigasiMelayang extends StatelessWidget {
   /// ruang yg harus disisain di bawah daftar biar item terakhir ga ketutup navigasi
   static const ruangBawah = 104.0;
 
-  /// sama, tapi kalau bar keranjang lagi muncul di atas navigasi
-  static const ruangBawahKeranjang = 170.0;
-
   static const _lebar = 274.0;
 
   final List<TabNavigasi> tabs;

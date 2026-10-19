@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/screens/beranda.dart';
 import 'package:sisa_rasa/presentation/screens/cari.dart';
@@ -25,7 +26,7 @@ void main() {
           'mulai': 12 * 60,
           'tutup': 18 * 60,
           'mejaBerbagi': true,
-          'foto': 'assets/images/shinchann.jpg',
+          'foto': 'assets/images/paket/croissant.jpg',
         };
 
         await tester.pumpWidget(
@@ -53,7 +54,7 @@ void main() {
           'mulai': 12 * 60,
           'tutup': 18 * 60,
           'mejaBerbagi': false,
-          'foto': 'assets/images/shinchann.jpg',
+          'foto': 'assets/images/paket/croissant.jpg',
         };
 
         await tester.pumpWidget(
@@ -81,7 +82,7 @@ void main() {
         'mitra': 'Ibis Hotel',
         'nama': 'Paket Habis Terjual',
         'deskripsi': '',
-        'kategori': 'Nasi & lauk',
+        'kategori': 'Hidangan utama',
         'hargaAsli': 30000,
         'hargaDiskon': 10000,
         'totalPorsi': 0,
@@ -104,10 +105,10 @@ void main() {
       expect(find.text('Paket Habis Terjual'), findsNothing);
 
       // Cari paket yang ada
-      await tester.enterText(find.byType(TextField), 'Sandwich');
+      await tester.enterText(find.byType(TextField), 'Breakfast');
       await tester.pumpAndSettle();
 
-      expect(find.text('Sandwich Sisa Brunch'), findsOneWidget);
+      expect(find.text('American Breakfast Set'), findsOneWidget);
 
       await paketCubit.close();
     });
@@ -123,8 +124,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: BlocProvider.value(
-              value: paketCubit,
+            body: MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: paketCubit),
+                // ikon keranjang di bilah atas beranda butuh KeranjangCubit
+                BlocProvider(create: (_) => KeranjangCubit()),
+              ],
               child: Beranda(onBukaMitra: (_) {}),
             ),
           ),

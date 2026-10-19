@@ -69,7 +69,7 @@ flutter:
 
   # foto paket makanan yang dipakai Image.asset
   assets:
-    - assets/images/
+    - assets/images/paket/
 
   # font sesuai desain: Plus Jakarta Sans untuk semua teks, JetBrains Mono untuk kode ambil
   fonts:

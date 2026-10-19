@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 
@@ -19,12 +20,9 @@ class ProfilUsaha extends StatelessWidget {
 
     final jenis = dataMitra?['jenisMitra'] ?? 'Restoran';
     final alamat = dataMitra?['alamat'] ?? 'Samarinda';
-    final buka = dataMitra?['buka'] != null
-        ? '${dataMitra!['buka']}:00'
-        : '08:00';
-    final tutup = dataMitra?['tutup'] != null
-        ? '${dataMitra!['tutup']}:00'
-        : '22:00';
+    // jam ambil paket hari ini, disimpan dalam menit (17 * 60 = 17.00)
+    final buka = dataMitra?['mulai'] is int ? jam(dataMitra!['mulai']) : '-';
+    final tutup = dataMitra?['tutup'] is int ? jam(dataMitra!['tutup']) : '-';
 
     return Scaffold(
       backgroundColor: Warna.latar,

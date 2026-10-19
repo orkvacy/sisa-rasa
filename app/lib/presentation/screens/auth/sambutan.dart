@@ -114,15 +114,15 @@ class Sambutan extends StatelessWidget {
 class _MosaikFoto extends StatelessWidget {
   const _MosaikFoto();
 
-  static const _foto = 'assets/images/shinchann.jpg';
+  static const _folder = 'assets/images/paket';
 
-  Widget _kotak({Widget? label}) {
+  Widget _kotak(String foto, {Widget? label}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(_foto, fit: BoxFit.cover),
+          Image.asset('$_folder/$foto.jpg', fit: BoxFit.cover),
           if (label != null) Positioned(left: 12, bottom: 12, child: label),
         ],
       ),
@@ -141,6 +141,7 @@ class _MosaikFoto extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: _kotak(
+                    'buffet_hotel',
                     label: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -169,7 +170,7 @@ class _MosaikFoto extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Expanded(flex: 2, child: _kotak()),
+                Expanded(flex: 2, child: _kotak('croissant')),
               ],
             ),
           ),
@@ -178,9 +179,9 @@ class _MosaikFoto extends StatelessWidget {
             flex: 3,
             child: Column(
               children: [
-                Expanded(flex: 2, child: _kotak()),
+                Expanded(flex: 2, child: _kotak('sushi')),
                 const SizedBox(height: 8),
-                Expanded(flex: 3, child: _kotak()),
+                Expanded(flex: 3, child: _kotak('sirloin')),
               ],
             ),
           ),
