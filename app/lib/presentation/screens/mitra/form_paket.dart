@@ -8,7 +8,13 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 
 /// kategori paket, sama kayak chip di beranda pembeli (F-03)
-const kategoriPaket = ['Nasi & lauk', 'Roti & kue', 'Buffet hotel', 'Minuman'];
+const kategoriPaket = [
+  'Hidangan utama',
+  'Pastry & roti',
+  'Buffet hotel',
+  'Dessert',
+  'Minuman',
+];
 
 /// form paket baru / ubah paket (figma v3: mitra/form paket baru, mitra/ubah paket).
 /// F-15 isi formulir, F-16 harga diskon harus lebih murah, F-17 porsi bilangan bulat positif,

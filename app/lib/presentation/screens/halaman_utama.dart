@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
-import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
-import 'package:sisa_rasa/presentation/router.dart';
-import 'package:sisa_rasa/presentation/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
 
 /// halaman induk, yg punya navigation bar (beranda, pesanan, akun)
 /// isi tiap tab sama tab yg aktif diatur router (StatefulShellRoute di router.dart),
-/// di sini tinggal gambar navigasi melayang sama bar keranjang
+/// di sini tinggal gambar navigasi melayang
 class HalamanUtama extends StatelessWidget {
   const HalamanUtama({required this.shell, super.key});
 
@@ -34,12 +29,6 @@ class HalamanUtama extends StatelessWidget {
     ),
   ];
 
-  void bukaKeranjang(BuildContext context) {
-    // snackbar "masuk keranjang" ditutup dulu biar ga nutupin tombol checkout
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    context.push(Rute.keranjang);
-  }
-
   @override
   Widget build(BuildContext context) {
     // 0 beranda, 1 pesanan, 2 akun
@@ -52,41 +41,15 @@ class HalamanUtama extends StatelessWidget {
       extendBody: true,
       // shell: tab yg aktif, tab lain ga di-reset (scroll nya tetep)
       body: shell,
-      // bar keranjang sama navigasi melayang numpuk di bawah, latarnya transparan
+      // navigasi melayang di bawah, latarnya transparan.
+      // keranjang pindah jadi ikon di kanan atas beranda (TombolKeranjang)
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.only(bottom: 12),
+        // Column min: tingginya ngikut navigasi, kalau ga Center di dalamnya
+        // makan seluruh layar dan isi tab ketutup
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // BlocBuilder: cuma bagian ini yg digambar ulang tiap isi keranjang berubah
-            BlocBuilder<KeranjangCubit, Map<String, int>>(
-              builder: (context, keranjang) {
-                // bar keranjang cuma muncul di beranda, itupun kalau keranjang ada isinya
-                if (tabAktif != 0 || keranjang.isEmpty) {
-                  // SizedBox: kotak ukuran tetap, .shrink() berarti ukurannya 0 jadi ga keliatan
-                  return const SizedBox.shrink();
-                }
-                final paketCubit = context.read<PaketCubit>();
-                final pertama = paketCubit.cari(keranjang.keys.first);
-                var porsi = 0;
-                var total = 0;
-                for (final id in keranjang.keys) {
-                  porsi += keranjang[id]!;
-                  total +=
-                      (paketCubit.cari(id)['hargaDiskon'] as int) *
-                      keranjang[id]!;
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: BarKeranjang(
-                    foto: pertama['foto'],
-                    jumlahPorsi: porsi,
-                    total: total,
-                    onTap: () => bukaKeranjang(context),
-                  ),
-                );
-              },
-            ),
             // NavigasiMelayang: navigasi bawah buat pindah halaman utama
             NavigasiMelayang(
               tabs: _tabs,

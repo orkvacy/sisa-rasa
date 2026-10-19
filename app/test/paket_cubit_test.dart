@@ -15,7 +15,7 @@ void main() {
     'mitra': 'Ibis Hotel',
     'nama': 'Nasi Kuning',
     'deskripsi': '',
-    'kategori': 'Nasi & lauk',
+    'kategori': 'Hidangan utama',
     'hargaAsli': 30000,
     'hargaDiskon': 12000,
     'totalPorsi': porsi,

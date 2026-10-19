@@ -46,11 +46,16 @@ int sisaPorsi(WidgetTester tester, String id) {
   return context.read<PaketCubit>().cari(id)['sisaPorsi'];
 }
 
-/// beranda -> kartu Ibis Hotel di Flash sale -> detail sandwich (id p1)
-Future<void> keDetailSandwich(WidgetTester tester) async {
+/// beranda -> kartu Ibis Hotel di Flash sale -> halaman mitranya
+Future<void> bukaIbis(WidgetTester tester) async {
   await tester.tap(find.text('Ibis Hotel'));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Sandwich Sisa Brunch'));
+}
+
+/// beranda -> halaman Ibis Hotel -> detail american breakfast (id p1)
+Future<void> keDetailSandwich(WidgetTester tester) async {
+  await bukaIbis(tester);
+  await tester.tap(find.text('American Breakfast Set'));
   await tester.pumpAndSettle();
 }
 
@@ -86,9 +91,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('Sore ini'), findsOneWidget);
-    // Ibis Hotel tutup 17.00, kurang dari sejam dari 16.20 -> masuk Flash sale (F-53)
+    // Ibis + Prime Cut tutup 17.00, kurang dari sejam dari 16.20 -> Flash sale (F-53)
     expect(find.text('Flash sale'), findsOneWidget);
     expect(find.text('2 paket'), findsOneWidget);
+    expect(find.text('1 paket'), findsOneWidget);
     expect(find.byType(NavigasiMelayang), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Mitra sekitar'),
@@ -138,8 +144,8 @@ void main() {
     await keDetailSandwich(tester);
     await tester.enterText(find.byType(TextField), '9a');
     await tester.pump();
-    expect(find.text('Tambah · Rp42.000'), findsOneWidget);
-    await tester.tap(find.text('Tambah · Rp42.000'));
+    expect(find.text('Tambah · Rp102.000'), findsOneWidget);
+    await tester.tap(find.text('Tambah · Rp102.000'));
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
@@ -147,10 +153,10 @@ void main() {
     await tester.tap(find.text('3 porsi'));
     await tester.pumpAndSettle();
     expect(find.text('Bayar di tempat'), findsNothing);
-    await tester.tap(find.text('Lanjut ke checkout · Rp42.000'));
+    await tester.tap(find.text('Lanjut ke checkout · Rp102.000'));
     await tester.pumpAndSettle();
-    expect(find.text('Rp46.200'), findsWidgets);
-    expect(find.text('Hemat Rp63.000'), findsOneWidget);
+    expect(find.text('Rp112.200'), findsWidgets);
+    expect(find.text('Hemat Rp153.000'), findsOneWidget);
 
     // pilih VA, terus pastiin aturan "tidak diambil" (F-56) keliatan sebelum bayar
     await tester.ensureVisible(find.text('Virtual Account'));
@@ -164,8 +170,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.textContaining('dananya tidak dikembalikan'), findsOneWidget);
-    // biaya layanan 10% dari Rp42.000
-    expect(find.text('Rp4.200'), findsOneWidget);
+    // biaya layanan 10% dari Rp102.000
+    expect(find.text('Rp10.200'), findsOneWidget);
 
     // bayar, porsinya langsung ditahan
     await tester.tap(find.text('Bayar sekarang'));
@@ -201,10 +207,11 @@ void main() {
     expect(find.text('Tampilkan QR'), findsOneWidget);
     expect(find.text('Disiapkan'), findsOneWidget);
 
-    // stok yg udah dibayar ga balik: sandwich habis, Ibis tinggal punya 1 paket
+    // stok yg udah dibayar ga balik: breakfast habis, Ibis tinggal punya 1 paket
+    // (kartu Ibis + Prime Cut di Flash sale sama-sama 1 paket)
     await tester.tap(find.text('Beranda').last);
     await tester.pumpAndSettle();
-    expect(find.text('1 paket'), findsOneWidget);
+    expect(find.text('1 paket'), findsNWidgets(2));
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -293,29 +300,44 @@ void main() {
     await tester.pump();
 
     // dari kartu Flash sale buka halaman Ibis Hotel
-    await tester.tap(find.text('Ibis Hotel'));
-    await tester.pumpAndSettle();
+    await bukaIbis(tester);
     expect(find.text('Paket hari ini'), findsOneWidget);
     expect(find.text('2 paket'), findsOneWidget);
     expect(find.text('Petunjuk arah'), findsOneWidget);
     expect(find.text('Halal bersertifikat'), findsOneWidget);
 
     // tambah dua paket beda, bar keranjang ngitung keduanya
-    await tester.tap(find.byTooltip('Tambah Sandwich Sisa Brunch'));
+    await tester.tap(find.byTooltip('Tambah American Breakfast Set'));
     await tester.pump();
-    await tester.tap(find.byTooltip('Tambah Kue Sisa Coffee Break'));
+    await tester.tap(find.byTooltip('Tambah Petit Four & Macaron'));
     await tester.pump();
     await tester.tap(find.byTooltip('Tambah porsi').last);
     await tester.pump();
     expect(find.text('3 porsi'), findsOneWidget);
-    expect(find.text('Rp38.000'), findsOneWidget);
+    expect(find.text('Rp110.000'), findsOneWidget);
 
     // minus di jumlah 1 = keluarin dari keranjang
     await tester.tap(find.byTooltip('Hapus dari keranjang'));
     await tester.pump();
     expect(find.text('2 porsi'), findsOneWidget);
-    expect(find.text('Rp24.000'), findsWidgets);
-    expect(find.byTooltip('Tambah Sandwich Sisa Brunch'), findsOneWidget);
+    expect(find.text('Rp76.000'), findsWidgets);
+    expect(
+      find.byTooltip('Tambah American Breakfast Set'),
+      findsOneWidget,
+    );
+
+    // balik ke beranda, gulir ke atas: ikon keranjang di kanan atas nunjukin 2 porsi
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const Key('jumlah-keranjang'))).data,
+      '2',
+    );
+    await tester.tap(find.byTooltip('Keranjang, 2 porsi'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Lanjut ke checkout'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -334,8 +356,8 @@ void main() {
     await tester.tap(find.byTooltip('Kembali'));
     await tester.pumpAndSettle();
 
-    // buka Warung Blok M dari Mitra sekitar, terus tombol + paketnya
-    final mitraLain = find.text('Warung Blok M');
+    // buka Teras Nusantara dari Mitra sekitar, terus tombol + paketnya
+    final mitraLain = find.text('Teras Nusantara');
     await tester.scrollUntilVisible(
       mitraLain,
       300,
@@ -346,7 +368,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(mitraLain);
     await tester.pumpAndSettle();
-    final tambah = find.byTooltip('Tambah Paket Ayam Goreng');
+    final tambah = find.byTooltip('Tambah Iga Bakar Madu');
     await tester.tap(tambah);
     await tester.pumpAndSettle();
     expect(find.text('Ganti isi keranjang?'), findsOneWidget);
@@ -354,15 +376,15 @@ void main() {
     // batal: keranjang tetap isi sandwich
     await tester.tap(find.text('Batal'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Rp14.000'), findsWidgets);
+    expect(find.textContaining('Rp34.000'), findsWidgets);
 
-    // setuju: keranjang diganti paket ayam
+    // setuju: keranjang diganti iga bakar
     await tester.tap(tambah);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Kosongkan & tambah'));
     await tester.pumpAndSettle();
     expect(find.text('1 porsi'), findsOneWidget);
-    expect(find.text('Rp8.000'), findsWidgets);
+    expect(find.text('Rp50.000'), findsWidgets);
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -491,7 +513,7 @@ void tesKelolaPaket() {
         find.byType(TextField).at(0),
         'Nasi Kuning Sisa Sarapan',
       );
-      await tester.tap(find.text('Nasi & lauk'));
+      await tester.tap(find.text('Hidangan utama'));
       await tester.ensureVisible(find.text('Harga asli'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).at(2), '30000');
@@ -547,6 +569,9 @@ void tesKelolaPaket() {
       await tester.pumpAndSettle();
       expect(find.text('Ubah paket'), findsOneWidget);
       await tester.ensureVisible(find.text('Hapus paket'));
+      // tunggu snackbar sebelumnya hilang, biar tombolnya ga ketutup
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Hapus paket'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hapus'));
