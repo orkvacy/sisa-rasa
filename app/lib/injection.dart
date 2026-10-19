@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:sisa_rasa/data/repositories/akun_api.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
 import 'package:sisa_rasa/data/repositories/pembayaran_tiruan.dart';
@@ -17,9 +18,16 @@ import 'package:sisa_rasa/domain/repositories/layanan_saldo.dart';
 /// ga ada satu pun berkas di presentation/ yg perlu diubah
 final sl = GetIt.instance;
 
+/// alamat server Go. kosong = semua pakai tiruan di HP.
+/// diisi pas build / run, misal:
+///   flutter run --dart-define=API_URL=http://192.168.1.10:8080
+const alamatApi = String.fromEnvironment('API_URL');
+
 void daftarkanDependensi() {
   sl
-    ..registerLazySingleton<LayananAkun>(AkunTiruan.new)
+    ..registerLazySingleton<LayananAkun>(
+      () => alamatApi.isEmpty ? AkunTiruan() : AkunApi(alamat: alamatApi),
+    )
     ..registerLazySingleton<LayananPaket>(PaketLokal.new)
     ..registerLazySingleton<LayananPembayaran>(PembayaranTiruan.new)
     ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new)

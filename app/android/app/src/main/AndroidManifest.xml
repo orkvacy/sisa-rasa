@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- manggil server Go (API_URL) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- simpan QR pembayaran ke galeri (plugin gal), cuma perlu di Android 10 ke bawah -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
