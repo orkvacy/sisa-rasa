@@ -27,7 +27,13 @@ class AkunCubit extends Cubit<Map<String, String>> {
   Future<void> pulihkan() async {
     final token = await penyimpanan.read(key: _kunciToken);
     if (token == null) return;
-    final akun = await layanan.sesi(token);
+    final Map<String, String>? akun;
+    try {
+      akun = await layanan.sesi(token);
+    } on GagalAkun {
+      // server ga bisa dihubungi: token disimpen, dicoba lagi pas aplikasi dibuka lagi
+      return;
+    }
     if (akun == null) {
       await penyimpanan.delete(key: _kunciToken);
       return;

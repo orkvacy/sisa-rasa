@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- khusus build debug: boleh http:// biasa ke server Go di laptop
+         (misal http://192.168.1.10:8080). build rilis tetap wajib https (NF-06) -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

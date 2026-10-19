@@ -1,0 +1,6 @@
+# hasil build
+/server
+/server.exe
+*.exe
+# rahasia lokal
+.env
