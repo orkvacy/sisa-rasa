@@ -14,6 +14,38 @@ func Pasang(mux *http.ServeMux, l *Layanan, batasi func(http.Handler) http.Handl
 	mux.Handle("POST /v1/akun/masuk", batasi(httpx.Handler(l.handleMasuk)))
 	mux.Handle("GET /v1/akun/saya", l.Wajib(httpx.Handler(handleSaya)))
 	mux.Handle("POST /v1/akun/keluar", httpx.Handler(l.handleKeluar))
+	mux.Handle("PATCH /v1/akun/saya", l.Wajib(httpx.Handler(l.handleUbahNama)))
+	// minta sandi, jadi ikut dibatasi biar ga bisa dipakai nebak sandi
+	mux.Handle("POST /v1/akun/hapus", batasi(l.Wajib(httpx.Handler(l.handleHapus))))
+}
+
+func (l *Layanan) handleUbahNama(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Nama string `json:"nama"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	a, err := l.UbahNama(r.Context(), DariKonteks(r.Context()), isi.Nama)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]Akun{"akun": a})
+	return nil
+}
+
+func (l *Layanan) handleHapus(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Sandi string `json:"sandi"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	if err := l.HapusAkun(r.Context(), DariKonteks(r.Context()), isi.Sandi); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (l *Layanan) handleDaftar(w http.ResponseWriter, r *http.Request) error {

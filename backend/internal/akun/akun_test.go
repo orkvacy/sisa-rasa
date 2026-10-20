@@ -44,6 +44,43 @@ func (s *storeMemori) BuatAkun(_ context.Context, nama, email, hash, peran strin
 	return a, nil
 }
 
+func (s *storeMemori) UbahNama(_ context.Context, id, nama string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for email, a := range s.akun {
+		if a.ID == id {
+			a.Nama = nama
+			s.akun[email] = a
+		}
+	}
+	return nil
+}
+
+// pesananAktif id akun yang pura-puranya masih punya pesanan berjalan
+var pesananAktif = map[string]bool{}
+
+func (s *storeMemori) HapusAkun(_ context.Context, id string, sekarang time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if pesananAktif[id] {
+		return ErrPesananAktif
+	}
+	for email, a := range s.akun {
+		if a.ID == id {
+			delete(s.akun, email)
+			a.Nama, a.Email, a.HashSandi = "Akun dihapus", "dihapus-"+id+"@sisarasa.invalid", "!"
+			s.akun[a.Email] = a
+		}
+	}
+	for h, ss := range s.sesi {
+		if ss.idAkun == id {
+			ss.dicabut = true
+			s.sesi[h] = ss
+		}
+	}
+	return nil
+}
+
 func (s *storeMemori) AkunDariEmail(_ context.Context, email string) (akunTersimpan, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -261,5 +298,56 @@ func TestPembatas(t *testing.T) {
 	}
 	if kode[2] != http.StatusOK || kode[3] != http.StatusTooManyRequests {
 		t.Errorf("3 boleh, ke-4 harus 429, dapet %v", kode)
+	}
+}
+
+func TestUbahNamaDanHapusAkun(t *testing.T) {
+	ctx := context.Background()
+	l := layananTes()
+	rani, err := l.Daftar(ctx, "Rani Amelia", "rani@contoh.id", "sandiaman1", "pembeli")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mitra, _ := l.Daftar(ctx, "Ibis Hotel", "ibis@contoh.id", "sandiaman1", "mitra")
+
+	// F-63 nama dirapikan, mitra ga bisa ganti sendiri
+	a, err := l.UbahNama(ctx, rani.Akun, "  Rani   Amelia Putri ")
+	if err != nil || a.Nama != "Rani Amelia Putri" {
+		t.Fatalf("ubah nama: %+v %v", a, err)
+	}
+	if sesi, _ := l.Sesi(ctx, rani.Token); sesi.Nama != "Rani Amelia Putri" {
+		t.Fatalf("nama di sesi: %q", sesi.Nama)
+	}
+	if _, err := l.UbahNama(ctx, rani.Akun, "R"); kodeGalat(t, err) != 422 {
+		t.Errorf("nama 1 huruf harus 422")
+	}
+	if _, err := l.UbahNama(ctx, mitra.Akun, "Ibis Baru"); kodeGalat(t, err) != 403 {
+		t.Errorf("mitra ganti nama harus 403")
+	}
+
+	// F-62 sandi salah, masih ada pesanan, lalu berhasil
+	if err := l.HapusAkun(ctx, rani.Akun, "salah"); kodeGalat(t, err) != 401 {
+		t.Errorf("sandi salah harus 401")
+	}
+	pesananAktif[rani.Akun.ID] = true
+	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1"); kodeGalat(t, err) != 409 {
+		t.Errorf("pesanan aktif harus 409")
+	}
+	delete(pesananAktif, rani.Akun.ID)
+	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1"); err != nil {
+		t.Fatal(err)
+	}
+	// sesi dicabut, ga bisa masuk lagi, emailnya bisa didaftarin ulang
+	if _, err := l.Sesi(ctx, rani.Token); err != ErrSesiTidakBerlaku {
+		t.Errorf("sesi setelah hapus: %v", err)
+	}
+	if _, err := l.Masuk(ctx, "rani@contoh.id", "sandiaman1"); kodeGalat(t, err) != 401 {
+		t.Errorf("masuk setelah hapus harus ditolak")
+	}
+	if _, err := l.Daftar(ctx, "Rani Baru", "rani@contoh.id", "sandiaman2", "pembeli"); err != nil {
+		t.Errorf("email bisa dipakai lagi: %v", err)
+	}
+	if err := l.HapusAkun(ctx, mitra.Akun, "sandiaman1"); kodeGalat(t, err) != 403 {
+		t.Errorf("mitra hapus sendiri harus 403")
 	}
 }

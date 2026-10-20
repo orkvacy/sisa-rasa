@@ -128,6 +128,46 @@ func (l *Layanan) Sesi(ctx context.Context, token string) (Akun, error) {
 	return a, err
 }
 
+// UbahNama F-63. khusus pembeli: nama mitra = nama gerai yang nempel di
+// paket dan riwayat pesanan, jadi gantinya lewat tim Sisa Rasa
+func (l *Layanan) UbahNama(ctx context.Context, a Akun, nama string) (Akun, error) {
+	if a.Peran != "pembeli" {
+		return Akun{}, httpx.NewGalat(http.StatusForbidden,
+			"Nama usaha diubah lewat tim Sisa Rasa, karena terhubung ke paket dan rekening.")
+	}
+	nama = strings.Join(strings.Fields(nama), " ")
+	if n := len([]rune(nama)); n < 2 || n > 60 {
+		return Akun{}, httpx.NewGalat(http.StatusUnprocessableEntity, "Nama 2 sampai 60 huruf.")
+	}
+	if err := l.Store.UbahNama(ctx, a.ID, nama); err != nil {
+		return Akun{}, err
+	}
+	a.Nama = nama
+	return a, nil
+}
+
+// HapusAkun F-62. minta sandi lagi biar HP yang kebetulan kebuka ga bisa
+// dipakai orang lain buat ngehapus akun
+func (l *Layanan) HapusAkun(ctx context.Context, a Akun, sandi string) error {
+	if a.Peran != "pembeli" {
+		return httpx.NewGalat(http.StatusForbidden,
+			"Akun mitra ditutup lewat tim Sisa Rasa, karena masih ada saldo dan rekening.")
+	}
+	tersimpan, err := l.Store.AkunDariEmail(ctx, a.Email)
+	if err != nil {
+		return err
+	}
+	if bcrypt.CompareHashAndPassword([]byte(tersimpan.HashSandi), []byte(sandi)) != nil {
+		return httpx.NewGalat(http.StatusUnauthorized, "Kata sandi salah.")
+	}
+	err = l.Store.HapusAkun(ctx, a.ID, l.sekarang())
+	if errors.Is(err, ErrPesananAktif) {
+		return httpx.NewGalat(http.StatusConflict,
+			"Masih ada pesanan yang berjalan. Selesaikan atau batalkan dulu, lalu coba lagi.")
+	}
+	return err
+}
+
 // Cari akun dari email, dipakai penyemai data contoh
 func (l *Layanan) Cari(ctx context.Context, email string) (Akun, error) {
 	a, err := l.Store.AkunDariEmail(ctx, rapikanEmail(email))
