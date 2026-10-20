@@ -13,7 +13,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
 | `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
 | `POST` | `/v1/akun/hapus` | `{sandi}` hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
-| `GET` | `/v1/paket` | Semua paket yang dijual, boleh tanpa masuk (F-65) |
+| `GET` | `/v1/paket` | Paket dari mitra terverifikasi, boleh tanpa masuk (F-65). Mitra yang masuk ikut melihat paketnya sendiri walau belum diverifikasi |
+| `GET` | `/v1/mitra/status` | `{status, alasan}` status verifikasi gerai: `menunggu` / `terverifikasi` / `ditolak` / `nonaktif` (F-37) |
 | `GET` `POST` | `/v1/mitra/paket` | Paket milik mitra / tambah paket (F-15) |
 | `PUT` `DELETE` | `/v1/mitra/paket/{id}` | Ubah / hapus paket (F-18) |
 | `PATCH` | `/v1/mitra/paket/{id}/sisa` | `{sisa}` (F-44) |
@@ -28,6 +29,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/v1/pesanan/{id}` | Satu pesanan |
 | `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Sementara selalu lunas, mode uji |
 | `POST` | `/v1/pesanan/{id}/batal` | `{alasan}` pembeli batal sebelum bayar, porsi kembali (F-55) |
+| `GET` | `/v1/admin/mitra?status=` | Khusus admin: daftar mitra, filter status opsional (F-36) |
+| `POST` | `/v1/admin/mitra/{id}/periksa` | Khusus admin: `{status, alasan}` setujui / tolak / nonaktifkan mitra. Alasan wajib untuk ditolak & nonaktif (F-37, F-38) |
 | `POST` | `/v1/pesanan/{id}/metode` | `{metode}` ganti metode sebelum bayar |
 | `POST` | `/v1/pesanan/{id}/status` | `{status}` mitra: `siap_diambil` / `selesai` (F-43) |
 | `POST` | `/v1/pesanan/{id}/batal-mitra` | `{alasan}` mitra batalkan pesanan lunas (F-42) |
@@ -110,6 +113,7 @@ Keamanan yang sudah dipasang:
 | `R2_ACCESS_KEY_ID` `R2_SECRET_ACCESS_KEY` | | Kunci API R2 (rahasia, isi di Coolify saja) |
 | `R2_PUBLIK` | | Alamat publik bucket, misal `https://cdn.sisarasa.web.id` |
 | `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
+| `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify

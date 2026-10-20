@@ -21,6 +21,9 @@ var (
 	dimas = akun.Akun{ID: "22222222-2222-4222-8222-222222222222", Nama: "Dimas Pratama", Peran: "pembeli"}
 	ibis  = akun.Akun{ID: "33333333-3333-4333-8333-333333333333", Nama: "Ibis Hotel", Peran: "mitra"}
 	prime = akun.Akun{ID: "44444444-4444-4444-8444-444444444444", Nama: "Prime Cut", Peran: "mitra"}
+	// mitra yang baru daftar, belum diverifikasi admin
+	mitraBaru = akun.Akun{ID: "66666666-6666-4666-8666-666666666666", Nama: "Dapur Baru", Peran: "mitra"}
+	admin     = akun.Akun{ID: "77777777-7777-4777-8777-777777777777", Nama: "Admin", Peran: "admin"}
 )
 
 // jamTes jam palsu yang bisa dimajuin
@@ -51,6 +54,7 @@ func siapkanMemori(t *testing.T) siap {
 	s := memoriBaru()
 	s.tambahMitra(ibis.ID, ibis.Nama)
 	s.tambahMitra(prime.ID, prime.Nama)
+	s.tambahMitraBaru(mitraBaru.ID, mitraBaru.Nama)
 	return siapkanDengan(t, s)
 }
 
@@ -76,7 +80,7 @@ func siapkanDengan(t *testing.T, s Store) siap {
 
 func (x siap) sisa(t *testing.T, id string) int {
 	t.Helper()
-	semua, _ := x.l.Store.SemuaPaket(context.Background())
+	semua, _ := x.l.Store.SemuaPaket(context.Background(), "")
 	for _, p := range semua {
 		if p.ID == id {
 			return p.SisaPorsi
@@ -365,6 +369,7 @@ func ujiHTTPPesanan(t *testing.T, siapkan func(*testing.T) siap) {
 	mux := http.NewServeMux()
 	// pengganti akun.Layanan.Wajib: akun dari header X-Tes
 	akunTes := map[string]akun.Akun{"rani": rani, "ibis": ibis}
+	opsional := func(h http.Handler) http.Handler { return h }
 	Pasang(mux, x.l, func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			a, ada := akunTes[r.Header.Get("X-Tes")]
@@ -374,7 +379,7 @@ func ujiHTTPPesanan(t *testing.T, siapkan func(*testing.T) siap) {
 			}
 			h.ServeHTTP(w, r.WithContext(akun.KeKonteks(r.Context(), a)))
 		})
-	})
+	}, opsional)
 	panggil := func(metode, jalur, siapa, kunci, isi string) (int, map[string]json.RawMessage) {
 		r := httptest.NewRequest(metode, jalur, strings.NewReader(isi))
 		r.Header.Set("X-Tes", siapa)
@@ -590,5 +595,80 @@ func ujiSaldo(t *testing.T, siapkan func(*testing.T) siap) {
 	// status Diproses tetap ngurangin saldo, biar ga dicairin dua kali
 	if s.Tersedia != 0 || len(s.Riwayat) != 2 || s.Riwayat[0].Status != "Diproses" {
 		t.Fatalf("cair besok: %+v", s)
+	}
+}
+
+func ujiVerifikasi(t *testing.T, siapkan func(*testing.T) siap) {
+	x := siapkan(t)
+	ctx := context.Background()
+	p, err := x.l.BuatPaket(ctx, mitraBaru, IsianPaket{Nama: "Nasi Kuning", Kategori: "Hidangan utama",
+		HargaAsli: 30000, HargaDiskon: 12000, TotalPorsi: 3, Mulai: 15 * 60, Tutup: 17 * 60})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ada := func(a akun.Akun) bool {
+		t.Helper()
+		daftar, err := x.l.DaftarPaket(ctx, a)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, q := range daftar {
+			if q.ID == p.ID {
+				return true
+			}
+		}
+		return false
+	}
+
+	// F-37 belum diverifikasi: pembeli ga liat, mitranya sendiri liat, ga bisa dipesan
+	if st, _ := x.l.StatusSaya(ctx, mitraBaru); st.Status != GeraiMenunggu {
+		t.Fatalf("status awal: %+v", st)
+	}
+	if ada(rani) || ada(akun.Akun{}) || !ada(mitraBaru) {
+		t.Fatalf("visibilitas sebelum verifikasi: pembeli %v tamu %v mitra %v", ada(rani), ada(akun.Akun{}), ada(mitraBaru))
+	}
+	if _, _, err := x.l.BuatPesanan(ctx, rani, map[string]int{p.ID: 1}, "qris", "kunci-verif-1"); kodeGalat(err) != http.StatusConflict {
+		t.Fatalf("pesan ke mitra belum verifikasi: %v", err)
+	}
+
+	// cuma admin yang bisa liat daftar dan meriksa
+	if _, err := x.l.DaftarMitra(ctx, ibis, ""); kodeGalat(err) != http.StatusForbidden {
+		t.Fatalf("mitra buka admin: %v", err)
+	}
+	menunggu, err := x.l.DaftarMitra(ctx, admin, GeraiMenunggu)
+	if err != nil || len(menunggu) != 1 || menunggu[0].ID != mitraBaru.ID {
+		t.Fatalf("daftar menunggu: %+v %v", menunggu, err)
+	}
+	if _, err := x.l.PeriksaMitra(ctx, admin, mitraBaru.ID, GeraiDitolak, ""); kodeGalat(err) != http.StatusUnprocessableEntity {
+		t.Fatalf("tolak tanpa alasan: %v", err)
+	}
+	if _, err := x.l.PeriksaMitra(ctx, admin, rani.ID, GeraiTerverifikasi, ""); kodeGalat(err) != http.StatusNotFound {
+		t.Fatalf("verifikasi akun pembeli: %v", err)
+	}
+	st, err := x.l.PeriksaMitra(ctx, admin, mitraBaru.ID, GeraiDitolak, "Foto KTP buram")
+	if err != nil || st.Alasan == nil || *st.Alasan != "Foto KTP buram" {
+		t.Fatalf("tolak: %+v %v", st, err)
+	}
+	if st, _ := x.l.StatusSaya(ctx, mitraBaru); st.Status != GeraiDitolak || st.Alasan == nil {
+		t.Fatalf("status ditolak keliatan mitra: %+v", st)
+	}
+
+	// disetujui: tampil dan bisa dipesan
+	if _, err := x.l.PeriksaMitra(ctx, admin, mitraBaru.ID, GeraiTerverifikasi, ""); err != nil {
+		t.Fatal(err)
+	}
+	if !ada(rani) {
+		t.Fatal("setelah verifikasi harus tampil ke pembeli")
+	}
+	if _, _, err := x.l.BuatPesanan(ctx, rani, map[string]int{p.ID: 1}, "qris", "kunci-verif-2"); err != nil {
+		t.Fatalf("pesan setelah verifikasi: %v", err)
+	}
+
+	// F-38 dinonaktifkan: hilang lagi dari pembeli
+	if _, err := x.l.PeriksaMitra(ctx, admin, mitraBaru.ID, GeraiNonaktif, "Melanggar ketentuan"); err != nil {
+		t.Fatal(err)
+	}
+	if ada(rani) {
+		t.Fatal("mitra nonaktif masih tampil")
 	}
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// ruang bawah daftar mitra biar item terakhir ga ketutup navigasi + tombol pindai
@@ -151,6 +154,7 @@ class Dasbor extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          const _BannerVerifikasi(),
 
           // gerai buka / tutup sementara (F-51)
           Container(
@@ -594,6 +598,107 @@ class _BarisPaket extends StatelessWidget {
             tooltip: 'Tambah sisa ${paket['nama']}',
             onPressed: () => cubit.ubahSisa(paket['id'], sisa + 1),
             icon: const Icon(Icons.add, size: 18),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// F-37: mitra yang belum diverifikasi admin dikasih tau kenapa paketnya
+/// belum keliatan pembeli. dicek ulang tiap daftar paket dimuat ulang (20 detik),
+/// jadi begitu admin nyetujuin bannernya ilang sendiri
+class _BannerVerifikasi extends StatefulWidget {
+  const _BannerVerifikasi();
+
+  @override
+  State<_BannerVerifikasi> createState() => _BannerVerifikasiState();
+}
+
+class _BannerVerifikasiState extends State<_BannerVerifikasi> {
+  Map<String, dynamic>? _status;
+  late final StreamSubscription<Object?> _paket;
+
+  @override
+  void initState() {
+    super.initState();
+    final paket = context.read<PaketCubit>();
+    _paket = paket.stream.listen((_) => _cek(paket));
+    _cek(paket);
+  }
+
+  Future<void> _cek(PaketCubit paket) async {
+    final status = await paket.statusGerai();
+    if (mounted && status != null) setState(() => _status = status);
+  }
+
+  @override
+  void dispose() {
+    _paket.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _status?['status'];
+    if (status == null || status == StatusGerai.terverifikasi) {
+      return const SizedBox.shrink();
+    }
+    final alasan = _status?['alasan'] as String?;
+    final menunggu = status == StatusGerai.menunggu;
+    final (judul, isi) = switch (status) {
+      StatusGerai.menunggu => (
+        'Akunmu sedang diverifikasi',
+        'Tim Sisa Rasa memeriksa data usahamu. Paket yang kamu buat '
+            'baru tampil ke pembeli setelah terverifikasi.',
+      ),
+      StatusGerai.ditolak => (
+        'Pendaftaran belum disetujui',
+        'Hubungi admin Sisa Rasa untuk memperbaiki datamu.',
+      ),
+      _ => (
+        'Akunmu dinonaktifkan',
+        'Paketmu tidak tampil ke pembeli. Hubungi admin Sisa Rasa.',
+      ),
+    };
+    return Container(
+      key: const Key('banner-verifikasi'),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: menunggu ? Warna.mendesakLembut : Warna.merahLembut,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            menunggu ? Icons.hourglass_top : Icons.error_outline,
+            size: 20,
+            color: menunggu ? Warna.mendesak : Warna.merah,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  judul,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  [isi, if (alasan != null) 'Alasan: $alasan'].join('\n'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Warna.teksPendukung,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

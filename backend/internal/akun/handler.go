@@ -112,6 +112,17 @@ func (l *Layanan) Wajib(berikut http.Handler) http.Handler {
 	})
 }
 
+// Opsional kayak Wajib, tapi request tanpa token / token ga berlaku tetap
+// diterusin tanpa akun (dipakai daftar paket yang boleh dibuka tamu)
+func (l *Layanan) Opsional(berikut http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if a, err := l.Sesi(r.Context(), tokenDari(r)); err == nil {
+			r = r.WithContext(context.WithValue(r.Context(), kunciAkun{}, a))
+		}
+		berikut.ServeHTTP(w, r)
+	})
+}
+
 // KeKonteks naruh akun di context kayak Wajib. dipakai tes paket lain
 func KeKonteks(ctx context.Context, a Akun) context.Context {
 	return context.WithValue(ctx, kunciAkun{}, a)

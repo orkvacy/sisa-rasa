@@ -18,16 +18,31 @@ type storeMemori struct {
 	pesanan []Pesanan
 	chat    []PesanChat
 	rek     map[string]Rekening
+	status  map[string]StatusGerai
 	cair    map[string][]Pencairan
 	urut    int
 }
 
 func memoriBaru() *storeMemori {
 	return &storeMemori{nama: map[string]string{}, gerai: map[string]Gerai{}, tutup: map[string]bool{},
-		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}}
+		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}, status: map[string]StatusGerai{}}
 }
 
-func (s *storeMemori) tambahMitra(id, nama string) { s.nama[id] = nama }
+// tambahMitra mitra contoh di tes, langsung terverifikasi kayak mitra semaian
+func (s *storeMemori) tambahMitra(id, nama string) {
+	s.nama[id] = nama
+	s.status[id] = StatusGerai{Status: GeraiTerverifikasi}
+}
+
+// tambahMitraBaru mitra yang baru daftar, belum diverifikasi admin
+func (s *storeMemori) tambahMitraBaru(id, nama string) { s.nama[id] = nama }
+
+func (s *storeMemori) statusDari(id string) StatusGerai {
+	if st, ada := s.status[id]; ada {
+		return st
+	}
+	return StatusGerai{Status: GeraiMenunggu}
+}
 
 func (s *storeMemori) lengkapi(p Paket) Paket {
 	g := s.gerai[p.IDMitra]
@@ -36,23 +51,25 @@ func (s *storeMemori) lengkapi(p Paket) Paket {
 		p.JenisMitra = "Mitra"
 	}
 	p.GeraiTutup = s.tutup[p.IDMitra]
+	p.StatusGerai = s.statusDari(p.IDMitra).Status
 	return p
 }
 
-func (s *storeMemori) SemuaPaket(context.Context) ([]Paket, error) {
+func (s *storeMemori) SemuaPaket(_ context.Context, idMitra string) ([]Paket, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	hasil := []Paket{}
 	for _, p := range s.paket {
-		if !p.dihapus {
-			hasil = append(hasil, s.lengkapi(p))
+		p = s.lengkapi(p)
+		if !p.dihapus && (p.StatusGerai == GeraiTerverifikasi || p.IDMitra == idMitra) {
+			hasil = append(hasil, p)
 		}
 	}
 	return hasil, nil
 }
 
 func (s *storeMemori) PaketMitra(_ context.Context, idMitra string) ([]Paket, error) {
-	semua, _ := s.SemuaPaket(context.Background())
+	semua, _ := s.SemuaPaket(context.Background(), idMitra)
 	hasil := []Paket{}
 	for _, p := range semua {
 		if p.IDMitra == idMitra {
@@ -363,6 +380,39 @@ func (s *storeMemori) Cairkan(_ context.Context, id, kunci string,
 	p.kunci = kunci
 	s.cair[id] = append([]Pencairan{*p}, s.cair[id]...)
 	return p, nil
+}
+
+func (s *storeMemori) StatusGerai(_ context.Context, id string) (StatusGerai, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ada := s.nama[id]; !ada {
+		return StatusGerai{}, ErrTidakAda
+	}
+	return s.statusDari(id), nil
+}
+
+func (s *storeMemori) DaftarMitra(_ context.Context, status string) ([]MitraAdmin, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	hasil := []MitraAdmin{}
+	for id, nama := range s.nama {
+		st := s.statusDari(id)
+		if status != "" && st.Status != status {
+			continue
+		}
+		hasil = append(hasil, MitraAdmin{ID: id, Nama: nama, Status: st.Status, Alasan: st.Alasan})
+	}
+	return hasil, nil
+}
+
+func (s *storeMemori) PeriksaMitra(_ context.Context, id, status string, alasan *string, _ time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ada := s.nama[id]; !ada {
+		return ErrTidakAda
+	}
+	s.status[id] = StatusGerai{Status: status, Alasan: alasan}
+	return nil
 }
 
 var _ Store = (*storeMemori)(nil)

@@ -31,12 +31,18 @@ func siapkanPG(url string) func(*testing.T) siap {
 			t.Fatal(err)
 		}
 		t.Cleanup(pool.Close)
-		semua := append([]akun.Akun{rani, dimas, ibis, prime}, pembeliBarengan()...)
+		semua := append([]akun.Akun{rani, dimas, ibis, prime, mitraBaru}, pembeliBarengan()...)
 		for i, a := range semua {
 			if _, err := pool.Exec(ctx, `
 				INSERT INTO akun (id, nama, email, hash_sandi, peran) VALUES ($1, $2, $3, 'x', $4)`,
 				a.ID, a.Nama, a.ID+"@contoh.id", a.Peran); err != nil {
 				t.Fatalf("akun %d: %v", i, err)
+			}
+		}
+		// mitra contoh udah diverifikasi admin, mitraBaru belum
+		for _, m := range []akun.Akun{ibis, prime} {
+			if _, err := pool.Exec(ctx, `INSERT INTO gerai (id_akun, status) VALUES ($1, 'terverifikasi')`, m.ID); err != nil {
+				t.Fatal(err)
 			}
 		}
 		return siapkanDengan(t, StorePG{Pool: pool})

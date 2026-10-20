@@ -168,6 +168,27 @@ func (l *Layanan) HapusAkun(ctx context.Context, a Akun, sandi string) error {
 	return err
 }
 
+// PastikanAdmin bikin akun admin kalau belum ada (F-36: admin ga bisa daftar
+// lewat aplikasi). kalau udah ada, sandinya ga diubah, jadi ADMIN_SANDI
+// cuma kepake sekali pas server pertama nyala
+func (l *Layanan) PastikanAdmin(ctx context.Context, email, sandi string) error {
+	email = rapikanEmail(email)
+	if _, err := l.Store.AkunDariEmail(ctx, email); err == nil {
+		return nil
+	} else if !errors.Is(err, ErrTidakAda) {
+		return err
+	}
+	if len(sandi) < 12 || len(sandi) > 72 {
+		return errors.New("ADMIN_SANDI minimal 12 karakter")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(sandi), l.biaya())
+	if err != nil {
+		return err
+	}
+	_, err = l.Store.BuatAkun(ctx, "Admin Sisa Rasa", email, string(hash), "admin")
+	return err
+}
+
 // Cari akun dari email, dipakai penyemai data contoh
 func (l *Layanan) Cari(ctx context.Context, email string) (Akun, error) {
 	a, err := l.Store.AkunDariEmail(ctx, rapikanEmail(email))

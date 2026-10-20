@@ -20,13 +20,15 @@ const (
 
 // Paket yang dikirim ke aplikasi, sudah digabung sama data gerainya
 type Paket struct {
-	ID          string `json:"id"`
-	IDMitra     string `json:"idMitra"`
-	Mitra       string `json:"mitra"`
-	JenisMitra  string `json:"jenisMitra"`
-	Alamat      string `json:"alamat"`
-	Jarak       string `json:"jarak"`
-	GeraiTutup  bool   `json:"geraiTutup"`
+	ID         string `json:"id"`
+	IDMitra    string `json:"idMitra"`
+	Mitra      string `json:"mitra"`
+	JenisMitra string `json:"jenisMitra"`
+	Alamat     string `json:"alamat"`
+	Jarak      string `json:"jarak"`
+	GeraiTutup bool   `json:"geraiTutup"`
+	// StatusGerai verifikasi mitra (F-37). pembeli cuma liat yang terverifikasi
+	StatusGerai string `json:"statusGerai"`
 	Nama        string `json:"nama"`
 	Deskripsi   string `json:"deskripsi"`
 	Kategori    string `json:"kategori"`
@@ -149,7 +151,9 @@ type Perubahan struct {
 // Store tempat nyimpen gerai, paket, dan pesanan. versi aslinya Postgres (store_pg.go),
 // di tes pakai versi memori. operasi yang nyentuh stok harus atomik
 type Store interface {
-	SemuaPaket(ctx context.Context) ([]Paket, error)
+	// SemuaPaket paket dari gerai terverifikasi, plus paket milik [idMitra]
+	// (mitra yang lagi masuk tetap liat paketnya sendiri walau belum diverifikasi)
+	SemuaPaket(ctx context.Context, idMitra string) ([]Paket, error)
 	PaketMitra(ctx context.Context, idMitra string) ([]Paket, error)
 	SimpanGerai(ctx context.Context, idMitra string, g Gerai) error
 	AturGerai(ctx context.Context, idMitra string, tutup bool) error
@@ -177,4 +181,5 @@ type Store interface {
 
 	StoreChat
 	StoreSaldo
+	StoreVerifikasi
 }

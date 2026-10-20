@@ -29,6 +29,16 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
     }
   }
 
+  /// status verifikasi gerai mitra yang lagi masuk (F-37).
+  /// null kalau gagal dimuat, banner di dasbor ga ditampilin
+  Future<Map<String, dynamic>?> statusGerai() async {
+    try {
+      return await layanan.statusGerai();
+    } on GagalLayanan {
+      return null;
+    }
+  }
+
   /// unggah foto paket yang dipilih mitra. null kalau gagal (pesannya ke [galat])
   Future<String?> unggahFoto(String jalur) async {
     try {

@@ -89,8 +89,14 @@ var (
 
 // DaftarPaket semua paket yang belum dihapus. aplikasi yang nyaring jam tutup,
 // karena jam demo di aplikasi bisa beda sama jam server
-func (l *Layanan) DaftarPaket(ctx context.Context) ([]Paket, error) {
-	return l.Store.SemuaPaket(ctx)
+// [a] akun yang lagi masuk (boleh kosong buat tamu). mitra ikut liat paketnya
+// sendiri walau gerainya belum diverifikasi
+func (l *Layanan) DaftarPaket(ctx context.Context, a akun.Akun) ([]Paket, error) {
+	idMitra := ""
+	if a.Peran == "mitra" {
+		idMitra = a.ID
+	}
+	return l.Store.SemuaPaket(ctx, idMitra)
 }
 
 func (l *Layanan) PaketSaya(ctx context.Context, a akun.Akun) ([]Paket, error) {
@@ -292,6 +298,9 @@ func (l *Layanan) susun(baru PesananBaru, paket []Paket) (Pesanan, error) {
 		case pk.IDMitra != pertama.IDMitra:
 			// F-07: satu pesanan cuma dari satu mitra, karena diambil langsung di tempat
 			return Pesanan{}, galat(http.StatusUnprocessableEntity, "Satu pesanan hanya bisa dari satu mitra.")
+		case pk.StatusGerai != GeraiTerverifikasi:
+			// F-37: mitra yang belum diverifikasi / dinonaktifkan ga bisa nerima pesanan
+			return Pesanan{}, galat(http.StatusConflict, pk.Mitra+" belum bisa menerima pesanan.")
 		case pk.Nonaktif || pk.GeraiTutup || pk.dihapus:
 			return Pesanan{}, galat(http.StatusConflict, pk.Nama+" sedang tidak dijual.")
 		case pk.Tutup <= menit:

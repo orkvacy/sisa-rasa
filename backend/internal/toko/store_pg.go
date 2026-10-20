@@ -37,7 +37,8 @@ func petakan(err error) error {
 
 const kolomPaket = `
 	p.id, p.id_mitra, a.nama, COALESCE(g.jenis, 'Mitra'), COALESCE(g.alamat, ''),
-	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), p.nama, p.deskripsi, p.kategori,
+	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), COALESCE(g.status, 'menunggu'),
+	p.nama, p.deskripsi, p.kategori,
 	p.foto, p.halal, p.meja_berbagi, p.harga_asli, p.harga_diskon, p.total_porsi,
 	p.sisa_porsi, p.mulai, p.tutup, p.nonaktif, p.dihapus`
 
@@ -49,7 +50,7 @@ const dariPaket = `
 func pindaiPaket(baris pgx.Row) (Paket, error) {
 	var p Paket
 	err := baris.Scan(&p.ID, &p.IDMitra, &p.Mitra, &p.JenisMitra, &p.Alamat,
-		&p.Jarak, &p.GeraiTutup, &p.Nama, &p.Deskripsi, &p.Kategori,
+		&p.Jarak, &p.GeraiTutup, &p.StatusGerai, &p.Nama, &p.Deskripsi, &p.Kategori,
 		&p.Foto, &p.Halal, &p.MejaBerbagi, &p.HargaAsli, &p.HargaDiskon, &p.TotalPorsi,
 		&p.SisaPorsi, &p.Mulai, &p.Tutup, &p.Nonaktif, &p.dihapus)
 	return p, err
@@ -67,9 +68,11 @@ func (s StorePG) daftarPaket(ctx context.Context, sql string, arg ...any) ([]Pak
 	return hasil, err
 }
 
-func (s StorePG) SemuaPaket(ctx context.Context) ([]Paket, error) {
+func (s StorePG) SemuaPaket(ctx context.Context, idMitra string) ([]Paket, error) {
 	return s.daftarPaket(ctx, `SELECT`+kolomPaket+dariPaket+`
-		WHERE NOT p.dihapus ORDER BY p.tutup, a.nama, p.dibuat`)
+		WHERE NOT p.dihapus
+		  AND (COALESCE(g.status, 'menunggu') = 'terverifikasi' OR p.id_mitra::text = $1)
+		ORDER BY p.tutup, a.nama, p.dibuat`, idMitra)
 }
 
 func (s StorePG) PaketMitra(ctx context.Context, idMitra string) ([]Paket, error) {
@@ -86,8 +89,8 @@ func (s StorePG) satuPaket(ctx context.Context, idMitra, id string) (Paket, erro
 
 func (s StorePG) SimpanGerai(ctx context.Context, idMitra string, g Gerai) error {
 	_, err := s.Pool.Exec(ctx, `
-		INSERT INTO gerai (id_akun, jenis, alamat, jarak) VALUES ($1, $2, $3, $4)
-		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4`,
+		INSERT INTO gerai (id_akun, jenis, alamat, jarak, status) VALUES ($1, $2, $3, $4, 'terverifikasi')
+		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4, status = 'terverifikasi'`,
 		idMitra, g.Jenis, g.Alamat, g.Jarak)
 	return petakan(err)
 }
