@@ -174,4 +174,6 @@ type Store interface {
 		ubah func(p *Pesanan) (Perubahan, error)) (Pesanan, error)
 	// MenungguLewat id pesanan yang masih nunggu bayar tapi batasnya udah lewat
 	MenungguLewat(ctx context.Context, sekarang time.Time) ([]string, error)
+
+	StoreChat
 }

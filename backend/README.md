@@ -26,6 +26,9 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `POST` | `/v1/pesanan/{id}/metode` | `{metode}` ganti metode sebelum bayar |
 | `POST` | `/v1/pesanan/{id}/status` | `{status}` mitra: `siap_diambil` / `selesai` (F-43) |
 | `POST` | `/v1/pesanan/{id}/batal-mitra` | `{alasan}` mitra batalkan pesanan lunas (F-42) |
+| `GET` `POST` | `/v1/pesanan/{id}/pesan` | Riwayat chat / kirim `{id, teks}` (F-67, F-68). `id` dari aplikasi, kiriman ulang tidak dobel |
+| `POST` | `/v1/pesanan/{id}/pesan/dibaca` | Tandai pesan lawan bicara sudah dibaca (F-70) |
+| `GET` | `/v1/pesan/baru?setelah=` | Pesan + tanda dibaca yang berubah di semua pesanan akun, ditarik aplikasi tiap 4 detik |
 
 Galat selalu berbentuk `{"pesan": "..."}` dengan kode HTTP yang sesuai
 (400 isian rusak, 401 belum/gagal masuk, 409 email terdaftar, 422 isian tidak

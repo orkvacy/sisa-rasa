@@ -163,6 +163,7 @@ class _SinkronState extends State<_Sinkron> {
     if (!pakaiServer || akun['id'] == _idAkun) return;
     _idAkun = akun['id'];
     // ganti akun / keluar: pesanan akun lama dibuang, lalu ambil punya akun baru
+    context.read<PercakapanCubit>().kosongkan();
     final pesanan = context.read<PesananBloc>()..add(PesananDikosongkan());
     if (akun['id'] != null) pesanan.add(PesananDimuat());
   }

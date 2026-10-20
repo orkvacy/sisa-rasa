@@ -5,6 +5,7 @@ import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
 import 'package:sisa_rasa/data/repositories/pembayaran_tiruan.dart';
+import 'package:sisa_rasa/data/repositories/percakapan_api.dart';
 import 'package:sisa_rasa/data/repositories/percakapan_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/pesanan_api.dart';
 import 'package:sisa_rasa/data/repositories/saldo_lokal.dart';
@@ -35,19 +36,20 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     // pembayaran masih tiruan di dua mode: server juga belum pakai Midtrans,
     // jadi layar pembayaran tetap nampilin keterangan mode uji
     ..registerLazySingleton<LayananPembayaran>(PembayaranTiruan.new)
-    // chat sama saldo belum ada di server
-    ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new)
+    // saldo belum ada di server
     ..registerLazySingleton<LayananSaldo>(SaldoLokal.new);
 
   if (alamat.isEmpty) {
     sl
       ..registerLazySingleton<LayananAkun>(AkunTiruan.new)
-      ..registerLazySingleton<LayananPaket>(PaketLokal.new);
+      ..registerLazySingleton<LayananPaket>(PaketLokal.new)
+      ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new);
     return;
   }
   final klien = KlienApi(alamat: alamat, sesi: sesi);
   sl
     ..registerLazySingleton<LayananAkun>(() => AkunApi(alamat: alamat))
     ..registerLazySingleton<LayananPaket>(() => PaketApi(klien))
-    ..registerLazySingleton<LayananPesanan>(() => PesananApi(klien));
+    ..registerLazySingleton<LayananPesanan>(() => PesananApi(klien))
+    ..registerLazySingleton<LayananPercakapan>(() => PercakapanApi(klien));
 }
