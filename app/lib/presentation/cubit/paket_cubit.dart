@@ -18,14 +18,41 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   /// pesan galat dari server, ditampilin jadi snackbar di main.dart
   Stream<String> get galat => _galat.stream;
 
+  bool _memuat = false;
+  String? _gagalMuat;
+
+  /// true selama daftar pertama belum datang: beranda nampilin kerangka
+  bool get memuat => _memuat && state.isEmpty;
+
+  /// pesan galat kalau daftar belum pernah kemuat sama sekali (ga ada
+  /// jaringan): beranda nampilin tombol coba lagi, bukan "belum ada paket"
+  String? get gagalMuat => state.isEmpty ? _gagalMuat : null;
+
   /// dipanggil pas aplikasi dibuka, dan berkala kalau tersambung server
   /// (stok berubah karena pembeli lain pesan)
   Future<void> muat() async {
+    if (state.isEmpty) {
+      _memuat = true;
+      _gagalMuat = null;
+      // list baru biar layar ikut digambar ulang
+      if (!isClosed) emit([...state]);
+    }
     try {
       final daftar = await layanan.semua();
+      _memuat = false;
+      _gagalMuat = null;
       if (!isClosed) emit(daftar);
     } on GagalLayanan catch (e) {
-      if (!_galat.isClosed) _galat.add(e.pesan);
+      _memuat = false;
+      if (isClosed) return;
+      if (state.isEmpty) {
+        // belum ada isi sama sekali: galatnya ditampilin di beranda
+        _gagalMuat = e.pesan;
+        emit([...state]);
+      } else if (!_galat.isClosed) {
+        // udah ada isi lama: cukup snackbar, daftar lama tetap keliatan
+        _galat.add(e.pesan);
+      }
     }
   }
 

@@ -136,7 +136,7 @@ class _KodeAmbilState extends State<KodeAmbil> {
                     foregroundColor: Warna.teks,
                     side: const BorderSide(color: Warna.garisKontrol),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: const Text(

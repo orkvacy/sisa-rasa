@@ -7,9 +7,10 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/presentation/widgets/hitung_mundur.dart';
-import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
 import 'package:sisa_rasa/presentation/widgets/pil_status.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
@@ -69,6 +70,7 @@ class _PesananState extends State<Pesanan> {
     // selesai sama dibatalkan dikelompokin per tanggal (Hari ini, Kemarin, ...)
     final isi = <Widget>[];
     String? kelompokTerakhir;
+    var urutan = 0;
     for (final pesanan in daftar) {
       if (segmen != 'berlangsung') {
         final kelompok = kelompokTanggal(_waktuAkhir(pesanan));
@@ -77,8 +79,15 @@ class _PesananState extends State<Pesanan> {
           kelompokTerakhir = kelompok;
         }
       }
+      // key ikut segmen: pindah segmen = kartunya muncul bertahap lagi
       isi
-        ..add(_kartu(pesanan))
+        ..add(
+          MunculBertahap(
+            key: ValueKey('$segmen-${pesanan['id']}'),
+            urutan: urutan++,
+            child: TekanMengecil(child: _kartu(pesanan)),
+          ),
+        )
         ..add(const SizedBox(height: 12));
     }
 
@@ -88,13 +97,13 @@ class _PesananState extends State<Pesanan> {
           16,
           12,
           16,
-          NavigasiMelayang.ruangBawah,
+          NavigasiBawah.ruangBawah,
         ),
         children: [
           const Text(
             'Pesanan',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 22,
               height: 34 / 28,
               letterSpacing: -0.4,
               fontWeight: FontWeight.w800,
@@ -173,7 +182,7 @@ class _PesananState extends State<Pesanan> {
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Warna.garis),
       ),
       clipBehavior: Clip.antiAlias,
@@ -443,7 +452,7 @@ class _SaringStatus extends StatelessWidget {
                 button: true,
                 selected: aktif == nama,
                 child: Material(
-                  color: aktif == nama ? Warna.gelap : Colors.transparent,
+                  color: aktif == nama ? Warna.hijau : Colors.transparent,
                   shape: const StadiumBorder(),
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
@@ -566,7 +575,7 @@ class _TombolUtama extends StatelessWidget {
           minimumSize: const Size(0, 44),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
         child: Row(
@@ -625,7 +634,7 @@ class _TombolGaris extends StatelessWidget {
         side: const BorderSide(color: Warna.garisKontrol),
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 13,

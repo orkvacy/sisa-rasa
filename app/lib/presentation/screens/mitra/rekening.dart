@@ -93,7 +93,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Warna.softGreen,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,9 +180,9 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
             onPressed: simpan,
             style: FilledButton.styleFrom(
               backgroundColor: Warna.hijau,
-              minimumSize: const Size.fromHeight(56),
+              minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
               ),
               textStyle: const TextStyle(
                 fontFamily: 'PlusJakartaSans',

@@ -78,15 +78,19 @@ class _DetailPaketState extends State<DetailPaket> {
               child: Stack(
                 children: [
                   // GambarPaket: foto paket full selebar layar
-                  GambarPaket(
-                    paket['foto'],
-                    width: double.infinity,
-                    height: 320,
-                    fit: BoxFit.cover,
+                  // Hero: nyambung sama foto di halaman mitra / hasil cari
+                  Hero(
+                    tag: 'foto-paket-${paket['id']}',
+                    child: GambarPaket(
+                      paket['foto'],
+                      width: double.infinity,
+                      height: 260,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  // lembar putih, margin atas 292 biar naik nutupin foto dikit
+                  // lembar putih, margin atas 236 biar naik nutupin foto dikit
                   Container(
-                    margin: const EdgeInsets.only(top: 292),
+                    margin: const EdgeInsets.only(top: 236),
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -240,7 +244,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Warna.latar,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,10 +404,10 @@ class _DetailPaketState extends State<DetailPaket> {
               children: [
                 if (!habis) ...[
                   Container(
-                    height: 52,
+                    height: 44,
                     decoration: BoxDecoration(
                       border: Border.all(color: Warna.garisKontrol),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
@@ -413,7 +417,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           onPressed: jumlah > 1
                               ? () => aturJumlah(jumlah - 1)
                               : null,
-                          icon: const Icon(Icons.remove),
+                          icon: const Icon(Icons.remove, size: 18),
                         ),
                         SizedBox(
                           width: 32,
@@ -445,7 +449,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           onPressed: jumlah < sisa
                               ? () => aturJumlah(jumlah + 1)
                               : null,
-                          icon: const Icon(Icons.add),
+                          icon: const Icon(Icons.add, size: 18),
                         ),
                       ],
                     ),
@@ -454,14 +458,14 @@ class _DetailPaketState extends State<DetailPaket> {
                 ],
                 Expanded(
                   child: SizedBox(
-                    height: 52,
+                    height: 44,
                     child: FilledButton(
                       onPressed: habis ? null : tambahKeKeranjang,
                       style: FilledButton.styleFrom(
                         backgroundColor: Warna.hijau,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       // FittedBox: tulisannya ngecil dikit kalau ga muat, biar ga turun baris

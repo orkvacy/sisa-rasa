@@ -99,9 +99,9 @@ class _TanpaKoneksiState extends State<TanpaKoneksi> {
                   backgroundColor: Warna.hijau,
                   disabledBackgroundColor: Warna.hijau.withValues(alpha: 0.6),
                   disabledForegroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),

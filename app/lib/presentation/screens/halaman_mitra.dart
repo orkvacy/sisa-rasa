@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_jumlah.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
@@ -12,6 +13,7 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
 /// isinya info gerai sama semua paket aktifnya, jadi pembeli bisa ambil
@@ -91,7 +93,7 @@ class HalamanMitra extends StatelessWidget {
                     Text(
                       nama,
                       style: const TextStyle(
-                        fontSize: 26,
+                        fontSize: 22,
                         height: 32 / 26,
                         letterSpacing: -0.78,
                         fontWeight: FontWeight.w800,
@@ -162,20 +164,23 @@ class HalamanMitra extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    for (final paket in daftar)
-                      _BarisPaketMitra(
-                        paket: paket,
-                        jumlah: keranjang[paket['id']] ?? 0,
-                        onTap: () => context.push(Rute.paket(paket['id'])),
-                        onTambah: () => _tambah(context, paket),
-                        onUbah: (baru) {
-                          final cubit = context.read<KeranjangCubit>();
-                          if (baru == 0) {
-                            cubit.hapus(paket['id']);
-                          } else {
-                            cubit.ubahJumlah(paket['id'], baru);
-                          }
-                        },
+                    for (final (i, paket) in daftar.indexed)
+                      MunculBertahap(
+                        urutan: i,
+                        child: _BarisPaketMitra(
+                          paket: paket,
+                          jumlah: keranjang[paket['id']] ?? 0,
+                          onTap: () => context.push(Rute.paket(paket['id'])),
+                          onTambah: () => _tambah(context, paket),
+                          onUbah: (baru) {
+                            final cubit = context.read<KeranjangCubit>();
+                            if (baru == 0) {
+                              cubit.hapus(paket['id']);
+                            } else {
+                              cubit.ubahJumlah(paket['id'], baru);
+                            }
+                          },
+                        ),
                       ),
                   ],
                 ),
@@ -311,7 +316,8 @@ class _Lencana extends StatelessWidget {
   }
 }
 
-/// kartu putih: jam tutup ambil + sisa waktu, sama tombol petunjuk arah
+/// satu baris info: jam tutup ambil + sisa waktu, tautan petunjuk arah di kanan.
+/// sengaja ga dibungkus kartu biar halamannya ga penuh kotak
 class _KartuTutup extends StatelessWidget {
   const _KartuTutup({required this.tutup, required this.onPetunjukArah});
 
@@ -320,31 +326,23 @@ class _KartuTutup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Warna.garis),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.schedule, size: 22, color: Warna.teks),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      children: [
+        const Icon(Icons.schedule, size: 16, color: Warna.mendesak),
+        const SizedBox(width: 6),
+        // satu teks biar bisa kepotong rapi di layar sempit / huruf besar
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              text: 'Tutup ${jam(tutup)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Warna.mendesak,
+              ),
               children: [
-                Text(
-                  'Tutup ${jam(tutup)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Warna.mendesak,
-                  ),
-                ),
-                Text(
-                  '${sisaWaktu(tutup)} lagi',
+                TextSpan(
+                  text: ' · ${sisaWaktu(tutup)} lagi',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -353,28 +351,26 @@ class _KartuTutup extends StatelessWidget {
                 ),
               ],
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(width: 12),
-          OutlinedButton.icon(
-            onPressed: onPetunjukArah,
-            icon: const Icon(Icons.navigation_outlined, size: 18),
-            label: const Text('Petunjuk arah'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Warna.teks,
-              side: const BorderSide(color: Warna.garisKontrol),
-              // tema bikin tombol outlined selebar layar, di sini seukuran isinya
-              minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
-              shape: const StadiumBorder(),
-              textStyle: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+        ),
+        TextButton.icon(
+          onPressed: onPetunjukArah,
+          icon: const Icon(Icons.navigation_outlined, size: 16),
+          label: const Text('Petunjuk arah'),
+          style: TextButton.styleFrom(
+            foregroundColor: Warna.hijau,
+            minimumSize: const Size(0, 36),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            textStyle: const TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -416,14 +412,18 @@ class _BarisPaketMitra extends StatelessWidget {
             Opacity(
               opacity: habis ? 0.5 : 1,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(10),
                 child: SizedBox(
                   width: 76,
                   height: 76,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      GambarPaket(paket['foto'], fit: BoxFit.cover),
+                      // Hero: fotonya "terbang" ke halaman detail paket
+                      Hero(
+                        tag: 'foto-paket-${paket['id']}',
+                        child: GambarPaket(paket['foto'], fit: BoxFit.cover),
+                      ),
                       // pil sisa cuma muncul kalau porsinya tinggal dikit
                       if (!habis && sisa <= 3)
                         Positioned(
@@ -508,11 +508,10 @@ class _BarisPaketMitra extends StatelessWidget {
                       if (habis)
                         const _PilHabis()
                       else if (jumlah == 0)
-                        _TombolHijau(
+                        TombolJumlah(
                           tooltip: 'Tambah ${paket['nama']}',
                           ikon: Icons.add,
-                          ukuran: 40,
-                          latar: Warna.softGreen,
+                          penuh: true,
                           onPressed: onTambah,
                         )
                       else
@@ -529,41 +528,7 @@ class _BarisPaketMitra extends StatelessWidget {
   }
 }
 
-/// tombol ikon bulat. area sentuhnya tetap 48 lewat materialTapTargetSize di tema
-class _TombolHijau extends StatelessWidget {
-  const _TombolHijau({
-    required this.tooltip,
-    required this.ikon,
-    required this.ukuran,
-    required this.latar,
-    required this.onPressed,
-  });
-
-  final String tooltip;
-  final IconData ikon;
-  final double ukuran;
-  final Color latar;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      icon: Icon(ikon, size: ukuran >= 40 ? 22 : 18),
-      style: IconButton.styleFrom(
-        backgroundColor: latar,
-        foregroundColor: Warna.teks,
-        disabledBackgroundColor: latar,
-        fixedSize: Size(ukuran, ukuran),
-        minimumSize: Size(ukuran, ukuran),
-        padding: EdgeInsets.zero,
-      ),
-    );
-  }
-}
-
-/// pengatur porsi: pil hijau muda isi tombol - jumlah +.
+/// pengatur porsi: tombol - jumlah +.
 /// minus di jumlah 1 berarti paketnya dikeluarin dari keranjang
 class _AturPorsi extends StatelessWidget {
   const _AturPorsi({
@@ -578,43 +543,11 @@ class _AturPorsi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Warna.softGreen,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _TombolHijau(
-            tooltip: jumlah == 1 ? 'Hapus dari keranjang' : 'Kurangi porsi',
-            ikon: Icons.remove,
-            ukuran: 32,
-            latar: Colors.white,
-            onPressed: () => onUbah(jumlah - 1),
-          ),
-          SizedBox(
-            width: 28,
-            child: Text(
-              '$jumlah',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Warna.teks,
-              ),
-            ),
-          ),
-          _TombolHijau(
-            tooltip: 'Tambah porsi',
-            ikon: Icons.add,
-            ukuran: 32,
-            latar: Colors.white,
-            onPressed: jumlah < sisa ? () => onUbah(jumlah + 1) : null,
-          ),
-        ],
-      ),
+    return PengaturJumlah(
+      jumlah: jumlah,
+      labelKurang: jumlah == 1 ? 'Hapus dari keranjang' : 'Kurangi porsi',
+      onKurang: () => onUbah(jumlah - 1),
+      onTambah: jumlah < sisa ? () => onUbah(jumlah + 1) : null,
     );
   }
 }

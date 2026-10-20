@@ -136,7 +136,7 @@ class _KeranjangState extends State<Keranjang> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
@@ -209,7 +209,7 @@ class _KeranjangState extends State<Keranjang> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +261,7 @@ class _KeranjangState extends State<Keranjang> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         children: [
@@ -352,7 +352,7 @@ class _KeranjangState extends State<Keranjang> {
                             style: FilledButton.styleFrom(
                               backgroundColor: Warna.hijau,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: Text(

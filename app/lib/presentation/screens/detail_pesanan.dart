@@ -53,7 +53,7 @@ class DetailPesanan extends StatelessWidget {
                 color: Warna.momen,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
+                    top: Radius.circular(14),
                   ),
                   child: ColoredBox(
                     color: Warna.latar,
@@ -177,7 +177,7 @@ class _KotakMenungguBayar extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Warna.mendesakLembut,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -235,7 +235,7 @@ class _KotakKode extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Warna.softGreen,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -268,7 +268,7 @@ class _KotakKode extends StatelessWidget {
             pesanan['kode'],
             style: const TextStyle(
               fontFamily: 'JetBrainsMono',
-              fontSize: 30,
+              fontSize: 24,
               height: 48 / 30,
               letterSpacing: 2,
               fontWeight: FontWeight.w700,

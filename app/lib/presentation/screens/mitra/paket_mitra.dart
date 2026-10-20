@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_jumlah.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// status satu paket dari sisi mitra
@@ -63,7 +65,7 @@ class _PaketMitraState extends State<PaketMitra> {
                 child: Text(
                   'Paket',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 22,
                     height: 34 / 28,
                     letterSpacing: -0.4,
                     fontWeight: FontWeight.w800,
@@ -73,19 +75,19 @@ class _PaketMitraState extends State<PaketMitra> {
               ),
               FilledButton.icon(
                 onPressed: () => context.push(Rute.mitraPaketBaru),
-                icon: const Icon(Icons.add, size: 20),
+                icon: const Icon(Icons.add, size: 18),
                 label: const Text('Paket baru'),
                 style: FilledButton.styleFrom(
                   backgroundColor: Warna.hijau,
                   // tema bikin tombol selebar layar, di sini seukuran isinya
-                  minimumSize: const Size(0, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  minimumSize: const Size(0, 38),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   textStyle: const TextStyle(
                     fontFamily: 'PlusJakartaSans',
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -95,9 +97,20 @@ class _PaketMitraState extends State<PaketMitra> {
           const SizedBox(height: 16),
           TextField(
             onChanged: (teks) => setState(() => cari = teks),
-            decoration: const InputDecoration(
+            // abu muda tanpa garis, sama kayak kolom cari beranda
+            decoration: InputDecoration(
               hintText: 'Cari nama paket',
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              fillColor: Warna.kraft,
+              isDense: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -129,10 +142,14 @@ class _PaketMitraState extends State<PaketMitra> {
                 style: const TextStyle(color: Warna.teksPendukung),
               ),
             ),
-          for (final p in tampil) ...[
-            _KartuPaket(
-              paket: p,
-              onTap: () => context.push(Rute.mitraUbahPaket(p['id'])),
+          for (final (i, p) in tampil.indexed) ...[
+            MunculBertahap(
+              key: ValueKey('$saring-${p['id']}'),
+              urutan: i,
+              child: _KartuPaket(
+                paket: p,
+                onTap: () => context.push(Rute.mitraUbahPaket(p['id'])),
+              ),
             ),
             const SizedBox(height: 12),
           ],
@@ -169,7 +186,7 @@ class _KartuPaket extends StatelessWidget {
       child: Material(
         color: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Warna.garis),
         ),
         clipBehavior: Clip.antiAlias,
@@ -275,31 +292,17 @@ class _KartuPaket extends StatelessWidget {
                       style: TextButton.styleFrom(foregroundColor: Warna.hijau),
                       child: Text(sisa > 0 ? 'Set habis' : 'Ubah'),
                     ),
-                    IconButton.outlined(
-                      tooltip: 'Kurangi sisa ${paket['nama']}',
-                      onPressed: sisa > 0
+                    PengaturJumlah(
+                      jumlah: sisa,
+                      labelKurang: 'Kurangi sisa ${paket['nama']}',
+                      labelTambah: 'Tambah sisa ${paket['nama']}',
+                      onKurang: sisa > 0
                           ? () => cubit.ubahSisa(paket['id'], sisa - 1)
                           : null,
-                      icon: const Icon(Icons.remove, size: 18),
-                    ),
-                    SizedBox(
-                      width: 28,
-                      child: Text(
-                        '$sisa',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    IconButton.outlined(
-                      tooltip: 'Tambah sisa ${paket['nama']}',
                       // ga boleh lebih dari jumlah porsi yg diterbitkan
-                      onPressed: sisa < total
+                      onTambah: sisa < total
                           ? () => cubit.ubahSisa(paket['id'], sisa + 1)
                           : null,
-                      icon: const Icon(Icons.add, size: 18),
                     ),
                   ],
                 ),

@@ -50,7 +50,7 @@ class DetailPesananMitra extends StatelessWidget {
                 color: Warna.momen,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
+                    top: Radius.circular(14),
                   ),
                   child: ColoredBox(
                     color: Warna.latar,
@@ -212,7 +212,7 @@ class _KotakStatus extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: batal ? Warna.merahLembut : Warna.softGreen,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -423,7 +423,7 @@ class _LembarBatalState extends State<_LembarBatal> {
                 style: FilledButton.styleFrom(
                   backgroundColor: Warna.merah,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(

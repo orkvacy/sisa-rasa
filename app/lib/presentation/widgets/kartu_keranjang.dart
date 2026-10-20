@@ -128,7 +128,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
                 onPressed: widget.jumlah > 1
                     ? () => widget.onJumlahBerubah(widget.jumlah - 1)
                     : null,
-                icon: const Icon(Icons.remove, size: 20),
+                icon: const Icon(Icons.remove, size: 18),
               ),
               SizedBox(
                 width: 32,
@@ -153,7 +153,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
                 onPressed: widget.jumlah < sisa
                     ? () => widget.onJumlahBerubah(widget.jumlah + 1)
                     : null,
-                icon: const Icon(Icons.add, size: 20),
+                icon: const Icon(Icons.add, size: 18),
               ),
             ],
           ),

@@ -139,7 +139,7 @@ class Pembayaran extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Warna.mendesakLembut,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
@@ -300,7 +300,7 @@ class Pembayaran extends StatelessWidget {
                       backgroundColor: Colors.white,
                       side: const BorderSide(color: Warna.garisKontrol),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: mengecek
@@ -405,7 +405,7 @@ class _Kartu extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Warna.garis),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: child,
     );
@@ -440,7 +440,7 @@ class _IsiTagihan extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
         color: Warna.latar,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
@@ -597,7 +597,7 @@ class _TombolGaris extends StatelessWidget {
           foregroundColor: Warna.teks,
           side: const BorderSide(color: Warna.garisKontrol),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: FittedBox(

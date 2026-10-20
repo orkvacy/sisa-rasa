@@ -32,7 +32,7 @@ class BarisMetode extends StatelessWidget {
       child: Material(
         color: dipilih ? Warna.softGreen : Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           side: BorderSide(
             color: dipilih ? Warna.hijau : Warna.garis,
             width: dipilih ? 1.5 : 1,

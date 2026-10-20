@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_jumlah.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
@@ -14,8 +15,9 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
-/// ruang bawah daftar mitra biar item terakhir ga ketutup navigasi + tombol pindai
-const ruangBawahMitra = 116.0;
+/// ruang bawah daftar mitra: isi tab berhenti di atas navigasi,
+/// tapi tombol pindai nongol ke atas sedikit
+const ruangBawahMitra = 40.0;
 
 /// pesanan milik mitra yg lagi masuk, dari semua pembeli
 List<Map<String, dynamic>> pesananMitra(BuildContext context, String mitra) {
@@ -120,7 +122,7 @@ class Dasbor extends StatelessWidget {
                           ? 'Dapur sore ini'
                           : 'Dapur malam ini',
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: 22,
                         height: 34 / 28,
                         letterSpacing: -0.4,
                         fontWeight: FontWeight.w800,
@@ -162,7 +164,7 @@ class Dasbor extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: Warna.garis),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -216,12 +218,13 @@ class Dasbor extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // kartu hijau: ringkasan hari ini (F-21)
+          // kartu ringkasan hari ini (F-21): putih, cuma angka porsinya yg hijau
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Warna.momen,
-              borderRadius: BorderRadius.circular(24),
+              color: Warna.kartu,
+              border: Border.all(color: Warna.garis),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,22 +235,22 @@ class Dasbor extends StatelessWidget {
                     Text(
                       '$porsi',
                       style: const TextStyle(
-                        fontSize: 40,
+                        fontSize: 30,
                         height: 44 / 40,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: Warna.hijau,
                       ),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         'porsi terselamatkan hari ini',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                        style: TextStyle(fontSize: 14, color: Warna.teks),
                       ),
                     ),
                   ],
                 ),
-                const Divider(height: 28, color: Colors.white24),
+                const Divider(height: 28, color: Warna.garis),
                 Row(
                   children: [
                     Expanded(
@@ -353,13 +356,13 @@ class _Angka extends StatelessWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: Warna.teks,
             ),
           ),
         ),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.white70),
+          style: const TextStyle(fontSize: 12, color: Warna.teksPendukung),
         ),
       ],
     );
@@ -419,7 +422,7 @@ class _Kartu extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Warna.garis),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,29 +578,14 @@ class _BarisPaket extends StatelessWidget {
               ],
             ),
           ),
-          IconButton.outlined(
-            tooltip: 'Kurangi sisa ${paket['nama']}',
-            onPressed: sisa > 0
+          PengaturJumlah(
+            jumlah: sisa,
+            labelKurang: 'Kurangi sisa ${paket['nama']}',
+            labelTambah: 'Tambah sisa ${paket['nama']}',
+            onKurang: sisa > 0
                 ? () => cubit.ubahSisa(paket['id'], sisa - 1)
                 : null,
-            icon: const Icon(Icons.remove, size: 18),
-          ),
-          SizedBox(
-            width: 28,
-            child: Text(
-              '$sisa',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Warna.teks,
-              ),
-            ),
-          ),
-          IconButton.outlined(
-            tooltip: 'Tambah sisa ${paket['nama']}',
-            onPressed: () => cubit.ubahSisa(paket['id'], sisa + 1),
-            icon: const Icon(Icons.add, size: 18),
+            onTambah: () => cubit.ubahSisa(paket['id'], sisa + 1),
           ),
         ],
       ),
@@ -667,7 +655,7 @@ class _BannerVerifikasiState extends State<_BannerVerifikasi> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: menunggu ? Warna.mendesakLembut : Warna.merahLembut,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

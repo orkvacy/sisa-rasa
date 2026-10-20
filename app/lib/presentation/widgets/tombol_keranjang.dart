@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// ikon keranjang di kanan atas beranda, angkanya = jumlah porsi di keranjang.
 /// gantiin bar keranjang melayang biar ga numpuk sama navigasi melayang
@@ -23,14 +24,18 @@ class TombolKeranjang extends StatelessWidget {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         context.push(Rute.keranjang);
       },
-      icon: Badge(
-        isLabelVisible: porsi > 0,
-        label: Text(
-          porsi > 99 ? '99+' : '$porsi',
-          key: const Key('jumlah-keranjang'),
+      // mantul tiap jumlahnya berubah, tanda paketnya udah masuk
+      icon: MantulSaatBerubah(
+        nilai: porsi,
+        child: Badge(
+          isLabelVisible: porsi > 0,
+          label: Text(
+            porsi > 99 ? '99+' : '$porsi',
+            key: const Key('jumlah-keranjang'),
+          ),
+          backgroundColor: Warna.merah,
+          child: const Icon(Icons.shopping_bag_outlined, color: Warna.teks),
         ),
-        backgroundColor: Warna.merah,
-        child: const Icon(Icons.shopping_bag_outlined, color: Warna.teks),
       ),
     );
   }

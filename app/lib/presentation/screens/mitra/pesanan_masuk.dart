@@ -8,6 +8,7 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
@@ -54,7 +55,7 @@ class _PesananMasukState extends State<PesananMasuk> {
           const Text(
             'Pesanan masuk',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 22,
               height: 34 / 28,
               letterSpacing: -0.4,
               fontWeight: FontWeight.w800,
@@ -78,7 +79,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                       selected: segmen == status,
                       child: Material(
                         color: segmen == status
-                            ? Warna.gelap
+                            ? Warna.hijau
                             : Colors.transparent,
                         shape: const StadiumBorder(),
                         clipBehavior: Clip.antiAlias,
@@ -176,10 +177,16 @@ class _PesananMasukState extends State<PesananMasuk> {
                 style: const TextStyle(color: Warna.teksPendukung),
               ),
             ),
-          for (final p in daftar) ...[
-            _KartuPesanan(
-              pesanan: p,
-              onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
+          for (final (i, p) in daftar.indexed) ...[
+            MunculBertahap(
+              key: ValueKey('$segmen-${p['id']}'),
+              urutan: i,
+              child: TekanMengecil(
+                child: _KartuPesanan(
+                  pesanan: p,
+                  onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
+                ),
+              ),
             ),
             const SizedBox(height: 12),
           ],
@@ -188,7 +195,7 @@ class _PesananMasukState extends State<PesananMasuk> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Warna.kraft,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -241,7 +248,7 @@ class _KartuPesanan extends StatelessWidget {
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Warna.garis),
       ),
       clipBehavior: Clip.antiAlias,
@@ -376,7 +383,7 @@ class _KartuPesanan extends StatelessWidget {
                           minimumSize: const Size(0, 48),
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: Text(

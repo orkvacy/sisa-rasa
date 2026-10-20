@@ -30,13 +30,14 @@ class BarKeranjang extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: _lebar),
         // Material + InkWell: biar ada efek riak waktu diketuk
         child: Material(
-          color: cs.inverseSurface,
-          borderRadius: BorderRadius.circular(999),
-          elevation: 6,
-          shadowColor: cs.scrim.withValues(alpha: 0.4),
+          color: cs.primary,
+          // sudut 12 kayak kartu lain, bayangannya tipis aja di latar putih
+          borderRadius: BorderRadius.circular(12),
+          elevation: 2,
+          shadowColor: cs.scrim.withValues(alpha: 0.18),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(12),
             child: Semantics(
               button: true,
               label: 'Keranjang, $jumlahPorsi porsi, ${rupiah(total)}',
@@ -65,9 +66,7 @@ class BarKeranjang extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: teks.labelSmall?.copyWith(
-                              color: cs.onInverseSurface.withValues(
-                                alpha: 0.75,
-                              ),
+                              color: cs.onPrimary.withValues(alpha: 0.75),
                             ),
                           ),
                           Text(
@@ -75,7 +74,7 @@ class BarKeranjang extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: teks.titleSmall?.copyWith(
-                              color: cs.onInverseSurface,
+                              color: cs.onPrimary,
                               fontWeight: FontWeight.w800,
                               fontFeatures: const [
                                 FontFeature.tabularFigures(),
@@ -88,16 +87,12 @@ class BarKeranjang extends StatelessWidget {
                     Text(
                       'Keranjang',
                       style: teks.labelSmall?.copyWith(
-                        color: cs.onInverseSurface,
+                        color: cs.onPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: cs.onInverseSurface,
-                    ),
+                    Icon(Icons.chevron_right, size: 20, color: cs.onPrimary),
                   ],
                 ),
               ),

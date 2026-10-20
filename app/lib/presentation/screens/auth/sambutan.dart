@@ -33,7 +33,7 @@ class Sambutan extends StatelessWidget {
                   const Text(
                     'Makanan enak yang belum sempat habis.',
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: 26,
                       height: 36 / 30,
                       letterSpacing: -0.6,
                       fontWeight: FontWeight.w800,
@@ -54,9 +54,9 @@ class Sambutan extends StatelessWidget {
                     onPressed: () => context.push(Rute.daftar),
                     style: FilledButton.styleFrom(
                       backgroundColor: Warna.hijau,
-                      minimumSize: const Size.fromHeight(52),
+                      minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       textStyle: const TextStyle(
                         fontFamily: 'PlusJakartaSans',
@@ -73,9 +73,9 @@ class Sambutan extends StatelessWidget {
                       foregroundColor: Warna.teks,
                       backgroundColor: Colors.white,
                       side: const BorderSide(color: Warna.garisKontrol),
-                      minimumSize: const Size.fromHeight(52),
+                      minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       textStyle: const TextStyle(
                         fontFamily: 'PlusJakartaSans',
@@ -123,7 +123,7 @@ class _MosaikFoto extends StatelessWidget {
 
   Widget _kotak(String foto, {Widget? label}) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(10),
       child: Stack(
         fit: StackFit.expand,
         children: [

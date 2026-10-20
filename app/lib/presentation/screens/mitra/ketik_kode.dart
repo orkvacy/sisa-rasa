@@ -132,7 +132,7 @@ Future<bool> konfirmasiSerahkan(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Warna.latar,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
@@ -162,7 +162,7 @@ Future<bool> konfirmasiSerahkan(
                 style: FilledButton.styleFrom(
                   backgroundColor: Warna.hijau,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
@@ -180,7 +180,7 @@ Future<bool> konfirmasiSerahkan(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Warna.teks,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
@@ -357,7 +357,7 @@ class _KetikKodeState extends State<KetikKode> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: galat != null
                                   ? Warna.merah
@@ -409,7 +409,7 @@ class _KetikKodeState extends State<KetikKode> {
               style: FilledButton.styleFrom(
                 backgroundColor: Warna.hijau,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(

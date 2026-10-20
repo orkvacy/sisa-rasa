@@ -48,8 +48,8 @@ class _TombolGoogleState extends State<TombolGoogle> {
         foregroundColor: Warna.teks,
         backgroundColor: Colors.white,
         side: const BorderSide(color: Warna.garisKontrol),
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 16,

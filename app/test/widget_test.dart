@@ -8,7 +8,7 @@ import 'package:sisa_rasa/data/sumber/dummy_akun.dart';
 import 'package:sisa_rasa/injection.dart';
 import 'package:sisa_rasa/main.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_utama.dart';
-import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
 
 /// hitung mundur batas bayar jalan tiap detik, jadi selama layarnya kebuka
 /// pumpAndSettle ga akan pernah "tenang". di bagian itu pake pump biasa
@@ -82,7 +82,7 @@ void main() {
   });
 
   tesKelolaPaket();
-  testWidgets('beranda: flash sale, mitra sekitar, navigasi melayang', (
+  testWidgets('beranda: flash sale, mitra sekitar, navigasi bawah', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
@@ -93,9 +93,9 @@ void main() {
     expect(find.text('Sore ini'), findsOneWidget);
     // Ibis + Prime Cut tutup 17.00, kurang dari sejam dari 16.20 -> Flash sale (F-53)
     expect(find.text('Flash sale'), findsOneWidget);
-    expect(find.text('2 paket'), findsOneWidget);
-    expect(find.text('1 paket'), findsOneWidget);
-    expect(find.byType(NavigasiMelayang), findsOneWidget);
+    // kartu flash sale cuma nampilin jam tutup, jumlah paket di halaman mitra
+    expect(find.text('Tutup 17.00'), findsNWidgets(2));
+    expect(find.byType(NavigasiBawah), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Mitra sekitar'),
       300,
@@ -116,7 +116,7 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('pindah tab lewat navigasi melayang', (tester) async {
+  testWidgets('pindah tab lewat navigasi bawah', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
     // paket dimuat async dari repository, tunggu satu frame
@@ -208,10 +208,17 @@ void main() {
     expect(find.text('Disiapkan'), findsOneWidget);
 
     // stok yg udah dibayar ga balik: breakfast habis, Ibis tinggal punya 1 paket
-    // (kartu Ibis + Prime Cut di Flash sale sama-sama 1 paket)
     await tester.tap(find.text('Beranda').last);
     await tester.pumpAndSettle();
-    expect(find.text('1 paket'), findsNWidgets(2));
+    final paket = tester
+        .element(find.text('Flash sale'))
+        .read<PaketCubit>()
+        .state;
+    expect(
+      paket.where((p) => p['mitra'] == 'Ibis Hotel' && p['sisaPorsi'] > 0),
+      hasLength(1),
+    );
+    expect(find.text('Ibis Hotel'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 
