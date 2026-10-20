@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_paket.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_pesanan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 
 // nyimpen daftar paket + sisa porsinya
@@ -10,10 +13,40 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
 
   final LayananPaket layanan;
 
-  /// dipanggil sekali pas aplikasi dibuka
+  final _galat = StreamController<String>.broadcast();
+
+  /// pesan galat dari server, ditampilin jadi snackbar di main.dart
+  Stream<String> get galat => _galat.stream;
+
+  /// dipanggil pas aplikasi dibuka, dan berkala kalau tersambung server
+  /// (stok berubah karena pembeli lain pesan)
   Future<void> muat() async {
-    final daftar = await layanan.semua();
-    if (!isClosed) emit(daftar);
+    try {
+      final daftar = await layanan.semua();
+      if (!isClosed) emit(daftar);
+    } on GagalLayanan catch (e) {
+      if (!_galat.isClosed) _galat.add(e.pesan);
+    }
+  }
+
+  /// perubahan dari mitra: layar langsung keubah duluan (di atas), baru dikirim
+  /// ke server. kalau server nolak, daftar dimuat ulang biar balik ke data asli
+  void _kirim(Future<void> Function() aksi) {
+    if (layanan.lokal) return;
+    unawaited(() async {
+      try {
+        await aksi();
+      } on GagalLayanan catch (e) {
+        if (!_galat.isClosed) _galat.add(e.pesan);
+      }
+      await muat();
+    }());
+  }
+
+  @override
+  Future<void> close() {
+    _galat.close();
+    return super.close();
   }
 
   Map<String, dynamic> cari(String id) {
@@ -45,6 +78,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
 
   // mitra ubah sisa porsi langsung dari daftar (F-44)
   void ubahSisa(String id, int sisa) {
+    _kirim(() => layanan.aturSisa(id, sisa));
     emit([
       for (final paket in state)
         if (paket['id'] == id) {...paket, 'sisaPorsi': sisa} else paket,
@@ -53,6 +87,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
 
   // mitra tutup / buka gerai sementara, paketnya ga tampil buat pembeli (F-51)
   void aturGerai(String mitra, {required bool buka}) {
+    _kirim(() => layanan.aturGerai(tutup: !buka));
     emit([
       for (final paket in state)
         if (paket['mitra'] == mitra) {...paket, 'geraiTutup': !buka} else paket,
@@ -77,6 +112,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
     final gerai = state.where((p) => p['mitra'] == isian['mitra']).firstOrNull;
     _nomorBaru++;
     final id = 'pm-${DateTime.now().millisecondsSinceEpoch}-$_nomorBaru';
+    _kirim(() => layanan.tambah(isian));
     emit([
       ...state,
       {
@@ -96,6 +132,8 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   /// mitra ubah paket (F-18). kalau jumlah porsinya diganti,
   /// sisa porsi ikut geser sebanyak selisihnya
   void ubahPaket(String id, Map<String, dynamic> isian) {
+    // server butuh isian lengkap (foto, halal, dst), jadi digabung sama data lama
+    _kirim(() => layanan.ubah(id, {...cari(id), ...isian}));
     emit([
       for (final paket in state)
         if (paket['id'] == id)
@@ -114,6 +152,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   void hapusPaket(String id) {
+    _kirim(() => layanan.hapus(id));
     emit([
       for (final paket in state)
         if (paket['id'] != id) paket,
@@ -122,6 +161,7 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
 
   /// aktif / nonaktifin paket, yg nonaktif ga tampil buat pembeli (F-45)
   void aturAktif(String id, {required bool aktif}) {
+    _kirim(() => layanan.aturAktif(id, aktif: aktif));
     emit([
       for (final paket in state)
         if (paket['id'] == id) {...paket, 'nonaktif': !aktif} else paket,
