@@ -176,4 +176,5 @@ type Store interface {
 	MenungguLewat(ctx context.Context, sekarang time.Time) ([]string, error)
 
 	StoreChat
+	StoreSaldo
 }

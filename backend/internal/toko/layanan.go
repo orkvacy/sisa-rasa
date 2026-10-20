@@ -42,6 +42,9 @@ type Layanan struct {
 	// JamDemo kalau diisi, "jam berapa sekarang" dikunci ke menit ini (misal 16*60+20),
 	// sama kayak jamSekarang di aplikasi demo. batas bayar tetap pakai waktu asli
 	JamDemo *int
+	// PencairanUji pencairan harian langsung dianggap berhasil karena belum ada
+	// transfer bank beneran. di production status awalnya Diproses
+	PencairanUji bool
 }
 
 func (l *Layanan) sekarang() time.Time {

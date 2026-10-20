@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/orkvacy/sisa-rasa/backend/internal/akun"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
@@ -88,6 +89,15 @@ func SemaiContoh(ctx context.Context, l *Layanan, ak *akun.Layanan) error {
 		}
 		if err := l.Store.SimpanGerai(ctx, a.ID, g.gerai); err != nil {
 			return err
+		}
+		// rekening contoh, sama kayak SaldoLokal di aplikasi
+		if rek, err := l.Store.Rekening(ctx, a.ID); err != nil {
+			return err
+		} else if rek == nil {
+			if err := l.Store.SimpanRekening(ctx, a.ID, Rekening{Bank: "BCA", Nomor: "1234567890",
+				Nama: strings.ToUpper(g.nama)}, l.sekarang()); err != nil {
+				return err
+			}
 		}
 		ada, err := l.Store.PaketMitra(ctx, a.ID)
 		if err != nil {

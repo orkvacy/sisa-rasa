@@ -502,3 +502,77 @@ func ujiChat(t *testing.T, siapkan func(*testing.T) siap) {
 		t.Fatalf("riwayat tetap bisa dibaca: %d %v", len(riwayat), err)
 	}
 }
+
+func ujiSaldo(t *testing.T, siapkan func(*testing.T) siap) {
+	x := siapkan(t)
+	ctx := context.Background()
+	x.l.PencairanUji = true
+	selesaikan := func(kunci string) {
+		t.Helper()
+		p, _, err := x.l.BuatPesanan(ctx, rani, map[string]int{x.kue.ID: 1}, "qris", kunci)
+		if err != nil {
+			t.Fatal(err)
+		}
+		p, _ = x.l.CekBayar(ctx, rani, p.ID)
+		if _, err := x.l.AmbilDenganKode(ctx, ibis, *p.Kode); err != nil {
+			t.Fatal(err)
+		}
+	}
+	tersedia := func() int {
+		t.Helper()
+		s, err := x.l.SaldoSaya(ctx, ibis)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s.Tersedia
+	}
+
+	if _, err := x.l.SaldoSaya(ctx, rani); kodeGalat(err) != http.StatusForbidden {
+		t.Fatalf("pembeli liat saldo: %v", err)
+	}
+	// 38rb - komisi 10% = 34.200
+	selesaikan("kunci-saldo-1")
+	if tersedia() != 34200 {
+		t.Fatalf("saldo: %d", tersedia())
+	}
+
+	// belum ada rekening: ga ada yang dicairin
+	x.l.CairkanHarian(ctx)
+	if tersedia() != 34200 {
+		t.Fatal("cair tanpa rekening")
+	}
+	// F-49 nama harus sama dengan nama usaha
+	if _, err := x.l.SimpanRekening(ctx, ibis, Rekening{Bank: "BCA", Nomor: "1234567890", Nama: "Orang Lain"}); kodeGalat(err) != http.StatusUnprocessableEntity {
+		t.Fatalf("nama beda: %v", err)
+	}
+	if _, err := x.l.SimpanRekening(ctx, ibis, Rekening{Bank: "Bank Ngawur", Nomor: "1234567890", Nama: "Ibis Hotel"}); kodeGalat(err) != http.StatusUnprocessableEntity {
+		t.Fatalf("bank ngawur: %v", err)
+	}
+	rek, err := x.l.SimpanRekening(ctx, ibis, Rekening{Bank: "BCA", Nomor: "1234 5678 90", Nama: "  ibis   hotel "})
+	if err != nil || rek.Nomor != "1234567890" || rek.Nama != "IBIS HOTEL" {
+		t.Fatalf("rekening: %+v %v", rek, err)
+	}
+
+	// pencairan harian dijalanin dua kali (server restart): tetap sekali
+	x.l.CairkanHarian(ctx)
+	x.l.CairkanHarian(ctx)
+	s, _ := x.l.SaldoSaya(ctx, ibis)
+	if s.Tersedia != 0 || len(s.Riwayat) != 1 || s.Riwayat[0].Jumlah != 34200 || s.Riwayat[0].Status != "Berhasil" {
+		t.Fatalf("cair dobel: %+v", s)
+	}
+
+	// pesanan baru selesai hari ini: nunggu pencairan besok
+	selesaikan("kunci-saldo-2")
+	x.l.CairkanHarian(ctx)
+	if tersedia() != 34200 {
+		t.Fatalf("hari yg sama cair lagi: %d", tersedia())
+	}
+	x.jam.maju(24 * time.Hour)
+	x.l.PencairanUji = false
+	x.l.CairkanHarian(ctx)
+	s, _ = x.l.SaldoSaya(ctx, ibis)
+	// status Diproses tetap ngurangin saldo, biar ga dicairin dua kali
+	if s.Tersedia != 0 || len(s.Riwayat) != 2 || s.Riwayat[0].Status != "Diproses" {
+		t.Fatalf("cair besok: %+v", s)
+	}
+}

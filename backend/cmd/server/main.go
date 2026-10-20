@@ -48,7 +48,8 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
-	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo}
+	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo,
+		PencairanUji: cfg.Lingkungan != "production"}
 	if cfg.SemaiAkunContoh {
 		if err := akun.SemaiContoh(ctx, layananAkun); err != nil {
 			return err
@@ -58,6 +59,8 @@ func jalan() error {
 		}
 		slog.Info("akun contoh siap", "sandi", akun.SandiContoh)
 	}
+	// NF-11: saldo mitra dicairkan tiap hari 09.00 WITA
+	go layananToko.JadwalCairkan(ctx)
 	// F-40: pesanan yang lewat batas bayar dibatalin dan porsinya dibalikin,
 	// walau ga ada yang buka aplikasi
 	go func() {

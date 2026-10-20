@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
 import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_pesanan.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_saldo.dart';
 
 /// rekening pencairan + riwayat saldo tiap mitra (F-48 s.d. F-50).
@@ -13,16 +16,31 @@ class SaldoCubit extends Cubit<Map<String, Map<String, dynamic>>> {
 
   final LayananSaldo layanan;
 
-  /// dipanggil pas masuk ke halaman mitra, cukup sekali per mitra
+  final _galat = StreamController<String>.broadcast();
+
+  /// pesan galat dari server, ditampilin jadi snackbar di main.dart
+  Stream<String> get galat => _galat.stream;
+
+  @override
+  Future<void> close() {
+    _galat.close();
+    return super.close();
+  }
+
+  /// dipanggil pas masuk ke halaman mitra, dan berkala kalau tersambung server
+  /// (pencairan harian 09.00 jalan di server)
   Future<void> muat(String mitra) async {
-    if (state.containsKey(mitra)) return;
-    final rekening = await layanan.rekening(mitra);
-    final riwayat = await layanan.riwayat(mitra);
-    if (isClosed) return;
-    emit({
-      ...state,
-      mitra: {'rekening': rekening, 'riwayat': riwayat},
-    });
+    try {
+      final rekening = await layanan.rekening(mitra);
+      final riwayat = await layanan.riwayat(mitra);
+      if (isClosed) return;
+      emit({
+        ...state,
+        mitra: {'rekening': rekening, 'riwayat': riwayat},
+      });
+    } on GagalLayanan {
+      // sinyal putus: data lama tetap ditampilin, dicoba lagi nanti
+    }
   }
 
   Map<String, dynamic>? rekening(String mitra) => state[mitra]?['rekening'];
@@ -40,7 +58,14 @@ class SaldoCubit extends Cubit<Map<String, Map<String, dynamic>>> {
       ...state,
       mitra: {...lama, 'rekening': rekening},
     });
-    await layanan.simpanRekening(mitra, rekening);
+    try {
+      await layanan.simpanRekening(mitra, rekening);
+    } on GagalLayanan catch (e) {
+      // server nolak: balik ke rekening lama
+      if (isClosed) return;
+      emit({...state, mitra: lama});
+      if (!_galat.isClosed) _galat.add(e.pesan);
+    }
   }
 
   /// riwayat lengkap satu mitra, terbaru di atas: catatan dari server + dana masuk

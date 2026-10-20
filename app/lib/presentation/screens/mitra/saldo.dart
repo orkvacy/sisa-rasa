@@ -182,12 +182,16 @@ class _KartuSaldo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rek = rekening;
-    // jam demo dikunci 16.20, jadi pencairan berikutnya selalu besok pagi
-    final kapan = jamSekarang < 9 * 60 ? 'hari ini' : 'besok';
+    // server nyairin saldo tiap hari mulai 09.00 (jendela sampai 11.59, NF-11)
+    final kapan = jamSekarang < 9 * 60
+        ? 'hari ini, 09.00'
+        : jamSekarang < 12 * 60
+        ? 'sebentar lagi'
+        : 'besok, 09.00';
     final jadwal = rek == null
         ? 'Tambahkan rekening supaya saldo bisa dicairkan'
         : tersedia > 0
-        ? 'Dicairkan otomatis $kapan, 09.00'
+        ? 'Dicairkan otomatis $kapan'
         : 'Belum ada saldo untuk dicairkan';
 
     return Container(

@@ -1,12 +1,13 @@
 /// bank yg bisa dipilih buat rekening pencairan (F-49)
 const bankPencairan = ['BCA', 'Mandiri', 'BRI', 'BNI', 'BSI', 'CIMB Niaga'];
 
-/// saldo yg belum dicairkan: semua dana masuk dikurangi pencairan yg berhasil
+/// saldo yg belum dicairkan: semua dana masuk dikurangi pencairan yg ga gagal.
+/// yg masih Diproses ikut ngurangin, biar ga keliatan bisa dicairin dua kali
 int saldoTersedia(List<Map<String, dynamic>> riwayat) {
   var saldo = 0;
   for (final e in riwayat) {
     if (e['jenis'] == 'masuk') saldo += e['jumlah'] as int;
-    if (e['jenis'] == 'cair' && e['status'] == 'Berhasil') {
+    if (e['jenis'] == 'cair' && e['status'] != 'Gagal') {
       saldo -= e['jumlah'] as int;
     }
   }
