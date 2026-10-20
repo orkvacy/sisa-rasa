@@ -19,17 +19,11 @@ func TestStorePG(t *testing.T) {
 		t.Skip("TEST_DATABASE_URL kosong, tes Postgres dilewati")
 	}
 	ctx := context.Background()
-	pool, err := db.Buka(ctx, url)
+	pool, err := db.BukaTes(ctx, url)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer pool.Close()
-	if _, err := pool.Exec(ctx, `DROP TABLE IF EXISTS sesi, akun, schema_migrasi`); err != nil {
-		t.Fatal(err)
-	}
-	if err := db.Migrasi(ctx, pool); err != nil {
-		t.Fatal(err)
-	}
 	// migrasi kedua kali ga boleh error / ngulang
 	if err := db.Migrasi(ctx, pool); err != nil {
 		t.Fatal(err)

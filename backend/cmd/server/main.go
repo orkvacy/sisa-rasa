@@ -20,6 +20,7 @@ import (
 	"github.com/orkvacy/sisa-rasa/backend/internal/config"
 	"github.com/orkvacy/sisa-rasa/backend/internal/db"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
+	"github.com/orkvacy/sisa-rasa/backend/internal/toko"
 )
 
 func main() {
@@ -47,12 +48,30 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
+	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo}
 	if cfg.SemaiAkunContoh {
 		if err := akun.SemaiContoh(ctx, layananAkun); err != nil {
 			return err
 		}
+		if err := toko.SemaiContoh(ctx, layananToko, layananAkun); err != nil {
+			return err
+		}
 		slog.Info("akun contoh siap", "sandi", akun.SandiContoh)
 	}
+	// F-40: pesanan yang lewat batas bayar dibatalin dan porsinya dibalikin,
+	// walau ga ada yang buka aplikasi
+	go func() {
+		detak := time.NewTicker(30 * time.Second)
+		defer detak.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-detak.C:
+				layananToko.Bersihkan(ctx)
+			}
+		}
+	}()
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthz", httpx.Handler(func(w http.ResponseWriter, r *http.Request) error {
@@ -65,6 +84,7 @@ func jalan() error {
 	// masuk / daftar: 10 kali per menit per IP (NF-13)
 	batasAkun := httpx.NewPembatas(10, time.Minute, cfg.DiBelakangProxy)
 	akun.Pasang(mux, layananAkun, batasAkun.Bungkus)
+	toko.Pasang(mux, layananToko, layananAkun.Wajib)
 
 	var handler http.Handler = mux
 	if len(cfg.AsalWeb) > 0 {

@@ -80,6 +80,11 @@ func (l *Layanan) Wajib(berikut http.Handler) http.Handler {
 	})
 }
 
+// KeKonteks naruh akun di context kayak Wajib. dipakai tes paket lain
+func KeKonteks(ctx context.Context, a Akun) context.Context {
+	return context.WithValue(ctx, kunciAkun{}, a)
+}
+
 // DariKonteks akun yang lagi masuk, cuma ada di handler yang dibungkus Wajib
 func DariKonteks(ctx context.Context) Akun {
 	a, _ := ctx.Value(kunciAkun{}).(Akun)
