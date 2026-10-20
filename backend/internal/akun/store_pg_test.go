@@ -59,7 +59,7 @@ func TestStorePG(t *testing.T) {
 	if a, _ := l.Sesi(ctx, masuk.Token); a.Nama != "Rani Putri" {
 		t.Errorf("nama baru: %q", a.Nama)
 	}
-	if err := l.HapusAkun(ctx, masuk.Akun, "sandiaman1"); err != nil {
+	if err := l.HapusAkun(ctx, masuk.Akun, "sandiaman1", ""); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := l.Sesi(ctx, masuk.Token); err != ErrSesiTidakBerlaku {
@@ -67,5 +67,24 @@ func TestStorePG(t *testing.T) {
 	}
 	if _, err := l.Daftar(ctx, "Rani Lagi", "rani@contoh.id", "sandiaman1", "pembeli"); err != nil {
 		t.Errorf("email bisa didaftarin lagi: %v", err)
+	}
+
+	// masuk dengan Google lewat SQL beneran
+	l.Google = googlePalsu{"tok-budi": {Sub: "g-budi", Email: "budi@gmail.com", Nama: "Budi"}}
+	g, err := l.MasukGoogle(ctx, "tok-budi")
+	if err != nil || g.Akun.PunyaSandi || g.Akun.Peran != "pembeli" {
+		t.Fatalf("google baru: %+v %v", g.Akun, err)
+	}
+	if lagi, err := l.MasukGoogle(ctx, "tok-budi"); err != nil || lagi.Akun.ID != g.Akun.ID {
+		t.Fatalf("google kedua: %+v %v", lagi.Akun, err)
+	}
+	if a, _ := l.Sesi(ctx, g.Token); a.PunyaSandi {
+		t.Error("sesi akun google harus punyaSandi false")
+	}
+	if err := l.HapusAkun(ctx, g.Akun, "", "tok-budi"); err != nil {
+		t.Fatal(err)
+	}
+	if baru, err := l.MasukGoogle(ctx, "tok-budi"); err != nil || baru.Akun.ID == g.Akun.ID {
+		t.Fatalf("abis dihapus harus jadi akun baru: %+v %v", baru.Akun, err)
 	}
 }

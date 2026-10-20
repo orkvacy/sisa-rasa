@@ -9,10 +9,11 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/healthz` | Cek server + koneksi database |
 | `POST` | `/v1/akun/daftar` | `{nama, email, sandi, peran}` → `{akun, token}` (F-29) |
 | `POST` | `/v1/akun/masuk` | `{email, sandi}` → `{akun, token}` (F-30) |
+| `POST` | `/v1/akun/google` | `{idToken}` masuk / daftar pembeli pakai Google. Token diperiksa ke kunci publik Google. Email yang sudah terdaftar pakai sandi ditolak 409 (tidak disambung otomatis) |
 | `GET` | `/v1/akun/saya` | Header `Authorization: Bearer <token>` → `{akun}` |
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
 | `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
-| `POST` | `/v1/akun/hapus` | `{sandi}` hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
+| `POST` | `/v1/akun/hapus` | `{sandi}` (akun Google: `{idToken}`) hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
 | `GET` | `/v1/paket` | Paket dari mitra terverifikasi, boleh tanpa masuk (F-65). Mitra yang masuk ikut melihat paketnya sendiri walau belum diverifikasi |
 | `GET` | `/v1/mitra/status` | `{status, alasan}` status verifikasi gerai: `menunggu` / `terverifikasi` / `ditolak` / `nonaktif` (F-37) |
 | `GET` `POST` | `/v1/mitra/paket` | Paket milik mitra / tambah paket (F-15) |
@@ -114,6 +115,7 @@ Keamanan yang sudah dipasang:
 | `R2_PUBLIK` | | Alamat publik bucket, misal `https://cdn.sisarasa.web.id` |
 | `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
 | `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
+| `GOOGLE_CLIENT_ID` | kosong | Web client ID OAuth dari Google Cloud (bukan rahasia). Kosong = masuk dengan Google mati |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify

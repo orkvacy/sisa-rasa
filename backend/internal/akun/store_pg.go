@@ -17,7 +17,7 @@ type StorePG struct{ Pool *pgxpool.Pool }
 const kodeUnik = "23505"
 
 func (s StorePG) BuatAkun(ctx context.Context, nama, email, hashSandi, peran string) (Akun, error) {
-	a := Akun{Nama: nama, Email: email, Peran: peran}
+	a := Akun{Nama: nama, Email: email, Peran: peran, PunyaSandi: true}
 	err := s.Pool.QueryRow(ctx,
 		`INSERT INTO akun (nama, email, hash_sandi, peran) VALUES ($1, $2, $3, $4) RETURNING id`,
 		nama, email, hashSandi, peran,
@@ -30,12 +30,37 @@ func (s StorePG) BuatAkun(ctx context.Context, nama, email, hashSandi, peran str
 }
 
 func (s StorePG) AkunDariEmail(ctx context.Context, email string) (akunTersimpan, error) {
+	return s.satuAkun(ctx, `email = $1`, email)
+}
+
+func (s StorePG) AkunDariGoogle(ctx context.Context, sub string) (akunTersimpan, error) {
+	return s.satuAkun(ctx, `google_sub = $1 AND dihapus_pada IS NULL`, sub)
+}
+
+func (s StorePG) satuAkun(ctx context.Context, syarat string, arg any) (akunTersimpan, error) {
 	var a akunTersimpan
-	err := s.Pool.QueryRow(ctx,
-		`SELECT id, nama, email, peran, hash_sandi FROM akun WHERE email = $1`, email,
-	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.HashSandi)
+	err := s.Pool.QueryRow(ctx, `
+		SELECT id, nama, email, peran, hash_sandi, COALESCE(google_sub, '')
+		FROM akun WHERE `+syarat, arg,
+	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.HashSandi, &a.GoogleSub)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return a, ErrTidakAda
+	}
+	a.PunyaSandi = a.HashSandi != ""
+	return a, err
+}
+
+// hash sandi ” = ga punya sandi, bcrypt ga bakal cocok sama sandi apa pun
+func (s StorePG) BuatAkunGoogle(ctx context.Context, nama, email, sub string) (Akun, error) {
+	a := Akun{Nama: nama, Email: email, Peran: "pembeli"}
+	err := s.Pool.QueryRow(ctx, `
+		INSERT INTO akun (nama, email, hash_sandi, peran, google_sub)
+		VALUES ($1, $2, '', 'pembeli', $3) RETURNING id`,
+		nama, email, sub,
+	).Scan(&a.ID)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == kodeUnik {
+		return Akun{}, ErrEmailDipakai
 	}
 	return a, err
 }
@@ -50,11 +75,11 @@ func (s StorePG) BuatSesi(ctx context.Context, tokenHash, idAkun string, kedaluw
 func (s StorePG) AkunDariSesi(ctx context.Context, tokenHash string, sekarang time.Time) (Akun, error) {
 	var a Akun
 	err := s.Pool.QueryRow(ctx, `
-		SELECT a.id, a.nama, a.email, a.peran
+		SELECT a.id, a.nama, a.email, a.peran, a.hash_sandi <> ''
 		FROM sesi s JOIN akun a ON a.id = s.id_akun
 		WHERE s.token_hash = $1 AND s.dicabut IS NULL AND s.kedaluwarsa > $2`,
 		tokenHash, sekarang,
-	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran)
+	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.PunyaSandi)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return a, ErrTidakAda
 	}
@@ -93,7 +118,7 @@ func (s StorePG) HapusAkun(ctx context.Context, idAkun string, sekarang time.Tim
 	// didaftarin lagi. hash '!' ga cocok sama sandi apa pun
 	if _, err := tx.Exec(ctx, `
 		UPDATE akun SET nama = 'Akun dihapus', email = 'dihapus-' || id || '@sisarasa.invalid',
-			hash_sandi = '!', dihapus_pada = $2
+			hash_sandi = '!', google_sub = NULL, dihapus_pada = $2
 		WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, sekarang); err != nil {
 		return err
 	}

@@ -50,6 +50,9 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
+	if len(cfg.GoogleClientID) > 0 {
+		layananAkun.Google = &akun.PemeriksaGoogle{ClientID: cfg.GoogleClientID}
+	}
 	// foto paket ke Cloudflare R2 kalau diatur, kalau belum ke disk
 	var penyimpananFoto foto.Penyimpanan = foto.Disk{Folder: cfg.FolderFoto}
 	if cfg.R2Bucket != "" {

@@ -107,7 +107,9 @@ void main() {
         layanan: AkunApi(alamat: alamat, klien: serverPalsu(mati: true)),
       );
       await cubit.pulihkan();
-      expect(cubit.state, isEmpty);
+      // ga dilempar ke layar masuk, nunggu di layar tanpa koneksi
+      expect(cubit.luring, isTrue);
+      expect(cubit.sudahMasuk, isFalse);
       expect(await cubit.penyimpanan.read(key: 'token_sesi'), 'tok-1');
 
       // server nyala lagi: sesi lanjut

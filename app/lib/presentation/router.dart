@@ -35,6 +35,7 @@ import 'package:sisa_rasa/presentation/screens/mitra/scan_kode.dart';
 import 'package:sisa_rasa/presentation/screens/pembayaran.dart';
 import 'package:sisa_rasa/presentation/screens/percakapan.dart';
 import 'package:sisa_rasa/presentation/screens/pesanan.dart';
+import 'package:sisa_rasa/presentation/screens/tanpa_koneksi.dart';
 
 /// semua alamat halaman dikumpulin di sini (NF-05),
 /// jadi ga ada lagi MaterialPageRoute yg kesebar di tiap layar.
@@ -100,6 +101,9 @@ abstract final class Rute {
 
   /// admin cuma punya satu halaman: verifikasi mitra (F-36 - F-38)
   static const admin = '/admin';
+
+  /// sesi tersimpan tapi server ga bisa dihubungi pas aplikasi dibuka
+  static const tanpaKoneksi = '/tanpa-koneksi';
 }
 
 /// GoRouter dengerin AkunCubit lewat ini, biar pas ganti akun redirect-nya jalan lagi
@@ -132,6 +136,11 @@ GoRouter buatRouter({required AkunCubit akun}) {
     refreshListenable: _DengarAkun(akun.stream),
     redirect: (context, state) {
       final lokasi = state.matchedLocation;
+      // ga ada koneksi pas ngecek sesi: tunggu di sini, jangan ke layar masuk
+      if (akun.luring) {
+        return lokasi == Rute.tanpaKoneksi ? null : Rute.tanpaKoneksi;
+      }
+      if (lokasi == Rute.tanpaKoneksi) return Rute.beranda;
       // ketentuan boleh dibuka siapa aja, termasuk dari form daftar
       if (lokasi == Rute.ketentuan) return null;
       final layarUmum =
@@ -196,6 +205,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
       GoRoute(
         path: Rute.ketentuan,
         builder: (context, state) => const Ketentuan(),
+      ),
+      GoRoute(
+        path: Rute.tanpaKoneksi,
+        builder: (context, state) => const TanpaKoneksi(),
       ),
       GoRoute(
         path: Rute.admin,

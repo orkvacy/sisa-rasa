@@ -23,6 +23,11 @@ abstract class LayananAkun {
     required String peran,
   });
 
+  /// F-30b: [idToken] dari Google diperiksa server. akun baru otomatis jadi
+  /// pembeli tanpa kata sandi ('punyaSandi': 'false').
+  /// lempar GagalAkun kalau emailnya udah terdaftar pakai sandi
+  Future<Map<String, String>> masukGoogle(String idToken);
+
   /// akun pemilik token, null kalau token udah ga berlaku
   Future<Map<String, String>?> sesi(String token);
 
@@ -34,8 +39,9 @@ abstract class LayananAkun {
   Future<Map<String, String>> ubahNama(String token, String nama);
 
   /// F-62: hapus akun setelah sandinya dicek lagi. semua sesi ikut dicabut.
+  /// akun Google tanpa sandi gantinya [idToken] dari masuk Google lagi.
   /// lempar GagalAkun kalau sandi salah / masih ada pesanan berjalan
-  Future<void> hapusAkun(String token, String sandi);
+  Future<void> hapusAkun(String token, String sandi, {String idToken = ''});
 
   /// F-61 langkah 1: kirim kode OTP ke email. sengaja ga ngasih tau
   /// emailnya terdaftar atau ga, biar ga bisa dipake nebak email orang.

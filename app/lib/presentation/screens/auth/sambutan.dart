@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
+import 'package:sisa_rasa/presentation/screens/auth/tombol_google.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 
 /// layar pertama sebelum masuk (figma v3: umum/sambutan)
@@ -84,6 +85,10 @@ class Sambutan extends StatelessWidget {
                     ),
                     child: const Text('Masuk'),
                   ),
+                  if (context.read<AkunCubit>().bisaGoogle) ...[
+                    const SizedBox(height: 12),
+                    const TombolGoogle(),
+                  ],
                   const SizedBox(height: 8),
                   TextButton(
                     // tamu bisa lihat paket, baru diminta masuk pas checkout

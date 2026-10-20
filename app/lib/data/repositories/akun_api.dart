@@ -71,6 +71,18 @@ class AkunApi implements LayananAkun {
   }
 
   @override
+  Future<Map<String, String>> masukGoogle(String idToken) async {
+    final res = await _kirim(
+      () => _klien.post(
+        _uri('/v1/akun/google'),
+        headers: _kepala(),
+        body: jsonEncode({'idToken': idToken}),
+      ),
+    );
+    return _akunDanToken(_isi(res));
+  }
+
+  @override
   Future<Map<String, String>> daftar({
     required String nama,
     required String email,
@@ -122,12 +134,16 @@ class AkunApi implements LayananAkun {
   }
 
   @override
-  Future<void> hapusAkun(String token, String sandi) async {
+  Future<void> hapusAkun(
+    String token,
+    String sandi, {
+    String idToken = '',
+  }) async {
     final res = await _kirim(
       () => _klien.post(
         _uri('/v1/akun/hapus'),
         headers: _kepala(token),
-        body: jsonEncode({'sandi': sandi}),
+        body: jsonEncode({'sandi': sandi, 'idToken': idToken}),
       ),
     );
     _isi(res);

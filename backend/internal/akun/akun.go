@@ -13,12 +13,17 @@ type Akun struct {
 	Nama  string `json:"nama"`
 	Email string `json:"email"`
 	Peran string `json:"peran"`
+	// PunyaSandi false = akun dibikin lewat Google, belum pernah pasang sandi.
+	// aplikasi pakai ini buat nentuin konfirmasi hapus akun
+	PunyaSandi bool `json:"punyaSandi"`
 }
 
 // akunTersimpan isi baris tabel akun, termasuk hash sandinya
 type akunTersimpan struct {
 	Akun
 	HashSandi string
+	// GoogleSub id akun Google yang nyambung, kosong kalau ga ada
+	GoogleSub string
 }
 
 // ErrTidakAda dibalikin Store kalau barisnya ga ketemu
@@ -35,6 +40,9 @@ var ErrPesananAktif = errors.New("pesanan aktif")
 type Store interface {
 	BuatAkun(ctx context.Context, nama, email, hashSandi, peran string) (Akun, error)
 	AkunDariEmail(ctx context.Context, email string) (akunTersimpan, error)
+	// BuatAkunGoogle akun pembeli tanpa sandi, nyambung ke akun Google [sub]
+	BuatAkunGoogle(ctx context.Context, nama, email, sub string) (Akun, error)
+	AkunDariGoogle(ctx context.Context, sub string) (akunTersimpan, error)
 	BuatSesi(ctx context.Context, tokenHash, idAkun string, kedaluwarsa time.Time) error
 	// AkunDariSesi cuma balikin akun kalau sesinya belum dicabut dan belum kedaluwarsa
 	AkunDariSesi(ctx context.Context, tokenHash string, sekarang time.Time) (Akun, error)

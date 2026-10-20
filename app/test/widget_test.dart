@@ -321,10 +321,7 @@ void main() {
     await tester.pump();
     expect(find.text('2 porsi'), findsOneWidget);
     expect(find.text('Rp76.000'), findsWidgets);
-    expect(
-      find.byTooltip('Tambah American Breakfast Set'),
-      findsOneWidget,
-    );
+    expect(find.byTooltip('Tambah American Breakfast Set'), findsOneWidget);
 
     // balik ke beranda, gulir ke atas: ikon keranjang di kanan atas nunjukin 2 porsi
     await tester.tap(find.byTooltip('Kembali'));

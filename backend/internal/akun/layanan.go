@@ -38,6 +38,9 @@ type Layanan struct {
 	BiayaBcrypt int
 	// Jam bisa diganti di tes
 	Jam func() time.Time
+	// Google pemeriksa ID token. kosong = masuk dengan Google dimatiin
+	// (GOOGLE_CLIENT_ID belum diisi)
+	Google Google
 
 	// hash pura-pura buat email yg ga terdaftar, biar waktu jawabnya sama
 	// kayak sandi salah dan ga bisa dipake nebak email terdaftar
@@ -116,6 +119,64 @@ func (l *Layanan) Masuk(ctx context.Context, email, sandi string) (Hasil, error)
 	return l.bukaSesi(ctx, a.Akun)
 }
 
+// MasukGoogle F-30b: masuk / daftar pembeli pakai akun Google.
+// akun baru otomatis dibikin sebagai pembeli tanpa sandi. email yang udah
+// terdaftar pakai sandi ga disambungin otomatis: email di form daftar belum
+// diverifikasi, jadi bisa aja yang daftar duluan bukan pemilik emailnya
+func (l *Layanan) MasukGoogle(ctx context.Context, idToken string) (Hasil, error) {
+	if l.Google == nil {
+		return Hasil{}, httpx.NewGalat(http.StatusServiceUnavailable,
+			"Masuk dengan Google belum tersedia. Pakai email dan kata sandi.")
+	}
+	id, err := l.Google.Periksa(ctx, idToken)
+	if errors.Is(err, errTokenGoogle) {
+		return Hasil{}, httpx.NewGalat(http.StatusUnauthorized, "Masuk dengan Google gagal. Coba lagi.")
+	}
+	if err != nil {
+		return Hasil{}, err
+	}
+	// dua kali coba: kalau dua request barengan bikin akun yang sama,
+	// yang kalah tinggal ngambil akun yang barusan dibikin
+	for range 2 {
+		a, err := l.Store.AkunDariGoogle(ctx, id.Sub)
+		if err == nil {
+			return l.bukaSesi(ctx, a.Akun)
+		}
+		if !errors.Is(err, ErrTidakAda) {
+			return Hasil{}, err
+		}
+		if _, err := l.Store.AkunDariEmail(ctx, id.Email); err == nil {
+			return Hasil{}, httpx.NewGalat(http.StatusConflict,
+				"Email ini sudah terdaftar dengan kata sandi. Masuk pakai email dan kata sandi.")
+		} else if !errors.Is(err, ErrTidakAda) {
+			return Hasil{}, err
+		}
+		baru, err := l.Store.BuatAkunGoogle(ctx, namaGoogle(id), id.Email, id.Sub)
+		if errors.Is(err, ErrEmailDipakai) {
+			continue
+		}
+		if err != nil {
+			return Hasil{}, err
+		}
+		return l.bukaSesi(ctx, baru)
+	}
+	return Hasil{}, httpx.NewGalat(http.StatusConflict, "Coba masuk lagi sebentar.")
+}
+
+// nama dari profil Google, kalau kosong / kepanjangan pakai bagian depan email
+func namaGoogle(id IdentitasGoogle) string {
+	nama := strings.Join(strings.Fields(id.Nama), " ")
+	if n := utf8.RuneCountInString(nama); n >= 2 && n <= 100 {
+		return nama
+	}
+	depan, _, _ := strings.Cut(id.Email, "@")
+	huruf := []rune(depan)
+	if len(huruf) < 2 {
+		return "Pembeli Sisa Rasa"
+	}
+	return string(huruf[:min(len(huruf), 100)])
+}
+
 // Sesi akun pemilik token, buat middleware dan GET /v1/akun/saya
 func (l *Layanan) Sesi(ctx context.Context, token string) (Akun, error) {
 	if token == "" {
@@ -147,8 +208,9 @@ func (l *Layanan) UbahNama(ctx context.Context, a Akun, nama string) (Akun, erro
 }
 
 // HapusAkun F-62. minta sandi lagi biar HP yang kebetulan kebuka ga bisa
-// dipakai orang lain buat ngehapus akun
-func (l *Layanan) HapusAkun(ctx context.Context, a Akun, sandi string) error {
+// dipakai orang lain buat ngehapus akun. akun Google tanpa sandi gantinya
+// konfirmasi masuk Google lagi ([idToken]) pakai akun Google yang sama
+func (l *Layanan) HapusAkun(ctx context.Context, a Akun, sandi, idToken string) error {
 	if a.Peran != "pembeli" {
 		return httpx.NewGalat(http.StatusForbidden,
 			"Akun mitra ditutup lewat tim Sisa Rasa, karena masih ada saldo dan rekening.")
@@ -157,7 +219,15 @@ func (l *Layanan) HapusAkun(ctx context.Context, a Akun, sandi string) error {
 	if err != nil {
 		return err
 	}
-	if bcrypt.CompareHashAndPassword([]byte(tersimpan.HashSandi), []byte(sandi)) != nil {
+	if tersimpan.HashSandi == "" {
+		if l.Google == nil {
+			return httpx.NewGalat(http.StatusServiceUnavailable, "Masuk dengan Google sedang tidak tersedia.")
+		}
+		id, err := l.Google.Periksa(ctx, idToken)
+		if err != nil || id.Sub != tersimpan.GoogleSub {
+			return httpx.NewGalat(http.StatusUnauthorized, "Konfirmasi dengan akun Google yang sama.")
+		}
+	} else if bcrypt.CompareHashAndPassword([]byte(tersimpan.HashSandi), []byte(sandi)) != nil {
 		return httpx.NewGalat(http.StatusUnauthorized, "Kata sandi salah.")
 	}
 	err = l.Store.HapusAkun(ctx, a.ID, l.sekarang())

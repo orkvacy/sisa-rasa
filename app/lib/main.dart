@@ -24,7 +24,7 @@ Future<void> main() async {
   if (pakaiServer) jamTetap = null;
   // sesi yg tersimpan dicek dulu sebelum layar pertama digambar,
   // biar yg udah masuk ga sempet liat layar Sambutan
-  final akun = AkunCubit(layanan: sl());
+  final akun = AkunCubit(layanan: sl(), google: sl());
   await akun.pulihkan();
   runApp(SisaRasaApp(akun: akun));
 }
@@ -44,7 +44,8 @@ class SisaRasaApp extends StatefulWidget {
 class _SisaRasaAppState extends State<SisaRasaApp> {
   // akun dibikin di sini (bukan di BlocProvider) soalnya router butuh dengerin akunnya
   late final akun =
-      widget.akun ?? AkunCubit(layanan: sl(), awal: widget.akunAwal);
+      widget.akun ??
+      AkunCubit(layanan: sl(), google: sl(), awal: widget.akunAwal);
   // router dibikin sekali aja, kalau di build bakal ke-reset tiap digambar ulang
   late final GoRouter router = buatRouter(akun: akun);
   // buat nampilin galat dari server di layar mana pun
