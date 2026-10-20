@@ -1,6 +1,15 @@
-/// jam sekarang dalam menit (16 * 60 + 20 = 16.20)
-/// sengaja dibikin tetap biar pas demo isinya sama terus, nnti diganti jam asli
-const int jamSekarang = 16 * 60 + 20;
+/// jam yg dikunci buat mode tiruan (16 * 60 + 20 = 16.20), biar isi demo
+/// sama terus. null = pakai jam asli HP, dipasang main.dart kalau tersambung server,
+/// biar sama kayak jam server (paket yg lewat jam tutup ditolak server)
+int? jamTetap = 16 * 60 + 20;
+
+/// jam sekarang dalam menit dari tengah malam
+int get jamSekarang {
+  final tetap = jamTetap;
+  if (tetap != null) return tetap;
+  final kini = DateTime.now();
+  return kini.hour * 60 + kini.minute;
+}
 
 /// Mengubah angka jadi format rupiah, contoh 18000 jadi Rp18.000
 String rupiah(int nilai) {

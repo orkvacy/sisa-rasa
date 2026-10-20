@@ -90,7 +90,7 @@ Keamanan yang sudah dipasang:
 | `LINGKUNGAN` | `dev` | `dev`, `staging`, atau `production`. Akun contoh dan CORS hanya di `dev` |
 | `DI_BELAKANG_PROXY` | kosong | Isi `1` kalau di belakang Coolify/Traefik, supaya IP asli dibaca dari `X-Forwarded-For` |
 | `ASAL_WEB` | kosong (`*` di dev) | Origin aplikasi web yang boleh memanggil API, dipisah koma. Contoh `https://app.sisarasa.id` |
-| `JAM_DEMO` | kosong | Kunci "jam sekarang" ke jam tertentu, misal `16:20`, sama seperti aplikasi demo. Ditolak di production |
+| `JAM_DEMO` | kosong | Opsional. Kunci "jam sekarang" ke jam tertentu, misal `16:20`, kalau mau demo paket sore di jam berapa pun. Kosong = jam asli (aplikasi yang tersambung server juga pakai jam asli). Ditolak di production |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify
@@ -106,7 +106,6 @@ Keamanan yang sudah dipasang:
    DATABASE_URL=<Postgres URL internal dari langkah 1>
    LINGKUNGAN=staging
    SEMAI_AKUN_CONTOH=1
-   JAM_DEMO=16:20
    ```
 
    `ALAMAT`, `DI_BELAKANG_PROXY`, dan zona waktu sudah diatur di Dockerfile.

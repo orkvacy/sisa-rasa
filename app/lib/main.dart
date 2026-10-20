@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/core/sesi_aktif.dart';
+import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
@@ -18,6 +19,8 @@ import 'package:sisa_rasa/core/theme/tema.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   daftarkanDependensi();
+  // tersambung server: jam asli, sama kayak server
+  if (pakaiServer) jamTetap = null;
   // sesi yg tersimpan dicek dulu sebelum layar pertama digambar,
   // biar yg udah masuk ga sempet liat layar Sambutan
   final akun = AkunCubit(layanan: sl());
