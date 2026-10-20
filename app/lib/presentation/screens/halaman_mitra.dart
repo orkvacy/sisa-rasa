@@ -12,6 +12,7 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
 /// isinya info gerai sama semua paket aktifnya, jadi pembeli bisa ambil
@@ -162,20 +163,23 @@ class HalamanMitra extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
-                    for (final paket in daftar)
-                      _BarisPaketMitra(
-                        paket: paket,
-                        jumlah: keranjang[paket['id']] ?? 0,
-                        onTap: () => context.push(Rute.paket(paket['id'])),
-                        onTambah: () => _tambah(context, paket),
-                        onUbah: (baru) {
-                          final cubit = context.read<KeranjangCubit>();
-                          if (baru == 0) {
-                            cubit.hapus(paket['id']);
-                          } else {
-                            cubit.ubahJumlah(paket['id'], baru);
-                          }
-                        },
+                    for (final (i, paket) in daftar.indexed)
+                      MunculBertahap(
+                        urutan: i,
+                        child: _BarisPaketMitra(
+                          paket: paket,
+                          jumlah: keranjang[paket['id']] ?? 0,
+                          onTap: () => context.push(Rute.paket(paket['id'])),
+                          onTambah: () => _tambah(context, paket),
+                          onUbah: (baru) {
+                            final cubit = context.read<KeranjangCubit>();
+                            if (baru == 0) {
+                              cubit.hapus(paket['id']);
+                            } else {
+                              cubit.ubahJumlah(paket['id'], baru);
+                            }
+                          },
+                        ),
                       ),
                   ],
                 ),
@@ -423,7 +427,11 @@ class _BarisPaketMitra extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      GambarPaket(paket['foto'], fit: BoxFit.cover),
+                      // Hero: fotonya "terbang" ke halaman detail paket
+                      Hero(
+                        tag: 'foto-paket-${paket['id']}',
+                        child: GambarPaket(paket['foto'], fit: BoxFit.cover),
+                      ),
                       // pil sisa cuma muncul kalau porsinya tinggal dikit
                       if (!habis && sisa <= 3)
                         Positioned(

@@ -7,6 +7,7 @@ import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// status satu paket dari sisi mitra
@@ -129,10 +130,14 @@ class _PaketMitraState extends State<PaketMitra> {
                 style: const TextStyle(color: Warna.teksPendukung),
               ),
             ),
-          for (final p in tampil) ...[
-            _KartuPaket(
-              paket: p,
-              onTap: () => context.push(Rute.mitraUbahPaket(p['id'])),
+          for (final (i, p) in tampil.indexed) ...[
+            MunculBertahap(
+              key: ValueKey('$saring-${p['id']}'),
+              urutan: i,
+              child: _KartuPaket(
+                paket: p,
+                onTap: () => context.push(Rute.mitraUbahPaket(p['id'])),
+              ),
             ),
             const SizedBox(height: 12),
           ],

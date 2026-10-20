@@ -78,11 +78,15 @@ class _DetailPaketState extends State<DetailPaket> {
               child: Stack(
                 children: [
                   // GambarPaket: foto paket full selebar layar
-                  GambarPaket(
-                    paket['foto'],
-                    width: double.infinity,
-                    height: 320,
-                    fit: BoxFit.cover,
+                  // Hero: nyambung sama foto di halaman mitra / hasil cari
+                  Hero(
+                    tag: 'foto-paket-${paket['id']}',
+                    child: GambarPaket(
+                      paket['foto'],
+                      width: double.infinity,
+                      height: 320,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   // lembar putih, margin atas 292 biar naik nutupin foto dikit
                   Container(

@@ -36,6 +36,7 @@ import 'package:sisa_rasa/presentation/screens/pembayaran.dart';
 import 'package:sisa_rasa/presentation/screens/percakapan.dart';
 import 'package:sisa_rasa/presentation/screens/pesanan.dart';
 import 'package:sisa_rasa/presentation/screens/tanpa_koneksi.dart';
+import 'package:sisa_rasa/presentation/widgets/tab_berganti.dart';
 
 /// semua alamat halaman dikumpulin di sini (NF-05),
 /// jadi ga ada lagi MaterialPageRoute yg kesebar di tiap layar.
@@ -215,7 +216,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
         builder: (context, state) => const VerifikasiMitra(),
       ),
       // StatefulShellRoute: tab bawah, isi tiap tab ga ke-reset pas pindah tab
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        // tab yg baru dipilih muncul pelan, isi tab lain tetap hidup
+        navigatorContainerBuilder: (context, shell, anak) =>
+            TabBerganti(indeks: shell.currentIndex, anak: anak),
         builder: (context, state, shell) => HalamanUtama(shell: shell),
         branches: [
           StatefulShellBranch(
@@ -306,7 +310,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
         ],
       ),
       // tab mitra: Dasbor, Paket, (tombol pindai di tengah), Pesanan, Saldo
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        // tab yg baru dipilih muncul pelan, isi tab lain tetap hidup
+        navigatorContainerBuilder: (context, shell, anak) =>
+            TabBerganti(indeks: shell.currentIndex, anak: anak),
         builder: (context, state, shell) => HalamanUtamaMitra(shell: shell),
         branches: [
           StatefulShellBranch(

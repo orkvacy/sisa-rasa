@@ -147,8 +147,11 @@ void main() {
       expect(find.text('Urutkan & Saring'), findsOneWidget);
       expect(find.text('Jam tutup terdekat'), findsOneWidget);
       expect(find.text('Harga termurah'), findsOneWidget);
-      expect(find.text('Hanya yang berlabel Halal'), findsOneWidget);
-      expect(find.text('Meja Berbagi (Donasi)'), findsOneWidget);
+      expect(find.text('Diskon terbesar'), findsOneWidget);
+      expect(find.text('≤ Rp25rb'), findsOneWidget);
+      expect(find.text('Bisa diambil sekarang'), findsOneWidget);
+      // donasi bukan dari pembeli, halal udah keliatan di halaman mitra
+      expect(find.text('Meja Berbagi (Donasi)'), findsNothing);
       expect(find.text('Terapkan'), findsOneWidget);
 
       // Tutup sheet dengan tap Terapkan

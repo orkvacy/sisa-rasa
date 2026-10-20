@@ -14,8 +14,9 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
-/// ruang bawah daftar mitra biar item terakhir ga ketutup navigasi + tombol pindai
-const ruangBawahMitra = 116.0;
+/// ruang bawah daftar mitra: isi tab berhenti di atas navigasi,
+/// tapi tombol pindai nongol ke atas sedikit
+const ruangBawahMitra = 40.0;
 
 /// pesanan milik mitra yg lagi masuk, dari semua pembeli
 List<Map<String, dynamic>> pesananMitra(BuildContext context, String mitra) {

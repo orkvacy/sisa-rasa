@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 /// warna khusus Sisa Rasa yang ga ada tempatnya di ColorScheme
@@ -138,6 +139,14 @@ class SisaRasaTema {
       extensions: [ekstensi],
       // tap target 48 dp walau chip tingginya 36
       materialTapTargetSize: MaterialTapTargetSize.padded,
+      // pindah halaman geser dari kanan kayak Gojek, di Android juga.
+      // sekalian bisa geser dari tepi kiri buat balik
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: cs.surface,
         foregroundColor: cs.onSurface,

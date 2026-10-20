@@ -10,7 +10,7 @@ import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
-import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
 
 /// tab akun: profil, kartu dampak, sama menu setelan
 class Akun extends StatelessWidget {
@@ -40,7 +40,7 @@ class Akun extends StatelessWidget {
           16,
           16,
           16,
-          NavigasiMelayang.ruangBawah,
+          NavigasiBawah.ruangBawah,
         ),
         children: [
           Row(
@@ -569,7 +569,7 @@ class _TombolGantiAkun extends StatelessWidget {
     // showModalBottomSheet: lembar dari bawah, isinya daftar akun uji
     showModalBottomSheet<void>(
       context: context,
-      // useRootNavigator: dibuka di atas navigasi melayang, kalau ga bawahnya ketutup
+      // useRootNavigator: dibuka di atas navigasi bawah, kalau ga bawahnya ketutup
       useRootNavigator: true,
       backgroundColor: Colors.white,
       showDragHandle: true,

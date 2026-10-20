@@ -7,9 +7,10 @@ import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
-import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
+import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// beranda pembeli (figma v3: pembeli/beranda - mitra).
 /// isinya daftar mitra, bukan paket: Flash sale buat yg tutup kurang dari 1 jam (F-53),
@@ -34,8 +35,28 @@ class _BerandaState extends State<Beranda> {
   ];
   String kategoriDipilih = 'Semua';
   String urutanDipilih = 'Jam tutup terdekat';
-  bool filterHalal = false;
-  bool filterMejaBerbagi = false;
+  String hargaDipilih = 'Semua harga';
+  // cuma paket yg jam ambilnya udah mulai, bisa langsung dijemput
+  bool bisaSekarang = false;
+
+  static const _urutan = [
+    'Jam tutup terdekat',
+    'Harga termurah',
+    'Diskon terbesar',
+  ];
+
+  /// rentang harga diskon per paket: (label, batas bawah, batas atas)
+  static const _rentangHarga = [
+    ('Semua harga', 0, 1 << 31),
+    ('≤ Rp25rb', 0, 25000),
+    ('Rp25–50rb', 25001, 50000),
+    ('> Rp50rb', 50001, 1 << 31),
+  ];
+
+  bool get _adaSaringan =>
+      kategoriDipilih != 'Semua' ||
+      hargaDipilih != 'Semua harga' ||
+      bisaSekarang;
 
   void _segeraHadir(String fitur) {
     ScaffoldMessenger.of(context)
@@ -45,8 +66,8 @@ class _BerandaState extends State<Beranda> {
 
   void _urutkanDanSaring(BuildContext context) {
     var tempUrutan = urutanDipilih;
-    var tempHalal = filterHalal;
-    var tempMejaBerbagi = filterMejaBerbagi;
+    var tempHarga = hargaDipilih;
+    var tempSekarang = bisaSekarang;
 
     showModalBottomSheet<void>(
       context: context,
@@ -83,7 +104,7 @@ class _BerandaState extends State<Beranda> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final opsi in ['Jam tutup terdekat', 'Harga termurah'])
+                    for (final opsi in _urutan)
                       ChoiceChip(
                         label: Text(opsi),
                         selected: tempUrutan == opsi,
@@ -102,33 +123,36 @@ class _BerandaState extends State<Beranda> {
                     color: Warna.teks,
                   ),
                 ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final (label, _, _) in _rentangHarga)
+                      ChoiceChip(
+                        label: Text(label),
+                        selected: tempHarga == label,
+                        onSelected: (val) {
+                          if (val) setModalState(() => tempHarga = label);
+                        },
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Hanya yang berlabel Halal'),
-                  subtitle: const Text(
-                    'Tampilkan paket dengan konfirmasi halal mitra',
-                  ),
-                  value: tempHalal,
-                  onChanged: (val) => setModalState(() => tempHalal = val),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Meja Berbagi (Donasi)'),
-                  subtitle: const Text(
-                    'Paket yang ikut program donasi sisa makanan',
-                  ),
-                  value: tempMejaBerbagi,
-                  onChanged: (val) =>
-                      setModalState(() => tempMejaBerbagi = val),
+                  title: const Text('Bisa diambil sekarang'),
+                  subtitle: const Text('Jam ambilnya sudah mulai'),
+                  value: tempSekarang,
+                  onChanged: (val) => setModalState(() => tempSekarang = val),
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () {
                     setState(() {
                       urutanDipilih = tempUrutan;
-                      filterHalal = tempHalal;
-                      filterMejaBerbagi = tempMejaBerbagi;
+                      hargaDipilih = tempHarga;
+                      bisaSekarang = tempSekarang;
                     });
                     Navigator.pop(sheetContext);
                   },
@@ -148,23 +172,29 @@ class _BerandaState extends State<Beranda> {
     final daftarPaket = context.watch<PaketCubit>().state;
 
     // paket yg masih bisa dipesan: belum lewat jam tutup, masih ada porsinya (F-25),
-    // terus disaring sesuai chip kategori (F-03), halal, dan meja berbagi
+    // terus disaring sesuai chip kategori (F-03), rentang harga, dan jam ambil
+    final (_, hargaMin, hargaMaks) = _rentangHarga.firstWhere(
+      (r) => r.$1 == hargaDipilih,
+    );
     final tampil = daftarPaket.where((paket) {
       final cocokKategori =
           kategoriDipilih == 'Semua' || paket['kategori'] == kategoriDipilih;
-      final cocokHalal = !filterHalal || paket['halal'] == true;
-      final cocokMejaBerbagi =
-          !filterMejaBerbagi || paket['mejaBerbagi'] == true;
+      final harga = paket['hargaDiskon'] as int;
+      final cocokHarga = harga >= hargaMin && harga <= hargaMaks;
+      final cocokSekarang =
+          !bisaSekarang || (paket['mulai'] as int) <= jamSekarang;
       return PaketCubit.tampilUntukPembeli(paket) &&
           (paket['sisaPorsi'] as int) > 0 &&
           cocokKategori &&
-          cocokHalal &&
-          cocokMejaBerbagi;
+          cocokHarga &&
+          cocokSekarang;
     }).toList();
 
     final semuaMitra = _kelompokkanMitra(tampil);
     if (urutanDipilih == 'Harga termurah') {
       semuaMitra.sort((a, b) => a.hargaTermurah.compareTo(b.hargaTermurah));
+    } else if (urutanDipilih == 'Diskon terbesar') {
+      semuaMitra.sort((a, b) => b.diskonTerbesar.compareTo(a.diskonTerbesar));
     } else {
       semuaMitra.sort((a, b) => a.tutup.compareTo(b.tutup));
     }
@@ -185,8 +215,8 @@ class _BerandaState extends State<Beranda> {
 
     return SafeArea(
       child: ListView(
-        // bawahnya dikasih jarak biar item terakhir ga ketutup navigasi melayang
-        padding: const EdgeInsets.only(bottom: NavigasiMelayang.ruangBawah),
+        // bawahnya dikasih jarak biar item terakhir ga ketutup navigasi bawah
+        padding: const EdgeInsets.only(bottom: NavigasiBawah.ruangBawah),
         children: [
           // bilah atas: area ambil + favorit
           Padding(
@@ -349,103 +379,123 @@ class _BerandaState extends State<Beranda> {
             ),
           ),
 
-          if (semuaMitra.isEmpty) _kosong(),
+          // ganti saringan: daftar lama memudar, yg baru masuk pelan
+          GantiHalus(
+            kunci:
+                '$kategoriDipilih|$hargaDipilih|$bisaSekarang|$urutanDipilih',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (semuaMitra.isEmpty) _kosong(),
 
-          // Flash sale: kartu geser mendatar, disembunyiin kalau ga ada (F-53)
-          if (flashSale.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Row(
-                children: [
-                  Icon(Icons.bolt, size: 26, color: Warna.teks),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Flash sale',
-                      style: TextStyle(
-                        fontSize: 26,
-                        height: 32 / 26,
-                        letterSpacing: -0.78,
-                        fontWeight: FontWeight.w800,
-                        color: Warna.teks,
-                      ),
+                // Flash sale: kartu geser mendatar, disembunyiin kalau ga ada (F-53)
+                if (flashSale.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
+                    child: Row(
+                      children: [
+                        Icon(Icons.bolt, size: 26, color: Warna.teks),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Flash sale',
+                            style: TextStyle(
+                              fontSize: 26,
+                              height: 32 / 26,
+                              letterSpacing: -0.78,
+                              fontWeight: FontWeight.w800,
+                              color: Warna.teks,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Tutup kurang dari 1 jam',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Warna.mendesak,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    'Tutup kurang dari 1 jam',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Warna.mendesak,
+                  // rel geser mendatar, tingginya ngikutin kartu biar ga kepotong
+                  // kalau hurufnya diperbesar (NF-01). mitranya cuma sedikit, jadi Row cukup
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final (i, mitra) in flashSale.indexed) ...[
+                          if (i > 0) const SizedBox(width: 12),
+                          MunculBertahap(
+                            urutan: i,
+                            child: TekanMengecil(
+                              child: _KartuFlashSale(
+                                mitra: mitra,
+                                onTap: () => widget.onBukaMitra(mitra.nama),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-            // rel geser mendatar, tingginya ngikutin kartu biar ga kepotong
-            // kalau hurufnya diperbesar (NF-01). mitranya cuma sedikit, jadi Row cukup
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final (i, mitra) in flashSale.indexed) ...[
-                    if (i > 0) const SizedBox(width: 12),
-                    _KartuFlashSale(
-                      mitra: mitra,
-                      onTap: () => widget.onBukaMitra(mitra.nama),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
 
-          // Mitra sekitar, urut dari jam tutup terdekat (F-01)
-          if (sekitar.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Mitra sekitar',
-                      style: TextStyle(
-                        fontSize: 26,
-                        height: 32 / 26,
-                        letterSpacing: -0.78,
-                        fontWeight: FontWeight.w800,
-                        color: Warna.teks,
-                      ),
+                // Mitra sekitar, urut dari jam tutup terdekat (F-01)
+                if (sekitar.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Mitra sekitar',
+                            style: TextStyle(
+                              fontSize: 26,
+                              height: 32 / 26,
+                              letterSpacing: -0.78,
+                              fontWeight: FontWeight.w800,
+                              color: Warna.teks,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Tutup terdekat',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 18 / 13,
+                            fontWeight: FontWeight.w600,
+                            color: Warna.teksPendukung,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    'Tutup terdekat',
-                    style: TextStyle(
-                      fontSize: 13,
-                      height: 18 / 13,
-                      fontWeight: FontWeight.w600,
-                      color: Warna.teksPendukung,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        for (final (i, mitra) in sekitar.indexed)
+                          MunculBertahap(
+                            urutan: i,
+                            child: TekanMengecil(
+                              child: _BarisMitra(
+                                mitra: mitra,
+                                onTap: () => widget.onBukaMitra(mitra.nama),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  for (final mitra in sekitar)
-                    _BarisMitra(
-                      mitra: mitra,
-                      onTap: () => widget.onBukaMitra(mitra.nama),
-                    ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
@@ -475,11 +525,15 @@ class _BerandaState extends State<Beranda> {
             textAlign: TextAlign.center,
             style: TextStyle(color: Warna.teksPendukung),
           ),
-          if (kategoriDipilih != 'Semua') ...[
+          if (_adaSaringan) ...[
             const SizedBox(height: 16),
             OutlinedButton(
-              onPressed: () => setState(() => kategoriDipilih = 'Semua'),
-              child: const Text('Lihat semua kategori'),
+              onPressed: () => setState(() {
+                kategoriDipilih = 'Semua';
+                hargaDipilih = 'Semua harga';
+                bisaSekarang = false;
+              }),
+              child: const Text('Hapus semua saringan'),
             ),
           ],
         ],
@@ -497,6 +551,7 @@ class _Mitra {
     required this.foto,
     required this.jumlahPaket,
     required this.hargaTermurah,
+    required this.diskonTerbesar,
     required this.tutup,
   });
 
@@ -506,6 +561,8 @@ class _Mitra {
   final String foto;
   final int jumlahPaket;
   final int hargaTermurah;
+  // persen diskon paling besar di antara paketnya
+  final int diskonTerbesar;
   // jam tutup ambil paling akhir, lewat dari ini mitranya udah ga nawarin apa-apa
   final int tutup;
 }
@@ -525,6 +582,9 @@ List<_Mitra> _kelompokkanMitra(List<Map<String, dynamic>> paket) {
         foto: isi.first['foto'],
         jumlahPaket: isi.length,
         hargaTermurah: isi.map((p) => p['hargaDiskon'] as int).reduce(min),
+        diskonTerbesar: isi
+            .map((p) => persenDiskon(p['hargaAsli'], p['hargaDiskon']))
+            .reduce(max),
         tutup: isi.map((p) => p['tutup'] as int).reduce(max),
       ),
   ];

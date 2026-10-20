@@ -8,6 +8,7 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
@@ -176,10 +177,16 @@ class _PesananMasukState extends State<PesananMasuk> {
                 style: const TextStyle(color: Warna.teksPendukung),
               ),
             ),
-          for (final p in daftar) ...[
-            _KartuPesanan(
-              pesanan: p,
-              onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
+          for (final (i, p) in daftar.indexed) ...[
+            MunculBertahap(
+              key: ValueKey('$segmen-${p['id']}'),
+              urutan: i,
+              child: TekanMengecil(
+                child: _KartuPesanan(
+                  pesanan: p,
+                  onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
+                ),
+              ),
             ),
             const SizedBox(height: 12),
           ],
