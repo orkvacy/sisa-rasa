@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
@@ -74,7 +75,7 @@ class Akun extends StatelessWidget {
             // ListTile: baris siap pakai, ada leading (kiri), title, subtitle, trailing (kanan)
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
-              onTap: () => _BarisMenu.segeraHadir(context, 'Profil'),
+              onTap: () => _ubahProfil(context),
               // CircleAvatar: lingkaran isi inisial nama, gantiin foto profil
               leading: CircleAvatar(
                 radius: 28,
@@ -218,15 +219,27 @@ class Akun extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
-            child: const Column(
+            child: Column(
               children: [
-                _BarisMenu(ikon: Icons.person_outline, judul: 'Profil'),
                 _BarisMenu(
+                  ikon: Icons.person_outline,
+                  judul: 'Profil',
+                  onTap: () => _ubahProfil(context),
+                ),
+                const _BarisMenu(
                   ikon: Icons.mail_outline,
                   judul: 'Email',
                   nilai: 'Terverifikasi',
                 ),
-                _BarisMenu(ikon: Icons.lock_outline, judul: 'Kata sandi'),
+                const _BarisMenu(ikon: Icons.lock_outline, judul: 'Kata sandi'),
+                // F-62: akun mitra ditutup lewat tim (masih ada saldo + rekening)
+                if (akun['peran'] == 'pembeli')
+                  _BarisMenu(
+                    ikon: Icons.delete_outline,
+                    judul: 'Hapus akun',
+                    warna: Warna.merah,
+                    onTap: () => _hapusAkun(context),
+                  ),
               ],
             ),
           ),
@@ -295,6 +308,197 @@ class Akun extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// F-63: pembeli ganti nama. nama mitra = nama gerai yang nempel di paket,
+/// pesanan, dan rekening, jadi gantinya lewat tim Sisa Rasa
+void _ubahProfil(BuildContext context) {
+  final akun = context.read<AkunCubit>().state;
+  if (akun['peran'] != 'pembeli') {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Nama usaha diubah lewat tim Sisa Rasa, karena terhubung ke paket dan rekening.',
+          ),
+        ),
+      );
+    return;
+  }
+  showDialog<void>(
+    context: context,
+    builder: (_) => BlocProvider.value(
+      value: context.read<AkunCubit>(),
+      child: _DialogUbahNama(namaSekarang: akun['nama']!),
+    ),
+  );
+}
+
+/// F-62: minta sandi lagi, lalu data akun dihapus dan semua sesi dicabut
+void _hapusAkun(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: context.read<AkunCubit>()),
+        BlocProvider.value(value: context.read<KeranjangCubit>()),
+      ],
+      child: const _DialogHapusAkun(),
+    ),
+  );
+}
+
+class _DialogUbahNama extends StatefulWidget {
+  const _DialogUbahNama({required this.namaSekarang});
+
+  final String namaSekarang;
+
+  @override
+  State<_DialogUbahNama> createState() => _DialogUbahNamaState();
+}
+
+class _DialogUbahNamaState extends State<_DialogUbahNama> {
+  late final nama = TextEditingController(text: widget.namaSekarang);
+  String? galat;
+  bool menyimpan = false;
+
+  @override
+  void dispose() {
+    nama.dispose();
+    super.dispose();
+  }
+
+  Future<void> simpan() async {
+    setState(() {
+      menyimpan = true;
+      galat = null;
+    });
+    try {
+      await context.read<AkunCubit>().ubahNama(nama.text);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(const SnackBar(content: Text('Nama disimpan')));
+    } on GagalAkun catch (e) {
+      if (mounted) setState(() => galat = e.pesan);
+    } finally {
+      if (mounted) setState(() => menyimpan = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Ubah nama'),
+      content: TextField(
+        controller: nama,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        maxLength: 60,
+        decoration: InputDecoration(
+          labelText: 'Nama lengkap',
+          errorText: galat,
+        ),
+        onSubmitted: (_) => simpan(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: menyimpan ? null : () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: menyimpan ? null : simpan,
+          child: Text(menyimpan ? 'Menyimpan…' : 'Simpan'),
+        ),
+      ],
+    );
+  }
+}
+
+class _DialogHapusAkun extends StatefulWidget {
+  const _DialogHapusAkun();
+
+  @override
+  State<_DialogHapusAkun> createState() => _DialogHapusAkunState();
+}
+
+class _DialogHapusAkunState extends State<_DialogHapusAkun> {
+  final sandi = TextEditingController();
+  String? galat;
+  bool menghapus = false;
+
+  @override
+  void dispose() {
+    sandi.dispose();
+    super.dispose();
+  }
+
+  Future<void> hapus() async {
+    setState(() {
+      menghapus = true;
+      galat = null;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    final keranjang = context.read<KeranjangCubit>();
+    try {
+      await context.read<AkunCubit>().hapusAkun(sandi.text);
+      keranjang.kosongkan();
+      if (mounted) Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Akunmu sudah dihapus')),
+      );
+    } on GagalAkun catch (e) {
+      if (mounted) {
+        setState(() {
+          galat = e.pesan;
+          menghapus = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Hapus akun?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Nama, email, dan kata sandimu dihapus, dan akun ini tidak bisa dipakai lagi. '
+            'Riwayat transaksi tetap disimpan tanpa namamu karena wajib dicatat. '
+            'Tindakan ini tidak bisa dibatalkan.',
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: sandi,
+            obscureText: true,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Kata sandi',
+              helperText: 'Masukkan kata sandi untuk konfirmasi',
+              errorText: galat,
+              errorMaxLines: 3,
+            ),
+            onSubmitted: (_) => hapus(),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: menghapus ? null : () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: menghapus ? null : hapus,
+          style: TextButton.styleFrom(foregroundColor: Warna.merah),
+          child: Text(menghapus ? 'Menghapus…' : 'Hapus akun'),
+        ),
+      ],
     );
   }
 }
@@ -447,11 +651,15 @@ class _BarisMenu extends StatelessWidget {
     required this.judul,
     this.nilai,
     this.onTap,
+    this.warna = Warna.teks,
   });
 
   final IconData ikon;
   final String judul;
   final String? nilai;
+
+  /// warna ikon + judul, merah buat aksi berbahaya (Hapus akun)
+  final Color warna;
 
   /// kosong = halamannya belum ada, cuma munculin snackbar
   final VoidCallback? onTap;
@@ -465,8 +673,8 @@ class _BarisMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(ikon, color: Warna.teks),
-      title: Text(judul),
+      leading: Icon(ikon, color: warna),
+      title: Text(judul, style: TextStyle(color: warna)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

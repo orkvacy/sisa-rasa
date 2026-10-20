@@ -106,6 +106,41 @@ class AkunTiruan implements LayananAkun {
   @override
   Future<void> keluar(String token) async => _dicabut.add(token);
 
+  Future<Map<String, String>> _akunDariToken(String token) async {
+    final akun = await sesi(token);
+    if (akun == null) throw const GagalAkun('Sesi berakhir. Masuk lagi.');
+    return _akun[akun['email']]!;
+  }
+
+  @override
+  Future<Map<String, String>> ubahNama(String token, String nama) async {
+    final akun = await _akunDariToken(token);
+    if (akun['peran'] != 'pembeli') {
+      throw const GagalAkun(
+        'Nama usaha diubah lewat tim Sisa Rasa, karena terhubung ke paket dan rekening.',
+      );
+    }
+    final rapi = nama.trim().split(RegExp(r'\s+')).join(' ');
+    if (rapi.length < 2 || rapi.length > 60) {
+      throw const GagalAkun('Nama 2 sampai 60 huruf.');
+    }
+    akun['nama'] = rapi;
+    return _tanpaSandi(akun);
+  }
+
+  @override
+  Future<void> hapusAkun(String token, String sandi) async {
+    final akun = await _akunDariToken(token);
+    if (akun['peran'] != 'pembeli') {
+      throw const GagalAkun(
+        'Akun mitra ditutup lewat tim Sisa Rasa, karena masih ada saldo dan rekening.',
+      );
+    }
+    if (akun['sandi'] != sandi) throw const GagalAkun('Kata sandi salah.');
+    _akun.remove(akun['email']);
+    _dicabut.add(token);
+  }
+
   @override
   Future<void> mintaKodeReset(String email) async {
     final kunci = rapikanEmail(email);

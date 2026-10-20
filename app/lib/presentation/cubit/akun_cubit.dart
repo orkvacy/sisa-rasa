@@ -78,6 +78,24 @@ class AkunCubit extends Cubit<Map<String, String>> {
     if (token != null) await layanan.keluar(token);
   }
 
+  /// F-63: lempar GagalAkun kalau ditolak
+  Future<void> ubahNama(String nama) async {
+    final token = state['token'];
+    if (token == null) return;
+    final baru = await layanan.ubahNama(token, nama);
+    emit({...state, ...baru, 'token': token});
+  }
+
+  /// F-62: lempar GagalAkun kalau sandi salah / masih ada pesanan berjalan.
+  /// berhasil = sama kayak keluar, token dihapus dari HP
+  Future<void> hapusAkun(String sandi) async {
+    final token = state['token'];
+    if (token == null) return;
+    await layanan.hapusAkun(token, sandi);
+    await penyimpanan.delete(key: _kunciToken);
+    emit(const {});
+  }
+
   /// khusus mode uji: pindah akun tanpa masuk ulang (tombol Ganti akun)
   void ganti(String id) {
     emit(layanan.akunUji.firstWhere((akun) => akun['id'] == id));

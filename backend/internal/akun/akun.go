@@ -27,6 +27,9 @@ var ErrTidakAda = errors.New("tidak ada")
 // ErrEmailDipakai dibalikin Store kalau email-nya udah terdaftar
 var ErrEmailDipakai = errors.New("email sudah dipakai")
 
+// ErrPesananAktif akun masih punya pesanan yang belum selesai, belum boleh dihapus
+var ErrPesananAktif = errors.New("pesanan aktif")
+
 // Store tempat nyimpen akun sama sesi. versi aslinya Postgres (store_pg.go),
 // di tes pake versi di memori biar ga butuh database
 type Store interface {
@@ -36,4 +39,9 @@ type Store interface {
 	// AkunDariSesi cuma balikin akun kalau sesinya belum dicabut dan belum kedaluwarsa
 	AkunDariSesi(ctx context.Context, tokenHash string, sekarang time.Time) (Akun, error)
 	CabutSesi(ctx context.Context, tokenHash string, sekarang time.Time) error
+	// UbahNama F-63
+	UbahNama(ctx context.Context, idAkun, nama string) error
+	// HapusAkun F-62: data pribadi dikosongkan, semua sesi dicabut, nama di
+	// pesanan lama dianonimkan. ErrPesananAktif kalau masih ada pesanan berjalan
+	HapusAkun(ctx context.Context, idAkun string, sekarang time.Time) error
 }

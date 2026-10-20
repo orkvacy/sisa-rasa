@@ -61,6 +61,53 @@ func (s StorePG) AkunDariSesi(ctx context.Context, tokenHash string, sekarang ti
 	return a, err
 }
 
+func (s StorePG) UbahNama(ctx context.Context, idAkun, nama string) error {
+	_, err := s.Pool.Exec(ctx,
+		`UPDATE akun SET nama = $2 WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, nama)
+	return err
+}
+
+func (s StorePG) HapusAkun(ctx context.Context, idAkun string, sekarang time.Time) error {
+	tx, err := s.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	// kunci baris akun dulu biar pesanan baru ga nyelip di tengah penghapusan
+	if _, err := tx.Exec(ctx, `SELECT 1 FROM akun WHERE id = $1 FOR UPDATE`, idAkun); err != nil {
+		return err
+	}
+	var aktif bool
+	if err := tx.QueryRow(ctx, `
+		SELECT EXISTS (SELECT 1 FROM pesanan
+		WHERE (id_pembeli = $1 OR id_mitra = $1)
+		  AND status IN ('menunggu_bayar', 'disiapkan', 'siap_diambil'))`, idAkun,
+	).Scan(&aktif); err != nil {
+		return err
+	}
+	if aktif {
+		return ErrPesananAktif
+	}
+	// email diganti alamat yang ga mungkin dipakai, jadi email aslinya bisa
+	// didaftarin lagi. hash '!' ga cocok sama sandi apa pun
+	if _, err := tx.Exec(ctx, `
+		UPDATE akun SET nama = 'Akun dihapus', email = 'dihapus-' || id || '@sisarasa.invalid',
+			hash_sandi = '!', dihapus_pada = $2
+		WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, sekarang); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+		UPDATE sesi SET dicabut = $2 WHERE id_akun = $1 AND dicabut IS NULL`, idAkun, sekarang); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+		UPDATE pesanan SET nama_pembeli = 'Akun dihapus' WHERE id_pembeli = $1`, idAkun); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
 func (s StorePG) CabutSesi(ctx context.Context, tokenHash string, sekarang time.Time) error {
 	_, err := s.Pool.Exec(ctx,
 		`UPDATE sesi SET dicabut = $2 WHERE token_hash = $1 AND dicabut IS NULL`,

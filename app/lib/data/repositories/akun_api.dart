@@ -109,6 +109,30 @@ class AkunApi implements LayananAkun {
     );
   }
 
+  @override
+  Future<Map<String, String>> ubahNama(String token, String nama) async {
+    final res = await _kirim(
+      () => _klien.patch(
+        _uri('/v1/akun/saya'),
+        headers: _kepala(token),
+        body: jsonEncode({'nama': nama}),
+      ),
+    );
+    return _akunDanToken(_isi(res));
+  }
+
+  @override
+  Future<void> hapusAkun(String token, String sandi) async {
+    final res = await _kirim(
+      () => _klien.post(
+        _uri('/v1/akun/hapus'),
+        headers: _kepala(token),
+        body: jsonEncode({'sandi': sandi}),
+      ),
+    );
+    _isi(res);
+  }
+
   // atur ulang kata sandi lewat email (F-61) belum ada di server
   static const _belumAda = GagalAkun(
     'Atur ulang kata sandi belum tersedia. Hubungi admin Sisa Rasa.',

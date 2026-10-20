@@ -47,4 +47,25 @@ func TestStorePG(t *testing.T) {
 	if _, err := l.Sesi(ctx, hasil.Token); err != ErrSesiTidakBerlaku {
 		t.Errorf("abis keluar harus ditolak, dapet %v", err)
 	}
+
+	// ubah nama + hapus akun lewat SQL beneran
+	masuk, err := l.Masuk(ctx, "rani@contoh.id", "sandiaman1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.UbahNama(ctx, masuk.Akun, "Rani Putri"); err != nil {
+		t.Fatal(err)
+	}
+	if a, _ := l.Sesi(ctx, masuk.Token); a.Nama != "Rani Putri" {
+		t.Errorf("nama baru: %q", a.Nama)
+	}
+	if err := l.HapusAkun(ctx, masuk.Akun, "sandiaman1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Sesi(ctx, masuk.Token); err != ErrSesiTidakBerlaku {
+		t.Errorf("sesi setelah hapus: %v", err)
+	}
+	if _, err := l.Daftar(ctx, "Rani Lagi", "rani@contoh.id", "sandiaman1", "pembeli"); err != nil {
+		t.Errorf("email bisa didaftarin lagi: %v", err)
+	}
 }

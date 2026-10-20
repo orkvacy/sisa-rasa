@@ -11,6 +11,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `POST` | `/v1/akun/masuk` | `{email, sandi}` → `{akun, token}` (F-30) |
 | `GET` | `/v1/akun/saya` | Header `Authorization: Bearer <token>` → `{akun}` |
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
+| `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
+| `POST` | `/v1/akun/hapus` | `{sandi}` hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
 | `GET` | `/v1/paket` | Semua paket yang dijual, boleh tanpa masuk (F-65) |
 | `GET` `POST` | `/v1/mitra/paket` | Paket milik mitra / tambah paket (F-15) |
 | `PUT` `DELETE` | `/v1/mitra/paket/{id}` | Ubah / hapus paket (F-18) |

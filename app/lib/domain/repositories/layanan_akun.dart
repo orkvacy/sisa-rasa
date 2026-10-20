@@ -29,6 +29,14 @@ abstract class LayananAkun {
   /// F-33: token dicabut, ga bisa dipake lagi
   Future<void> keluar(String token);
 
+  /// F-63: ganti nama akun pembeli, balikin data akun terbaru (tanpa token).
+  /// lempar GagalAkun kalau ditolak (misal akun mitra)
+  Future<Map<String, String>> ubahNama(String token, String nama);
+
+  /// F-62: hapus akun setelah sandinya dicek lagi. semua sesi ikut dicabut.
+  /// lempar GagalAkun kalau sandi salah / masih ada pesanan berjalan
+  Future<void> hapusAkun(String token, String sandi);
+
   /// F-61 langkah 1: kirim kode OTP ke email. sengaja ga ngasih tau
   /// emailnya terdaftar atau ga, biar ga bisa dipake nebak email orang.
   /// lempar GagalAkun kalau minta ulang sebelum [jedaKirimUlang] lewat
