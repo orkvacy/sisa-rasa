@@ -75,6 +75,9 @@ class PercakapanCubit extends Cubit<Map<String, List<Map<String, dynamic>>>> {
     }
   }
 
+  /// ganti akun / keluar: percakapan akun sebelumnya dibuang dari HP
+  void kosongkan() => emit(const {});
+
   /// pesan dari lawan bicara di percakapan ini ditandai udah dibaca [oleh]
   void tandaiDibaca(String idPesanan, String oleh) {
     if (belumDibaca(idPesanan, oleh) == 0) return;

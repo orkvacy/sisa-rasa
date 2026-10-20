@@ -2,6 +2,7 @@ package toko
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/orkvacy/sisa-rasa/backend/internal/akun"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
@@ -31,6 +32,12 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib func(http.Handler) http.Handle
 	mux.Handle("POST /v1/pesanan/{id}/metode", h(l.handleMetode))
 	mux.Handle("POST /v1/pesanan/{id}/status", h(l.handleStatus))
 	mux.Handle("POST /v1/pesanan/{id}/batal-mitra", h(l.handleBatalMitra))
+
+	// percakapan per pesanan (F-67 s.d. F-70)
+	mux.Handle("GET /v1/pesanan/{id}/pesan", h(l.handleRiwayatChat))
+	mux.Handle("POST /v1/pesanan/{id}/pesan", h(l.handleKirimChat))
+	mux.Handle("POST /v1/pesanan/{id}/pesan/dibaca", h(l.handleBacaChat))
+	mux.Handle("GET /v1/pesan/baru", h(l.handleChatBaru))
 }
 
 func tulisPaket(w http.ResponseWriter, kode int, p Paket, err error) error {
@@ -227,4 +234,57 @@ func (l *Layanan) handleBatalMitra(w http.ResponseWriter, r *http.Request) error
 	}
 	p, err := l.BatalMitra(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), isi.Alasan)
 	return tulisPesanan(w, p, err)
+}
+
+// ---------- percakapan ----------
+
+func (l *Layanan) handleRiwayatChat(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.RiwayatChat(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]PesanChat{"pesan": daftar})
+	return nil
+}
+
+func (l *Layanan) handleKirimChat(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		ID   string `json:"id"`
+		Teks string `json:"teks"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	p, err := l.KirimChat(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), isi.ID, isi.Teks)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]PesanChat{"pesan": p})
+	return nil
+}
+
+func (l *Layanan) handleBacaChat(w http.ResponseWriter, r *http.Request) error {
+	if err := l.BacaChat(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id")); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// GET /v1/pesan/baru?setelah=2026-10-20T08:20:00Z. tanpa setelah = semua
+func (l *Layanan) handleChatBaru(w http.ResponseWriter, r *http.Request) error {
+	var setelah time.Time
+	if v := r.URL.Query().Get("setelah"); v != "" {
+		t, err := time.Parse(time.RFC3339Nano, v)
+		if err != nil {
+			return httpx.NewGalat(http.StatusBadRequest, "Format waktu tidak valid.")
+		}
+		setelah = t
+	}
+	daftar, sekarang, err := l.ChatBaru(r.Context(), akun.DariKonteks(r.Context()), setelah)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]any{"pesan": daftar, "sekarang": sekarang})
+	return nil
 }

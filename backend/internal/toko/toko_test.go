@@ -412,6 +412,7 @@ func ujiHTTPPesanan(t *testing.T, siapkan func(*testing.T) siap) {
 
 // skenario dijalanin di memori (selalu) dan di Postgres asli (store_pg_test.go)
 var skenario = map[string]func(*testing.T, func(*testing.T) siap){
+	"Chat":                           ujiChat,
 	"BuatPesananNgitungDanNahanStok": ujiBuatPesananNgitungDanNahanStok,
 	"IdempotencyPesananGaDobel":      ujiIdempotencyPesananGaDobel,
 	"StokGaBisaMinusWalauBarengan":   ujiStokGaBisaMinusWalauBarengan,
@@ -425,5 +426,79 @@ var skenario = map[string]func(*testing.T, func(*testing.T) siap){
 func TestSkenarioMemori(t *testing.T) {
 	for nama, uji := range skenario {
 		t.Run(nama, func(t *testing.T) { uji(t, siapkanMemori) })
+	}
+}
+
+func ujiChat(t *testing.T, siapkan func(*testing.T) siap) {
+	x := siapkan(t)
+	ctx := context.Background()
+	p, _, _ := x.l.BuatPesanan(ctx, rani, map[string]int{x.sarapan.ID: 1}, "qris", "kunci-chat-1")
+
+	// belum dibayar: percakapan belum ada
+	if _, err := x.l.KirimChat(ctx, rani, p.ID, "pesan-0001", "Halo"); kodeGalat(err) != http.StatusNotFound {
+		t.Fatalf("chat sebelum bayar: %v", err)
+	}
+	_, _ = x.l.CekBayar(ctx, rani, p.ID)
+	mulai := x.jam.t.Add(-time.Second)
+
+	satu, err := x.l.KirimChat(ctx, rani, p.ID, "pesan-0001", "  Saya sudah sampai  ")
+	if err != nil || satu.Peran != "pembeli" || satu.Teks != "Saya sudah sampai" {
+		t.Fatalf("kirim: %+v %v", satu, err)
+	}
+	// NF-18 kiriman ulang dengan id sama ga dobel
+	if _, err := x.l.KirimChat(ctx, rani, p.ID, "pesan-0001", "Saya sudah sampai"); err != nil {
+		t.Fatal(err)
+	}
+	x.jam.maju(time.Second)
+	if _, err := x.l.KirimChat(ctx, ibis, p.ID, "pesan-0002", "Pesanan sudah siap"); err != nil {
+		t.Fatal(err)
+	}
+	riwayat, _ := x.l.RiwayatChat(ctx, rani, p.ID)
+	if len(riwayat) != 2 || riwayat[1].Peran != "mitra" {
+		t.Fatalf("riwayat: %+v", riwayat)
+	}
+	// orang lain ga bisa baca / kirim
+	if _, err := x.l.RiwayatChat(ctx, dimas, p.ID); kodeGalat(err) != http.StatusNotFound {
+		t.Fatalf("akun lain baca: %v", err)
+	}
+	if _, err := x.l.KirimChat(ctx, prime, p.ID, "pesan-0003", "hai"); kodeGalat(err) != http.StatusNotFound {
+		t.Fatalf("mitra lain kirim: %v", err)
+	}
+	if _, err := x.l.KirimChat(ctx, rani, p.ID, "pesan-0004", "   "); kodeGalat(err) != http.StatusUnprocessableEntity {
+		t.Fatalf("pesan kosong: %v", err)
+	}
+
+	// F-70 Rani baca: pesan mitra jadi dibaca, pesan Rani sendiri tetap terkirim
+	x.jam.maju(time.Second)
+	if err := x.l.BacaChat(ctx, rani, p.ID); err != nil {
+		t.Fatal(err)
+	}
+	riwayat, _ = x.l.RiwayatChat(ctx, ibis, p.ID)
+	for _, c := range riwayat {
+		if (c.Peran == "mitra") != (c.DibacaPada != nil) {
+			t.Fatalf("status baca salah: %+v", c)
+		}
+	}
+
+	// pesan baru: mitra narik semua yang berubah sejak awal, termasuk tanda dibaca
+	baru, sekarang, err := x.l.ChatBaru(ctx, ibis, mulai)
+	if err != nil || len(baru) != 2 || !sekarang.Equal(x.jam.t) {
+		t.Fatalf("chat baru mitra: %d %v", len(baru), err)
+	}
+	if baru, _, _ := x.l.ChatBaru(ctx, ibis, x.jam.t); len(baru) != 0 {
+		t.Fatalf("setelah sekarang harusnya kosong: %d", len(baru))
+	}
+	if baru, _, _ := x.l.ChatBaru(ctx, dimas, time.Time{}); len(baru) != 0 {
+		t.Fatalf("pembeli lain dapet pesan orang: %d", len(baru))
+	}
+
+	// selesai + lewat 2 jam: baca saja
+	_, _ = x.l.UbahStatus(ctx, ibis, p.ID, Selesai)
+	x.jam.maju(2*time.Hour + time.Minute)
+	if _, err := x.l.KirimChat(ctx, rani, p.ID, "pesan-0005", "Terima kasih"); kodeGalat(err) != http.StatusConflict {
+		t.Fatalf("chat ditutup: %v", err)
+	}
+	if riwayat, err := x.l.RiwayatChat(ctx, rani, p.ID); err != nil || len(riwayat) != 2 {
+		t.Fatalf("riwayat tetap bisa dibaca: %d %v", len(riwayat), err)
 	}
 }

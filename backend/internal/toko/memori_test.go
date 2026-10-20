@@ -16,6 +16,7 @@ type storeMemori struct {
 	tutup   map[string]bool
 	paket   []Paket
 	pesanan []Pesanan
+	chat    []PesanChat
 	urut    int
 }
 
@@ -233,6 +234,61 @@ func (s *storeMemori) MenungguLewat(_ context.Context, sekarang time.Time) ([]st
 		}
 	}
 	return id, nil
+}
+
+func (s *storeMemori) SimpanPesan(_ context.Context, p PesanChat) (PesanChat, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, lama := range s.chat {
+		if lama.IDPesanan == p.IDPesanan && lama.ID == p.ID {
+			return lama, nil
+		}
+	}
+	s.chat = append(s.chat, p)
+	return p, nil
+}
+
+func (s *storeMemori) DaftarPesan(_ context.Context, idPesanan string) ([]PesanChat, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	hasil := []PesanChat{}
+	for _, p := range s.chat {
+		if p.IDPesanan == idPesanan {
+			hasil = append(hasil, p)
+		}
+	}
+	return hasil, nil
+}
+
+func (s *storeMemori) TandaiDibaca(_ context.Context, idPesanan, oleh string, sekarang time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.chat {
+		p := &s.chat[i]
+		if p.IDPesanan == idPesanan && p.Peran != oleh && p.DibacaPada == nil {
+			t := sekarang
+			p.DibacaPada, p.Diubah = &t, sekarang
+		}
+	}
+	return nil
+}
+
+func (s *storeMemori) PesanBaru(_ context.Context, idAkun, peran string, setelah time.Time) ([]PesanChat, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	milik := map[string]bool{}
+	for _, p := range s.pesanan {
+		if (peran == "pembeli" && p.IDAkun == idAkun) || (peran == "mitra" && p.IDMitra == idAkun && p.DibayarPada != nil) {
+			milik[p.ID] = true
+		}
+	}
+	hasil := []PesanChat{}
+	for _, c := range s.chat {
+		if milik[c.IDPesanan] && c.Diubah.After(setelah) {
+			hasil = append(hasil, c)
+		}
+	}
+	return hasil, nil
 }
 
 var _ Store = (*storeMemori)(nil)
