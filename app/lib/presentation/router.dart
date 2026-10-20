@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
+import 'package:sisa_rasa/presentation/screens/admin/verifikasi_mitra.dart';
 import 'package:sisa_rasa/presentation/screens/akun.dart';
 import 'package:sisa_rasa/presentation/screens/auth/daftar.dart';
 import 'package:sisa_rasa/presentation/screens/auth/ketentuan.dart';
@@ -96,6 +97,9 @@ abstract final class Rute {
   static String mitraUbahPaket(String id) => '/mitra/paket/ubah/$id';
   static String mitraDetailPesanan(String id) => '/mitra/pesanan/detail/$id';
   static String mitraPercakapan(String id) => '/mitra/pesanan/chat/$id';
+
+  /// admin cuma punya satu halaman: verifikasi mitra (F-36 - F-38)
+  static const admin = '/admin';
 }
 
 /// GoRouter dengerin AkunCubit lewat ini, biar pas ganti akun redirect-nya jalan lagi
@@ -147,7 +151,8 @@ GoRouter buatRouter({required AkunCubit akun}) {
             lokasi.startsWith(Rute.pesanan) ||
             lokasi.startsWith(Rute.akun) ||
             lokasi == Rute.checkout ||
-            lokasi.startsWith('/mitra');
+            lokasi.startsWith('/mitra') ||
+            lokasi == Rute.admin;
         if (perluAkun) return Rute.masukLalu(state.uri.toString());
         return null;
       }
@@ -157,6 +162,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
 
       // F-26 / F-32: halaman yg kebuka ditentuin peran akun yg lagi masuk.
       // mitra ga bisa buka halaman pembeli, pembeli ga bisa buka halaman mitra
+      // admin cuma boleh di halaman admin, peran lain ga boleh ke sana
+      final admin = akun.state['peran'] == 'admin';
+      if (admin) return lokasi == Rute.admin ? null : Rute.admin;
+      if (lokasi == Rute.admin) return Rute.beranda;
       final mitra = akun.state['peran'] == 'mitra';
       final diHalamanMitra = lokasi.startsWith('/mitra');
       if (mitra && !diHalamanMitra) return Rute.mitraDasbor;
@@ -187,6 +196,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
       GoRoute(
         path: Rute.ketentuan,
         builder: (context, state) => const Ketentuan(),
+      ),
+      GoRoute(
+        path: Rute.admin,
+        builder: (context, state) => const VerifikasiMitra(),
       ),
       // StatefulShellRoute: tab bawah, isi tiap tab ga ke-reset pas pindah tab
       StatefulShellRoute.indexedStack(

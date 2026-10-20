@@ -35,6 +35,9 @@ type Config struct {
 	FolderFoto string
 	// Cloudflare R2 buat foto paket. kalau R2Bucket kosong, foto disimpan di FolderFoto
 	R2IDAkun, R2Kunci, R2Rahasia, R2Bucket, R2Publik string
+	// AdminEmail + AdminSandi bikin akun admin pas server nyala kalau belum ada.
+	// sandinya cuma dipakai sekali, ganti nanti lewat fitur ganti sandi
+	AdminEmail, AdminSandi string
 }
 
 func Baca() (Config, error) {
@@ -63,6 +66,8 @@ func Baca() (Config, error) {
 	}
 	c.QRISStatis = strings.TrimSpace(os.Getenv("QRIS_STATIS"))
 	c.FolderFoto = ambil("FOLDER_FOTO", "data/foto")
+	c.AdminEmail = strings.TrimSpace(os.Getenv("ADMIN_EMAIL"))
+	c.AdminSandi = os.Getenv("ADMIN_SANDI")
 	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
 	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")
 	c.R2Rahasia = os.Getenv("R2_SECRET_ACCESS_KEY")

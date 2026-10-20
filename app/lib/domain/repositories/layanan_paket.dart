@@ -26,6 +26,10 @@ abstract class LayananPaket {
   /// F-51
   Future<void> aturGerai({required bool tutup});
 
+  /// F-37: status verifikasi gerai mitra yang lagi masuk, isinya
+  /// status (StatusGerai) dan alasan kalau ditolak / dinonaktifkan admin
+  Future<Map<String, dynamic>> statusGerai();
+
   /// foto paket dari HP ([jalur] file), balikin isi field 'foto' paket:
   /// URL di server, atau file:// kalau ga tersambung server
   Future<String> unggahFoto(String jalur);

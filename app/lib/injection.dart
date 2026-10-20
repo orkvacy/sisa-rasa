@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:sisa_rasa/core/alamat.dart';
 import 'package:sisa_rasa/core/sesi_aktif.dart';
+import 'package:sisa_rasa/data/repositories/admin_api.dart';
+import 'package:sisa_rasa/data/repositories/admin_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/akun_api.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
@@ -12,6 +14,7 @@ import 'package:sisa_rasa/data/repositories/pesanan_api.dart';
 import 'package:sisa_rasa/data/repositories/saldo_api.dart';
 import 'package:sisa_rasa/data/repositories/saldo_lokal.dart';
 import 'package:sisa_rasa/data/sumber/klien_api.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_paket.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
@@ -39,7 +42,8 @@ void daftarkanDependensi({String alamat = alamatApi}) {
       ..registerLazySingleton<LayananAkun>(AkunTiruan.new)
       ..registerLazySingleton<LayananPaket>(PaketLokal.new)
       ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new)
-      ..registerLazySingleton<LayananSaldo>(SaldoLokal.new);
+      ..registerLazySingleton<LayananSaldo>(SaldoLokal.new)
+      ..registerLazySingleton<LayananAdmin>(AdminTiruan.new);
     return;
   }
   final klien = KlienApi(alamat: alamat, sesi: sesi);
@@ -48,5 +52,6 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     ..registerLazySingleton<LayananPaket>(() => PaketApi(klien))
     ..registerLazySingleton<LayananPesanan>(() => PesananApi(klien))
     ..registerLazySingleton<LayananPercakapan>(() => PercakapanApi(klien))
-    ..registerLazySingleton<LayananSaldo>(() => SaldoApi(klien));
+    ..registerLazySingleton<LayananSaldo>(() => SaldoApi(klien))
+    ..registerLazySingleton<LayananAdmin>(() => AdminApi(klien));
 }

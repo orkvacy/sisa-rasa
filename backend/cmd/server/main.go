@@ -79,6 +79,13 @@ func jalan() error {
 		}
 		slog.Info("akun contoh siap", "sandi", akun.SandiContoh)
 	}
+	// F-36: akun admin dibikin dari env, ga bisa daftar lewat aplikasi
+	if cfg.AdminEmail != "" {
+		if err := layananAkun.PastikanAdmin(ctx, cfg.AdminEmail, cfg.AdminSandi); err != nil {
+			return fmt.Errorf("akun admin: %w", err)
+		}
+	}
+
 	// NF-11: saldo mitra dicairkan tiap hari 09.00 WITA
 	go layananToko.JadwalCairkan(ctx)
 	// F-40: pesanan yang lewat batas bayar dibatalin dan porsinya dibalikin,
@@ -107,7 +114,7 @@ func jalan() error {
 	// masuk / daftar: 10 kali per menit per IP (NF-13)
 	batasAkun := httpx.NewPembatas(10, time.Minute, cfg.DiBelakangProxy)
 	akun.Pasang(mux, layananAkun, batasAkun.Bungkus)
-	toko.Pasang(mux, layananToko, layananAkun.Wajib)
+	toko.Pasang(mux, layananToko, layananAkun.Wajib, layananAkun.Opsional)
 	// foto paket: unggah 30 kali per menit per IP
 	batasFoto := httpx.NewPembatas(30, time.Minute, cfg.DiBelakangProxy)
 	mux.Handle("POST /v1/mitra/foto", batasFoto.Bungkus(layananAkun.Wajib(foto.Unggah(penyimpananFoto))))

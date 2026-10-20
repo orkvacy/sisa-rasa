@@ -8,12 +8,16 @@ import (
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
 )
 
-// Pasang daftarin rute paket dan pesanan. [wajib] nolak request tanpa sesi (akun.Layanan.Wajib)
-func Pasang(mux *http.ServeMux, l *Layanan, wajib func(http.Handler) http.Handler) {
+// Pasang daftarin rute paket dan pesanan. [wajib] nolak request tanpa sesi (akun.Layanan.Wajib),
+// [opsional] masang akun kalau ada token yang berlaku tapi tetap lanjut kalau ga ada
+func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) http.Handler) {
 	h := func(f httpx.Handler) http.Handler { return wajib(f) }
 
 	// daftar paket boleh dilihat tamu (F-65)
-	mux.Handle("GET /v1/paket", httpx.Handler(l.handlePaket))
+	mux.Handle("GET /v1/paket", opsional(httpx.Handler(l.handlePaket)))
+	mux.Handle("GET /v1/mitra/status", h(l.handleStatusGerai))
+	mux.Handle("GET /v1/admin/mitra", h(l.handleDaftarMitra))
+	mux.Handle("POST /v1/admin/mitra/{id}/periksa", h(l.handlePeriksaMitra))
 
 	mux.Handle("GET /v1/mitra/paket", h(l.handlePaketSaya))
 	mux.Handle("POST /v1/mitra/paket", h(l.handleBuatPaket))
@@ -61,7 +65,7 @@ func tulisPesanan(w http.ResponseWriter, p Pesanan, err error) error {
 // ---------- paket ----------
 
 func (l *Layanan) handlePaket(w http.ResponseWriter, r *http.Request) error {
-	daftar, err := l.DaftarPaket(r.Context())
+	daftar, err := l.DaftarPaket(r.Context(), akun.DariKonteks(r.Context()))
 	if err != nil {
 		return err
 	}
@@ -312,5 +316,41 @@ func (l *Layanan) handleRekening(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, map[string]Rekening{"rekening": rek})
+	return nil
+}
+
+// ---------- verifikasi mitra ----------
+
+func (l *Layanan) handleStatusGerai(w http.ResponseWriter, r *http.Request) error {
+	st, err := l.StatusSaya(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, st)
+	return nil
+}
+
+func (l *Layanan) handleDaftarMitra(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.DaftarMitra(r.Context(), akun.DariKonteks(r.Context()), r.URL.Query().Get("status"))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]MitraAdmin{"mitra": daftar})
+	return nil
+}
+
+func (l *Layanan) handlePeriksaMitra(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Status string `json:"status"`
+		Alasan string `json:"alasan"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	st, err := l.PeriksaMitra(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), isi.Status, isi.Alasan)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, st)
 	return nil
 }

@@ -7,6 +7,7 @@ import 'package:sisa_rasa/core/sesi_aktif.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
+import 'package:sisa_rasa/presentation/cubit/admin_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
@@ -69,6 +70,8 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         BlocProvider(create: (context) => KeranjangCubit()),
         BlocProvider(create: (context) => SaldoCubit(layanan: sl())),
         BlocProvider(create: (context) => PercakapanCubit(layanan: sl())),
+        // baru dibikin pas halaman admin dibuka
+        BlocProvider(create: (context) => AdminCubit(layanan: sl())),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya
         BlocProvider(
           create: (context) {
@@ -150,7 +153,8 @@ class _SinkronState extends State<_Sinkron> {
 
     if (pakaiServer) {
       _detak = Timer.periodic(const Duration(seconds: 5), (_) {
-        if (!akun.sudahMasuk) return;
+        // admin ga punya pesanan / paket, halamannya dimuat sendiri
+        if (!akun.sudahMasuk || akun.state['peran'] == 'admin') return;
         pesanan.add(PesananDimuat());
         if (++_putaran % 4 == 0) {
           paket.muat();
