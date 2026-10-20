@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 // bagian-bagian detail pesanan yg dipake bareng layar pembeli sama layar mitra
 
@@ -412,7 +413,7 @@ class BagianIsiPesanan extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
+                child: GambarPaket(
                   item['foto'] ?? pesanan['foto'],
                   width: 64,
                   height: 64,

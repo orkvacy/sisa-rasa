@@ -9,6 +9,7 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_keranjang.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// beranda pembeli (figma v3: pembeli/beranda - mitra).
 /// isinya daftar mitra, bukan paket: Flash sale buat yg tutup kurang dari 1 jam (F-53),
@@ -561,7 +562,7 @@ class _KartuFlashSale extends StatelessWidget {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.asset(mitra.foto, fit: BoxFit.cover),
+                        GambarPaket(mitra.foto, fit: BoxFit.cover),
                         Positioned(
                           left: 10,
                           top: 10,
@@ -677,7 +678,7 @@ class _BarisMitra extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: Image.asset(
+              child: GambarPaket(
                 mitra.foto,
                 width: 76,
                 height: 76,

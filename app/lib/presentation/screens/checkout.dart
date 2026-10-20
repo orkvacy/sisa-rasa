@@ -15,6 +15,7 @@ import 'package:sisa_rasa/presentation/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/pilih_metode.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// halaman checkout (figma v3): cek isi pesanan, pilih cara bayar, lalu bayar
 /// (F-09, F-10, F-56)
@@ -501,7 +502,7 @@ class _ItemPesanan extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
+          child: GambarPaket(
             paket['foto'],
             width: 56,
             height: 56,

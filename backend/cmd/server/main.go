@@ -20,6 +20,7 @@ import (
 	"github.com/orkvacy/sisa-rasa/backend/internal/akun"
 	"github.com/orkvacy/sisa-rasa/backend/internal/config"
 	"github.com/orkvacy/sisa-rasa/backend/internal/db"
+	"github.com/orkvacy/sisa-rasa/backend/internal/foto"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
 	"github.com/orkvacy/sisa-rasa/backend/internal/toko"
 )
@@ -49,8 +50,20 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
+	// foto paket ke Cloudflare R2 kalau diatur, kalau belum ke disk
+	var penyimpananFoto foto.Penyimpanan = foto.Disk{Folder: cfg.FolderFoto}
+	if cfg.R2Bucket != "" {
+		r2, err := foto.BukaR2(cfg.R2IDAkun, cfg.R2Kunci, cfg.R2Rahasia, cfg.R2Bucket, cfg.R2Publik)
+		if err != nil {
+			return fmt.Errorf("R2: %w", err)
+		}
+		penyimpananFoto = r2
+		slog.Info("foto paket disimpan di R2", "bucket", cfg.R2Bucket)
+	}
+
 	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo,
-		PencairanUji: cfg.Lingkungan != "production", QRISStatis: cfg.QRISStatis}
+		PencairanUji: cfg.Lingkungan != "production", QRISStatis: cfg.QRISStatis,
+		FotoSah: penyimpananFoto.Sah}
 	if cfg.QRISStatis != "" {
 		if err := toko.CekQRIS(cfg.QRISStatis); err != nil {
 			return fmt.Errorf("QRIS_STATIS: %w", err)
@@ -95,6 +108,12 @@ func jalan() error {
 	batasAkun := httpx.NewPembatas(10, time.Minute, cfg.DiBelakangProxy)
 	akun.Pasang(mux, layananAkun, batasAkun.Bungkus)
 	toko.Pasang(mux, layananToko, layananAkun.Wajib)
+	// foto paket: unggah 30 kali per menit per IP
+	batasFoto := httpx.NewPembatas(30, time.Minute, cfg.DiBelakangProxy)
+	mux.Handle("POST /v1/mitra/foto", batasFoto.Bungkus(layananAkun.Wajib(foto.Unggah(penyimpananFoto))))
+	if disk, ok := penyimpananFoto.(foto.Disk); ok {
+		mux.Handle("GET /v1/foto/{nama}", disk.Sajikan())
+	}
 
 	var handler http.Handler = mux
 	if len(cfg.AsalWeb) > 0 {

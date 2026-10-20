@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// pil gelap yg ngambang tepat di atas navigasi melayang kalau keranjang ada isinya.
 /// lebarnya disamain sama navigasi (274) biar rapi satu kolom
@@ -46,7 +47,7 @@ class BarKeranjang extends StatelessWidget {
                 child: Row(
                   children: [
                     ClipOval(
-                      child: Image.asset(
+                      child: GambarPaket(
                         foto,
                         width: 40,
                         height: 40,

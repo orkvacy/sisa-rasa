@@ -25,4 +25,8 @@ abstract class LayananPaket {
 
   /// F-51
   Future<void> aturGerai({required bool tutup});
+
+  /// foto paket dari HP ([jalur] file), balikin isi field 'foto' paket:
+  /// URL di server, atau file:// kalau ga tersambung server
+  Future<String> unggahFoto(String jalur);
 }

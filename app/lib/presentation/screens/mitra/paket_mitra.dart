@@ -7,6 +7,7 @@ import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// status satu paket dari sisi mitra
 String statusPaket(Map<String, dynamic> paket) {
@@ -183,7 +184,7 @@ class _KartuPaket extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
+                      child: GambarPaket(
                         paket['foto'],
                         width: 56,
                         height: 56,

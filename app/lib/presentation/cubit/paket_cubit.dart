@@ -29,6 +29,16 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
     }
   }
 
+  /// unggah foto paket yang dipilih mitra. null kalau gagal (pesannya ke [galat])
+  Future<String?> unggahFoto(String jalur) async {
+    try {
+      return await layanan.unggahFoto(jalur);
+    } on GagalLayanan catch (e) {
+      if (!_galat.isClosed) _galat.add(e.pesan);
+      return null;
+    }
+  }
+
   /// perubahan dari mitra: layar langsung keubah duluan (di atas), baru dikirim
   /// ke server. kalau server nolak, daftar dimuat ulang biar balik ke data asli
   void _kirim(Future<void> Function() aksi) {

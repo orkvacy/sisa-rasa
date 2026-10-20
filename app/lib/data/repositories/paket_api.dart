@@ -56,4 +56,11 @@ class PaketApi implements LayananPaket {
   @override
   Future<void> aturGerai({required bool tutup}) =>
       klien.put('/v1/mitra/gerai/tutup', {'tutup': tutup});
+
+  /// server ngecilin + ngebuang EXIF, lalu nyimpen ke R2. balikin URL fotonya
+  @override
+  Future<String> unggahFoto(String jalur) async {
+    final hasil = await klien.unggah('/v1/mitra/foto', 'foto', jalur);
+    return hasil['foto'] as String;
+  }
 }
