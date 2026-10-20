@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// foto paket dengan sudut bulat. kalau paketnya habis, fotonya dibikin pudar (grayscale 50%)
 /// biar jelas ga bisa dipesan
@@ -30,7 +31,7 @@ class FotoPaket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gambar = Image.asset(
+    final gambar = GambarPaket(
       foto,
       width: lebar ?? double.infinity,
       height: tinggi,

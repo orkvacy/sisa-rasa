@@ -12,6 +12,7 @@ import 'package:sisa_rasa/presentation/widgets/hitung_mundur.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_melayang.dart';
 import 'package:sisa_rasa/presentation/widgets/pil_status.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// tab pesanan (figma v3), disaring jadi berlangsung / selesai / dibatalkan (F-12)
 class Pesanan extends StatefulWidget {
@@ -215,7 +216,7 @@ class _PesananState extends State<Pesanan> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
+                    child: GambarPaket(
                       pesanan['foto'],
                       width: 48,
                       height: 48,

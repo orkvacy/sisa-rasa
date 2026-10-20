@@ -10,6 +10,7 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/kartu_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/timeline_ambil.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
@@ -76,8 +77,8 @@ class _DetailPaketState extends State<DetailPaket> {
               // tombol back sama favorit numpuk paling depan
               child: Stack(
                 children: [
-                  // Image.asset: foto paket full selebar layar
-                  Image.asset(
+                  // GambarPaket: foto paket full selebar layar
+                  GambarPaket(
                     paket['foto'],
                     width: double.infinity,
                     height: 320,

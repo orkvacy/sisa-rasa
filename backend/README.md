@@ -19,6 +19,7 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `PUT` | `/v1/mitra/gerai/tutup` | `{tutup}` tutup gerai sementara (F-51) |
 | `GET` | `/v1/mitra/saldo` | `{rekening, tersedia, riwayat}` saldo dari pesanan selesai dikurangi komisi 10% dan pencairan (F-48, F-50) |
 | `PUT` | `/v1/mitra/rekening` | `{bank, nomor, nama}` nama harus sama dengan nama usaha (F-49) |
+| `POST` | `/v1/mitra/foto` | Multipart field `foto` (JPG/PNG/WebP, maks 8 MB). Dikecilkan ke lebar 1200 px, EXIF dibuang, disimpan ke R2. Jawab `{foto: url}` |
 | `POST` | `/v1/mitra/ambil` | `{kode}` scan / ketik kode ambil, pesanan selesai (F-46) |
 | `GET` | `/v1/pesanan` | Pesanan pembeli, atau pesanan masuk mitra (yang sudah dibayar) |
 | `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode}` + header **`Idempotency-Key`** |
@@ -102,6 +103,11 @@ Keamanan yang sudah dipasang:
 | `ASAL_WEB` | kosong (`*` di dev) | Origin aplikasi web yang boleh memanggil API, dipisah koma. Contoh `https://app.sisarasa.id` |
 | `JAM_DEMO` | kosong | Opsional. Kunci "jam sekarang" ke jam tertentu, misal `16:20`, kalau mau demo paket sore di jam berapa pun. Kosong = jam asli (aplikasi yang tersambung server juga pakai jam asli). Ditolak di production |
 | `QRIS_STATIS` | kosong | Isi **teks** QRIS statis merchant (hasil scan gambar QRIS, diawali `000201`). Kalau diisi, pesanan QRIS dapat QR asli dengan nominal pesanan (tag 01 jadi 12, tag 54 nominal, CRC dihitung ulang). Status lunas belum dicek otomatis; tunggu Midtrans |
+| `R2_BUCKET` | kosong | Bucket Cloudflare R2 untuk foto paket. Kosong = foto disimpan di `FOLDER_FOTO` |
+| `R2_ID_AKUN` | | Account ID Cloudflare |
+| `R2_ACCESS_KEY_ID` `R2_SECRET_ACCESS_KEY` | | Kunci API R2 (rahasia, isi di Coolify saja) |
+| `R2_PUBLIK` | | Alamat publik bucket, misal `https://cdn.sisarasa.web.id` |
+| `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify

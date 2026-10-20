@@ -30,4 +30,8 @@ class PaketLokal implements LayananPaket {
 
   @override
   Future<void> aturGerai({required bool tutup}) async {}
+
+  /// ga ada server: foto langsung dibaca dari file di HP
+  @override
+  Future<String> unggahFoto(String jalur) async => 'file://$jalur';
 }

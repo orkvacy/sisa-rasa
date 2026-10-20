@@ -11,6 +11,7 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// pesanan masuk mitra (figma v3: mitra/pesanan, F-19, F-20, F-43, F-47)
 class PesananMasuk extends StatefulWidget {
@@ -295,7 +296,7 @@ class _KartuPesanan extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
+                    child: GambarPaket(
                       pesanan['foto'],
                       width: 44,
                       height: 44,

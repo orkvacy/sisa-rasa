@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// gaya kolom angka di tombol - +. semua garis sama padding dari tema dimatiin,
 /// soalnya padding 16 dari inputDecorationTheme bikin angkanya kedorong keluar kolom
@@ -72,8 +73,8 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          // Image.asset: foto kecil paketnya
-          child: Image.asset(
+          // GambarPaket: foto kecil paketnya
+          child: GambarPaket(
             widget.paket['foto'],
             width: 60,
             height: 60,

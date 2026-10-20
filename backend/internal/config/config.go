@@ -30,6 +30,11 @@ type Config struct {
 	// QRISStatis QRIS statis merchant (isi teks QR-nya, bukan gambar).
 	// kalau diisi, pesanan QRIS dapet QR asli dengan nominal pesanan
 	QRISStatis string
+	// FolderFoto tempat nyimpen foto paket kalau R2 belum diatur. di Coolify
+	// folder ini harus dipasang Persistent Storage, kalau ga fotonya ilang tiap deploy
+	FolderFoto string
+	// Cloudflare R2 buat foto paket. kalau R2Bucket kosong, foto disimpan di FolderFoto
+	R2IDAkun, R2Kunci, R2Rahasia, R2Bucket, R2Publik string
 }
 
 func Baca() (Config, error) {
@@ -57,6 +62,15 @@ func Baca() (Config, error) {
 		c.JamDemo = &menit
 	}
 	c.QRISStatis = strings.TrimSpace(os.Getenv("QRIS_STATIS"))
+	c.FolderFoto = ambil("FOLDER_FOTO", "data/foto")
+	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
+	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")
+	c.R2Rahasia = os.Getenv("R2_SECRET_ACCESS_KEY")
+	c.R2Bucket = os.Getenv("R2_BUCKET")
+	c.R2Publik = os.Getenv("R2_PUBLIK")
+	if c.R2Bucket != "" && (c.R2IDAkun == "" || c.R2Kunci == "" || c.R2Rahasia == "" || c.R2Publik == "") {
+		return c, errors.New("R2_BUCKET diisi tapi R2_ID_AKUN / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_PUBLIK belum lengkap")
+	}
 	if c.DatabaseURL == "" {
 		return c, errors.New("DATABASE_URL belum diisi")
 	}

@@ -48,6 +48,8 @@ type Layanan struct {
 	// QRISStatis isi QRIS statis milik Sisa Rasa (env QRIS_STATIS). kalau diisi,
 	// pesanan QRIS dapet QR asli dengan nominal pesanan di dalamnya. kosong = QR tiruan
 	QRISStatis string
+	// FotoSah ngecek URL foto unggahan (foto.Penyimpanan.Sah). nil = cuma foto bawaan
+	FotoSah func(url string) bool
 }
 
 func (l *Layanan) sekarang() time.Time {
@@ -74,6 +76,9 @@ var polaID = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[
 
 func idSah(id string) bool { return polaID.MatchString(id) }
 
+// polaFotoBawaan foto contoh yang ikut di aplikasi (assets/images/paket)
+var polaFotoBawaan = regexp.MustCompile(`^assets/images/paket/[a-z0-9_]+\.jpg$`)
+
 var (
 	errBukanPembeli = galat(http.StatusForbidden, "Fitur ini khusus akun pembeli.")
 	errBukanMitra   = galat(http.StatusForbidden, "Fitur ini khusus akun mitra.")
@@ -95,7 +100,7 @@ func (l *Layanan) PaketSaya(ctx context.Context, a akun.Akun) ([]Paket, error) {
 	return l.Store.PaketMitra(ctx, a.ID)
 }
 
-func cekIsian(isi *IsianPaket) error {
+func (l *Layanan) cekIsian(isi *IsianPaket) error {
 	isi.Nama = strings.TrimSpace(isi.Nama)
 	isi.Deskripsi = strings.TrimSpace(isi.Deskripsi)
 	switch {
@@ -116,8 +121,12 @@ func cekIsian(isi *IsianPaket) error {
 	case isi.Mulai < 0 || isi.Tutup > 24*60 || isi.Mulai >= isi.Tutup:
 		return galat(http.StatusUnprocessableEntity, "Jam tutup ambil harus setelah jam buka.")
 	}
-	if isi.Foto == "" {
+	switch {
+	case isi.Foto == "":
 		isi.Foto = "assets/images/paket/buffet_hotel.jpg"
+	case !polaFotoBawaan.MatchString(isi.Foto) && (l.FotoSah == nil || !l.FotoSah(isi.Foto)):
+		// cuma foto bawaan aplikasi atau unggahan ke server ini, bukan URL bebas
+		return galat(http.StatusUnprocessableEntity, "Foto paket tidak valid. Unggah ulang fotonya.")
 	}
 	return nil
 }
@@ -126,7 +135,7 @@ func (l *Layanan) BuatPaket(ctx context.Context, a akun.Akun, isi IsianPaket) (P
 	if a.Peran != "mitra" {
 		return Paket{}, errBukanMitra
 	}
-	if err := cekIsian(&isi); err != nil {
+	if err := l.cekIsian(&isi); err != nil {
 		return Paket{}, err
 	}
 	return l.Store.BuatPaket(ctx, a.ID, isi)
@@ -139,7 +148,7 @@ func (l *Layanan) UbahPaket(ctx context.Context, a akun.Akun, id string, isi Isi
 	if a.Peran != "mitra" {
 		return Paket{}, errBukanMitra
 	}
-	if err := cekIsian(&isi); err != nil {
+	if err := l.cekIsian(&isi); err != nil {
 		return Paket{}, err
 	}
 	return tanganiTidakAda(l.Store.UbahPaket(ctx, a.ID, id, isi))

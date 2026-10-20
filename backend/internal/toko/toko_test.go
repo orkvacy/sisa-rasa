@@ -331,6 +331,12 @@ func ujiKelolaPaket(t *testing.T, siapkan func(*testing.T) siap) {
 		t.Fatalf("pembeli bikin paket: %v", err)
 	}
 	isi.HargaDiskon = 12000
+	// foto cuma boleh bawaan aplikasi atau unggahan ke server, bukan URL bebas
+	isi.Foto = "https://jahat.example/foto.jpg"
+	if _, err := x.l.BuatPaket(ctx, ibis, isi); kodeGalat(err) != http.StatusUnprocessableEntity {
+		t.Fatalf("URL foto bebas: %v", err)
+	}
+	isi.Foto = "assets/images/paket/sushi.jpg"
 	p, err := x.l.BuatPaket(ctx, ibis, isi)
 	if err != nil || p.SisaPorsi != 3 || p.Foto == "" {
 		t.Fatalf("buat: %+v %v", p, err)

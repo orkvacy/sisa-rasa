@@ -11,6 +11,7 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
 /// isinya info gerai sama semua paket aktifnya, jadi pembeli bisa ambil
@@ -218,7 +219,7 @@ class _Sampul extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(foto, fit: BoxFit.cover),
+          GambarPaket(foto, fit: BoxFit.cover),
           Positioned(
             top: atas + 12,
             left: 16,
@@ -422,7 +423,7 @@ class _BarisPaketMitra extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.asset(paket['foto'], fit: BoxFit.cover),
+                      GambarPaket(paket['foto'], fit: BoxFit.cover),
                       // pil sisa cuma muncul kalau porsinya tinggal dikit
                       if (!habis && sisa <= 3)
                         Positioned(

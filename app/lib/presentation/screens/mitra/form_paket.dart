@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// kategori paket, sama kayak chip di beranda pembeli (F-03)
 const kategoriPaket = [
@@ -40,6 +42,9 @@ class _FormPaketState extends State<FormPaket> {
   int? tutup;
   bool mejaBerbagi = false;
   Map<String, String?> galat = {};
+  // foto paket: aset contoh, URL unggahan, atau file:// (tanpa server)
+  String? foto;
+  bool mengunggah = false;
 
   // dicari pakai where, bukan cari(), soalnya abis dihapus paketnya udah ga ada
   Map<String, dynamic>? get _lama => widget.idPaket == null
@@ -64,7 +69,26 @@ class _FormPaketState extends State<FormPaket> {
       mulai = lama['mulai'];
       tutup = lama['tutup'];
       mejaBerbagi = lama['mejaBerbagi'] == true;
+      foto = lama['foto'];
     }
+  }
+
+  /// pilih foto dari galeri lalu diunggah. HP udah ngecilin duluan biar
+  /// unggahnya cepet di sinyal pas-pasan, server ngecilin lagi + buang EXIF
+  Future<void> pilihFoto() async {
+    final dipilih = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 85,
+    );
+    if (dipilih == null || !mounted) return;
+    setState(() => mengunggah = true);
+    final hasil = await context.read<PaketCubit>().unggahFoto(dipilih.path);
+    if (!mounted) return;
+    setState(() {
+      mengunggah = false;
+      if (hasil != null) foto = hasil;
+    });
   }
 
   @override
@@ -133,6 +157,7 @@ class _FormPaketState extends State<FormPaket> {
       'mulai': mulai,
       'tutup': tutup,
       'mejaBerbagi': mejaBerbagi,
+      'foto': ?foto,
     };
     final cubit = context.read<PaketCubit>();
     final messenger = ScaffoldMessenger.of(context);
@@ -186,7 +211,6 @@ class _FormPaketState extends State<FormPaket> {
   @override
   Widget build(BuildContext context) {
     final baru = widget.idPaket == null;
-    final lama = _lama;
 
     return Scaffold(
       backgroundColor: Warna.latar,
@@ -212,7 +236,11 @@ class _FormPaketState extends State<FormPaket> {
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
           const _Label('Foto'),
-          _KotakFoto(foto: lama?['foto']),
+          _KotakFoto(
+            foto: foto,
+            mengunggah: mengunggah,
+            onPilih: mengunggah ? null : pilihFoto,
+          ),
           const SizedBox(height: 20),
 
           const _Label('Nama paket'),
@@ -484,24 +512,41 @@ class _Galat extends StatelessWidget {
   }
 }
 
-/// kotak foto. unggah foto butuh tempat nyimpen (server), jadi sementara pakai foto contoh
+/// kotak foto paket: pilih dari galeri, langsung diunggah
 class _KotakFoto extends StatelessWidget {
-  const _KotakFoto({required this.foto});
+  const _KotakFoto({
+    required this.foto,
+    required this.mengunggah,
+    required this.onPilih,
+  });
 
   final String? foto;
+  final bool mengunggah;
 
-  void _belum(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Unggah foto menyusul setelah server jadi, sementara pakai foto contoh',
-        ),
-      ),
-    );
-  }
+  /// null = lagi mengunggah, tombolnya dimatiin
+  final VoidCallback? onPilih;
 
   @override
   Widget build(BuildContext context) {
+    if (mengunggah) {
+      return Container(
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Warna.garisKontrol),
+        ),
+        alignment: Alignment.center,
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 12),
+            Text('Mengunggah foto…'),
+          ],
+        ),
+      );
+    }
     if (foto != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(18),
@@ -511,12 +556,12 @@ class _KotakFoto extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(foto!, fit: BoxFit.cover),
+              GambarPaket(foto!, fit: BoxFit.cover),
               Positioned(
                 right: 10,
                 bottom: 10,
                 child: FilledButton.icon(
-                  onPressed: () => _belum(context),
+                  onPressed: onPilih,
                   icon: const Icon(Icons.photo_camera_outlined, size: 18),
                   label: const Text('Ganti'),
                   style: FilledButton.styleFrom(
@@ -539,7 +584,7 @@ class _KotakFoto extends StatelessWidget {
         side: const BorderSide(color: Warna.garisKontrol),
       ),
       child: InkWell(
-        onTap: () => _belum(context),
+        onTap: onPilih,
         borderRadius: BorderRadius.circular(18),
         child: const SizedBox(
           height: 150,

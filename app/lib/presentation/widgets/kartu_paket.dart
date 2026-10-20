@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
+import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
 /// kartu paket versi kecil, foto di kiri. dipake buat paket yg bukanya nanti
 class KartuPaket extends StatelessWidget {
@@ -39,8 +40,8 @@ class KartuPaket extends StatelessWidget {
                 // ClipRRect: motong sudut foto biar ikut bulet
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  // Image.asset: foto paket dari assets/images
-                  child: Image.asset(
+                  // GambarPaket: foto paket dari assets/images
+                  child: GambarPaket(
                     paket['foto'],
                     width: 104,
                     height: 104,
