@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +30,31 @@ class _CheckoutState extends State<Checkout> {
   // tombol bayar dikunci selama pesanan dibikin, biar ga kepencet dua kali
   bool memproses = false;
 
+  // idempotency key: satu per layar checkout. kalau bayar diulang setelah gagal
+  // (sinyal putus), server tau itu pesanan yg sama, jadi ga dobel / stok ga kepotong dua kali
+  final kunci = List.generate(
+    16,
+    (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
+
+  StreamSubscription<String>? _galat;
+
+  @override
+  void initState() {
+    super.initState();
+    // server nolak (stok habis, jam lewat): tombol bayar dibuka lagi,
+    // pesannya udah ditampilin snackbar di main.dart
+    _galat = context.read<PesananBloc>().galat.listen((_) {
+      if (mounted) setState(() => memproses = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _galat?.cancel();
+    super.dispose();
+  }
+
   void bayar() {
     if (memproses) return;
     setState(() => memproses = true);
@@ -38,6 +66,7 @@ class _CheckoutState extends State<Checkout> {
         keranjang: context.read<KeranjangCubit>().state,
         daftarPaket: context.read<PaketCubit>().state,
         metode: metode,
+        kunci: kunci,
       ),
     );
   }

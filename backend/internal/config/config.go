@@ -4,6 +4,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -23,6 +24,9 @@ type Config struct {
 	// bikin akun contoh (sandi sisarasa123). otomatis di dev,
 	// di server demo dinyalain pakai SEMAI_AKUN_CONTOH=1. jangan di production
 	SemaiAkunContoh bool
+	// JamDemo kunci "jam sekarang" ke menit tertentu, sama kayak aplikasi demo
+	// yang dikunci di 16.20. diisi lewat JAM_DEMO=16:20, kosong = jam asli
+	JamDemo *int
 }
 
 func Baca() (Config, error) {
@@ -41,11 +45,19 @@ func Baca() (Config, error) {
 			c.AsalWeb = append(c.AsalWeb, asal)
 		}
 	}
+	if v := os.Getenv("JAM_DEMO"); v != "" {
+		var j, m int
+		if _, err := fmt.Sscanf(v, "%d:%d", &j, &m); err != nil || j < 0 || j > 23 || m < 0 || m > 59 {
+			return c, errors.New("JAM_DEMO harus berbentuk JJ:MM, misal 16:20")
+		}
+		menit := j*60 + m
+		c.JamDemo = &menit
+	}
 	if c.DatabaseURL == "" {
 		return c, errors.New("DATABASE_URL belum diisi")
 	}
-	if c.Lingkungan == "production" && c.SemaiAkunContoh {
-		return c, errors.New("SEMAI_AKUN_CONTOH ga boleh nyala di production")
+	if c.Lingkungan == "production" && (c.SemaiAkunContoh || c.JamDemo != nil) {
+		return c, errors.New("SEMAI_AKUN_CONTOH dan JAM_DEMO ga boleh nyala di production")
 	}
 	return c, nil
 }

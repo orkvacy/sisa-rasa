@@ -9,6 +9,7 @@ class PesananDibuat extends PesananEvent {
     required this.keranjang,
     required this.daftarPaket,
     required this.metode,
+    this.kunci,
   });
 
   // pemilik pesanan, biar pas ganti akun daftar pesanannya ikut ganti
@@ -19,7 +20,17 @@ class PesananDibuat extends PesananEvent {
   final List<Map<String, dynamic>> daftarPaket;
   // salah satu dari MetodeBayar (qris, gopay, va)
   final String metode;
+  // idempotency key, satu per layar checkout. kalau request ke server diulang
+  // (sinyal putus, kepencet dua kali), server ngasih pesanan yg sama, bukan pesanan baru
+  final String? kunci;
 }
+
+// minta daftar pesanan terbaru dari server. dikirim pas masuk dan berkala,
+// biar HP mitra liat pesanan baru dan HP pembeli liat status dari mitra
+class PesananDimuat extends PesananEvent {}
+
+// akun keluar / ganti: pesanan akun sebelumnya dibuang dari HP
+class PesananDikosongkan extends PesananEvent {}
 
 // dikirim pas pembeli mencet "Saya sudah bayar · cek status"
 class PembayaranDicek extends PesananEvent {

@@ -128,6 +128,12 @@ func (l *Layanan) Sesi(ctx context.Context, token string) (Akun, error) {
 	return a, err
 }
 
+// Cari akun dari email, dipakai penyemai data contoh
+func (l *Layanan) Cari(ctx context.Context, email string) (Akun, error) {
+	a, err := l.Store.AkunDariEmail(ctx, rapikanEmail(email))
+	return a.Akun, err
+}
+
 // Keluar F-33: token dicabut, ga bisa dipake lagi
 func (l *Layanan) Keluar(ctx context.Context, token string) error {
 	return l.Store.CabutSesi(ctx, hashToken(token), l.sekarang())

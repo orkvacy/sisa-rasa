@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_pesanan.dart';
 import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
@@ -12,20 +14,92 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
   // tahanPorsi / lepasPorsi nyambung ke PaketCubit (lihat main.dart).
   // stok sengaja diurus di sini, bukan di tiap layar: kalau batas bayar abis di dua layar
   // barengan, event batal yg kedua ditolak, jadi porsi pasti balik cuma sekali
-  PesananBloc({required this.pembayaran, this.tahanPorsi, this.lepasPorsi})
-    : super([]) {
+  //
+  // kalau [server] diisi (aplikasi tersambung API), semua aksi dikirim ke server
+  // dan isi pesanan diganti jawaban server. stok juga diurus server, jadi
+  // tahanPorsi / lepasPorsi ga dipake, cukup [muatUlangPaket]
+  PesananBloc({
+    required this.pembayaran,
+    this.tahanPorsi,
+    this.lepasPorsi,
+    this.server,
+    this.muatUlangPaket,
+  }) : super([]) {
     on<PesananDibuat>(buatPesanan);
     on<PembayaranDicek>(cekPembayaran);
     on<PesananDibatalkan>(batalkanPesanan);
     on<StatusPesananDiubah>(ubahStatus);
     on<MetodeDiganti>(gantiMetode);
     on<PesananDibatalkanMitra>(batalkanOlehMitra);
+    on<PesananDimuat>(muat);
+    on<PesananDikosongkan>((event, emit) => emit(const []));
   }
 
   final LayananPembayaran pembayaran;
   final void Function(Map<String, int> porsiPaket)? tahanPorsi;
   final void Function(Map<String, int> porsiPaket)? lepasPorsi;
+  final LayananPesanan? server;
+  final void Function()? muatUlangPaket;
   var _nomorUrut = 0;
+
+  final _galat = StreamController<String>.broadcast();
+
+  /// pesan galat dari server, ditampilin jadi snackbar (main.dart, checkout)
+  Stream<String> get galat => _galat.stream;
+
+  @override
+  Future<void> close() {
+    _galat.close();
+    return super.close();
+  }
+
+  /// jalanin [aksi] ke server, pesanan hasilnya gantiin yg lama di daftar.
+  /// galat dikirim ke [galat], daftarnya ga diubah
+  Future<Map<String, dynamic>?> _keServer(
+    Emitter<List<Map<String, dynamic>>> emit,
+    Future<Map<String, dynamic>> Function(LayananPesanan server) aksi, {
+    bool stokBerubah = false,
+  }) async {
+    try {
+      final pesanan = await aksi(server!);
+      emit(
+        [
+          pesanan,
+          for (final lama in state)
+            if (lama['id'] != pesanan['id']) lama,
+        ]..sort(_terbaru),
+      );
+      if (stokBerubah) muatUlangPaket?.call();
+      return pesanan;
+    } on GagalLayanan catch (e) {
+      if (!_galat.isClosed) _galat.add(e.pesan);
+      return null;
+    }
+  }
+
+  static int _terbaru(Map<String, dynamic> a, Map<String, dynamic> b) =>
+      (b['dibuat'] as DateTime).compareTo(a['dibuat'] as DateTime);
+
+  Future<void> muat(
+    PesananDimuat event,
+    Emitter<List<Map<String, dynamic>>> emit,
+  ) async {
+    if (server == null) return;
+    try {
+      final daftar = await server!.daftar();
+      // yg lagi dicek pembayarannya jangan sampai tombolnya balik aktif
+      final mengecek = {
+        for (final p in state)
+          if (p['mengecek'] == true) p['id'],
+      };
+      emit([
+        for (final p in daftar)
+          mengecek.contains(p['id']) ? {...p, 'mengecek': true} : p,
+      ]);
+    } on GagalLayanan {
+      // dimuat berkala: kalau sinyal putus, coba lagi di putaran berikutnya
+    }
+  }
 
   /// diteruskan ke layar pembayaran buat nampilin keterangan "disimulasikan"
   bool get modeUji => pembayaran.modeUji;
@@ -66,6 +140,15 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     return 'SR-${dua(waktu.year % 100)}${dua(waktu.month)}${dua(waktu.day)}$acak';
   }
 
+  /// cadangan kalau event ga bawa kunci: tetap unik, cuma ga bisa dipake ngulang
+  String _kunciAcak() {
+    final acak = Random.secure();
+    return List.generate(
+      16,
+      (_) => acak.nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+  }
+
   // kode acak SR-xxxx, huruf O/I sama angka 0/1 dibuang biar ga ketuker pas dibaca
   String _buatKode() {
     const huruf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -81,6 +164,18 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     PesananDibuat event,
     Emitter<List<Map<String, dynamic>>> emit,
   ) async {
+    if (server != null) {
+      await _keServer(
+        emit,
+        (server) => server.buat(
+          isi: event.keranjang,
+          metode: event.metode,
+          kunci: event.kunci ?? _kunciAcak(),
+        ),
+        stokBerubah: true,
+      );
+      return;
+    }
     Map<String, dynamic> cariPaket(String id) {
       return event.daftarPaket.firstWhere((paket) => paket['id'] == id);
     }
@@ -174,6 +269,14 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     }
 
     emit(_ubah(event.id, (lama) => {...lama, 'mengecek': true}));
+    if (server != null) {
+      // status lunas + kode ambil dari server (NF-10)
+      final hasil = await _keServer(emit, (s) => s.cekBayar(event.id));
+      if (hasil == null) {
+        emit(_ubah(event.id, (lama) => {...lama, 'mengecek': false}));
+      }
+      return;
+    }
     final lunas = await pembayaran.sudahLunas(event.id);
 
     // bisa aja keburu dibatalin pas lagi nunggu jawaban
@@ -196,13 +299,22 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     );
   }
 
-  void batalkanPesanan(
+  Future<void> batalkanPesanan(
     PesananDibatalkan event,
     Emitter<List<Map<String, dynamic>>> emit,
-  ) {
+  ) async {
     final pesanan = cari(event.id);
     // F-55: pembeli cuma bisa batalin yg belum dibayar
     if (pesanan == null || pesanan['status'] != StatusPesanan.menungguBayar) {
+      return;
+    }
+    if (server != null) {
+      await _keServer(
+        emit,
+        (s) =>
+            s.batal(event.id, alasan: event.alasan, otomatis: event.otomatis),
+        stokBerubah: true,
+      );
       return;
     }
     emit(
@@ -224,13 +336,17 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
 
   /// mitra batalin pesanan yg udah dibayar: status batal, dana dikembalikan penuh (F-42).
   /// porsinya ga dibalikin ke stok, soalnya biasanya batal karena makanannya ga ada
-  void batalkanOlehMitra(
+  Future<void> batalkanOlehMitra(
     PesananDibatalkanMitra event,
     Emitter<List<Map<String, dynamic>>> emit,
-  ) {
+  ) async {
     final status = cari(event.id)?['status'];
     if (status != StatusPesanan.disiapkan &&
         status != StatusPesanan.siapDiambil) {
+      return;
+    }
+    if (server != null) {
+      await _keServer(emit, (s) => s.batalMitra(event.id, event.alasan));
       return;
     }
     emit(
@@ -256,6 +372,20 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     if (pesanan == null ||
         pesanan['status'] != StatusPesanan.menungguBayar ||
         pesanan['metode'] == event.metode) {
+      return;
+    }
+    if (server != null) {
+      emit(
+        _ubah(
+          event.id,
+          (lama) => {
+            ...lama,
+            'metode': event.metode,
+            'tagihan': <String, String>{},
+          },
+        ),
+      );
+      await _keServer(emit, (s) => s.gantiMetode(event.id, event.metode));
       return;
     }
     emit(
@@ -284,10 +414,10 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
 
   /// tahapan yg diubah mitra: disiapkan -> siap diambil (F-43) -> selesai (F-20).
   /// selain urutan itu ditolak, misalnya pesanan yg belum dibayar
-  void ubahStatus(
+  Future<void> ubahStatus(
     StatusPesananDiubah event,
     Emitter<List<Map<String, dynamic>>> emit,
-  ) {
+  ) async {
     final status = cari(event.id)?['status'];
     final boleh = switch (event.status) {
       StatusPesanan.siapDiambil => status == StatusPesanan.disiapkan,
@@ -297,6 +427,10 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       _ => false,
     };
     if (!boleh) return;
+    if (server != null) {
+      await _keServer(emit, (s) => s.ubahStatus(event.id, event.status));
+      return;
+    }
     emit(
       _ubah(
         event.id,
