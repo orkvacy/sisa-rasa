@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/presentation/router.dart';
+import 'package:sisa_rasa/presentation/screens/auth/tombol_google.dart';
 import 'package:sisa_rasa/presentation/screens/auth/bagian_auth.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/domain/aturan/akun.dart';
@@ -160,6 +161,12 @@ class _MasukState extends State<Masuk> {
             ),
             const SizedBox(height: 8),
             TombolAuth(label: 'Masuk', memuat: memuat, onPressed: kirim),
+            if (context.read<AkunCubit>().bisaGoogle) ...[
+              const SizedBox(height: 12),
+              TombolGoogle(
+                onGagal: (pesan) => setState(() => galatMasuk = pesan),
+              ),
+            ],
             const SizedBox(height: 24),
             TautanBawah(
               teks: 'Belum punya akun?',

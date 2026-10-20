@@ -12,6 +12,7 @@ import (
 func Pasang(mux *http.ServeMux, l *Layanan, batasi func(http.Handler) http.Handler) {
 	mux.Handle("POST /v1/akun/daftar", batasi(httpx.Handler(l.handleDaftar)))
 	mux.Handle("POST /v1/akun/masuk", batasi(httpx.Handler(l.handleMasuk)))
+	mux.Handle("POST /v1/akun/google", batasi(httpx.Handler(l.handleGoogle)))
 	mux.Handle("GET /v1/akun/saya", l.Wajib(httpx.Handler(handleSaya)))
 	mux.Handle("POST /v1/akun/keluar", httpx.Handler(l.handleKeluar))
 	mux.Handle("PATCH /v1/akun/saya", l.Wajib(httpx.Handler(l.handleUbahNama)))
@@ -36,12 +37,13 @@ func (l *Layanan) handleUbahNama(w http.ResponseWriter, r *http.Request) error {
 
 func (l *Layanan) handleHapus(w http.ResponseWriter, r *http.Request) error {
 	var isi struct {
-		Sandi string `json:"sandi"`
+		Sandi   string `json:"sandi"`
+		IDToken string `json:"idToken"`
 	}
 	if err := httpx.BacaJSON(w, r, &isi); err != nil {
 		return err
 	}
-	if err := l.HapusAkun(r.Context(), DariKonteks(r.Context()), isi.Sandi); err != nil {
+	if err := l.HapusAkun(r.Context(), DariKonteks(r.Context()), isi.Sandi, isi.IDToken); err != nil {
 		return err
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -75,6 +77,21 @@ func (l *Layanan) handleMasuk(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	hasil, err := l.Masuk(r.Context(), isi.Email, isi.Sandi)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, hasil)
+	return nil
+}
+
+func (l *Layanan) handleGoogle(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		IDToken string `json:"idToken"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	hasil, err := l.MasukGoogle(r.Context(), isi.IDToken)
 	if err != nil {
 		return err
 	}

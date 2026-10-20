@@ -5,6 +5,7 @@ import 'package:sisa_rasa/data/repositories/admin_api.dart';
 import 'package:sisa_rasa/data/repositories/admin_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/akun_api.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
+import 'package:sisa_rasa/data/repositories/google_asli.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
 import 'package:sisa_rasa/data/repositories/pembayaran_tiruan.dart';
@@ -21,6 +22,7 @@ import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_percakapan.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pesanan.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_saldo.dart';
+import 'package:sisa_rasa/domain/repositories/masuk_google.dart';
 
 /// service locator (GetIt). layar sama cubit cuma kenal kontrak di domain/,
 /// implementasinya ditentuin di sini doang (NF-04)
@@ -43,7 +45,8 @@ void daftarkanDependensi({String alamat = alamatApi}) {
       ..registerLazySingleton<LayananPaket>(PaketLokal.new)
       ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new)
       ..registerLazySingleton<LayananSaldo>(SaldoLokal.new)
-      ..registerLazySingleton<LayananAdmin>(AdminTiruan.new);
+      ..registerLazySingleton<LayananAdmin>(AdminTiruan.new)
+      ..registerLazySingleton<MasukGoogle>(GoogleMati.new);
     return;
   }
   final klien = KlienApi(alamat: alamat, sesi: sesi);
@@ -53,5 +56,10 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     ..registerLazySingleton<LayananPesanan>(() => PesananApi(klien))
     ..registerLazySingleton<LayananPercakapan>(() => PercakapanApi(klien))
     ..registerLazySingleton<LayananSaldo>(() => SaldoApi(klien))
-    ..registerLazySingleton<LayananAdmin>(() => AdminApi(klien));
+    ..registerLazySingleton<LayananAdmin>(() => AdminApi(klien))
+    ..registerLazySingleton<MasukGoogle>(
+      () => googleClientId.isEmpty
+          ? const GoogleMati()
+          : GoogleAsli(googleClientId),
+    );
 }

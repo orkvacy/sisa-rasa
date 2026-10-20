@@ -39,9 +39,33 @@ func (s *storeMemori) BuatAkun(_ context.Context, nama, email, hash, peran strin
 		return Akun{}, ErrEmailDipakai
 	}
 	s.nomor++
-	a := Akun{ID: fmt.Sprintf("a%d", s.nomor), Nama: nama, Email: email, Peran: peran}
+	a := Akun{ID: fmt.Sprintf("a%d", s.nomor), Nama: nama, Email: email, Peran: peran, PunyaSandi: hash != ""}
 	s.akun[email] = akunTersimpan{Akun: a, HashSandi: hash}
 	return a, nil
+}
+
+func (s *storeMemori) BuatAkunGoogle(ctx context.Context, nama, email, sub string) (Akun, error) {
+	a, err := s.BuatAkun(ctx, nama, email, "", "pembeli")
+	if err != nil {
+		return a, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	t := s.akun[email]
+	t.GoogleSub = sub
+	s.akun[email] = t
+	return a, nil
+}
+
+func (s *storeMemori) AkunDariGoogle(_ context.Context, sub string) (akunTersimpan, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, a := range s.akun {
+		if a.GoogleSub == sub {
+			return a, nil
+		}
+	}
+	return akunTersimpan{}, ErrTidakAda
 }
 
 func (s *storeMemori) UbahNama(_ context.Context, id, nama string) error {
@@ -69,6 +93,7 @@ func (s *storeMemori) HapusAkun(_ context.Context, id string, sekarang time.Time
 		if a.ID == id {
 			delete(s.akun, email)
 			a.Nama, a.Email, a.HashSandi = "Akun dihapus", "dihapus-"+id+"@sisarasa.invalid", "!"
+			a.GoogleSub = ""
 			s.akun[a.Email] = a
 		}
 	}
@@ -326,15 +351,15 @@ func TestUbahNamaDanHapusAkun(t *testing.T) {
 	}
 
 	// F-62 sandi salah, masih ada pesanan, lalu berhasil
-	if err := l.HapusAkun(ctx, rani.Akun, "salah"); kodeGalat(t, err) != 401 {
+	if err := l.HapusAkun(ctx, rani.Akun, "salah", ""); kodeGalat(t, err) != 401 {
 		t.Errorf("sandi salah harus 401")
 	}
 	pesananAktif[rani.Akun.ID] = true
-	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1"); kodeGalat(t, err) != 409 {
+	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1", ""); kodeGalat(t, err) != 409 {
 		t.Errorf("pesanan aktif harus 409")
 	}
 	delete(pesananAktif, rani.Akun.ID)
-	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1"); err != nil {
+	if err := l.HapusAkun(ctx, rani.Akun, "sandiaman1", ""); err != nil {
 		t.Fatal(err)
 	}
 	// sesi dicabut, ga bisa masuk lagi, emailnya bisa didaftarin ulang
@@ -347,7 +372,7 @@ func TestUbahNamaDanHapusAkun(t *testing.T) {
 	if _, err := l.Daftar(ctx, "Rani Baru", "rani@contoh.id", "sandiaman2", "pembeli"); err != nil {
 		t.Errorf("email bisa dipakai lagi: %v", err)
 	}
-	if err := l.HapusAkun(ctx, mitra.Akun, "sandiaman1"); kodeGalat(t, err) != 403 {
+	if err := l.HapusAkun(ctx, mitra.Akun, "sandiaman1", ""); kodeGalat(t, err) != 403 {
 		t.Errorf("mitra hapus sendiri harus 403")
 	}
 }

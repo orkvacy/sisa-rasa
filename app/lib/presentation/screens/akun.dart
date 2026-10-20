@@ -443,8 +443,17 @@ class _DialogHapusAkunState extends State<_DialogHapusAkun> {
     });
     final messenger = ScaffoldMessenger.of(context);
     final keranjang = context.read<KeranjangCubit>();
+    final akun = context.read<AkunCubit>();
     try {
-      await context.read<AkunCubit>().hapusAkun(sandi.text);
+      if (akun.tanpaSandi) {
+        // akun Google: konfirmasinya pilih akun Google yang sama lagi
+        if (!await akun.hapusAkunGoogle()) {
+          if (mounted) setState(() => menghapus = false);
+          return;
+        }
+      } else {
+        await akun.hapusAkun(sandi.text);
+      }
       keranjang.kosongkan();
       if (mounted) Navigator.pop(context);
       messenger.showSnackBar(
@@ -462,6 +471,7 @@ class _DialogHapusAkunState extends State<_DialogHapusAkun> {
 
   @override
   Widget build(BuildContext context) {
+    final tanpaSandi = context.read<AkunCubit>().tanpaSandi;
     return AlertDialog(
       title: const Text('Hapus akun?'),
       content: Column(
@@ -474,18 +484,28 @@ class _DialogHapusAkunState extends State<_DialogHapusAkun> {
             'Tindakan ini tidak bisa dibatalkan.',
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: sandi,
-            obscureText: true,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: 'Kata sandi',
-              helperText: 'Masukkan kata sandi untuk konfirmasi',
-              errorText: galat,
-              errorMaxLines: 3,
+          if (tanpaSandi) ...[
+            const Text(
+              'Kamu masuk dengan Google. Pilih akun Google yang sama untuk konfirmasi.',
+              style: TextStyle(color: Warna.teksPendukung),
             ),
-            onSubmitted: (_) => hapus(),
-          ),
+            if (galat != null) ...[
+              const SizedBox(height: 8),
+              Text(galat!, style: const TextStyle(color: Warna.merah)),
+            ],
+          ] else
+            TextField(
+              controller: sandi,
+              obscureText: true,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Kata sandi',
+                helperText: 'Masukkan kata sandi untuk konfirmasi',
+                errorText: galat,
+                errorMaxLines: 3,
+              ),
+              onSubmitted: (_) => hapus(),
+            ),
         ],
       ),
       actions: [
@@ -496,7 +516,13 @@ class _DialogHapusAkunState extends State<_DialogHapusAkun> {
         TextButton(
           onPressed: menghapus ? null : hapus,
           style: TextButton.styleFrom(foregroundColor: Warna.merah),
-          child: Text(menghapus ? 'Menghapus…' : 'Hapus akun'),
+          child: Text(
+            menghapus
+                ? 'Menghapus…'
+                : tanpaSandi
+                ? 'Konfirmasi dengan Google'
+                : 'Hapus akun',
+          ),
         ),
       ],
     );

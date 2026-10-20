@@ -128,8 +128,17 @@ class AkunTiruan implements LayananAkun {
     return _tanpaSandi(akun);
   }
 
+  /// mode tiruan ga punya server buat meriksa token Google
   @override
-  Future<void> hapusAkun(String token, String sandi) async {
+  Future<Map<String, String>> masukGoogle(String idToken) async =>
+      throw const GagalAkun('Masuk dengan Google butuh server.');
+
+  @override
+  Future<void> hapusAkun(
+    String token,
+    String sandi, {
+    String idToken = '',
+  }) async {
     final akun = await _akunDariToken(token);
     if (akun['peran'] != 'pembeli') {
       throw const GagalAkun(

@@ -1,19 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
+import 'package:sisa_rasa/domain/repositories/masuk_google.dart';
 
 /// akun yg lagi masuk.
 /// {} = belum masuk (layar Sambutan), {'peran': 'tamu'} = lihat-lihat tanpa akun,
+/// {'luring': '1', 'pesan': ...} = ada sesi tersimpan tapi server ga bisa dihubungi,
 /// selain itu data akun dari LayananAkun (id, nama, email, peran, token)
 class AkunCubit extends Cubit<Map<String, String>> {
   AkunCubit({
     required this.layanan,
+    this.google,
     FlutterSecureStorage? penyimpanan,
     Map<String, String> awal = const {},
   }) : penyimpanan = penyimpanan ?? const FlutterSecureStorage(),
        super(awal);
 
   final LayananAkun layanan;
+
+  /// kosong di tes yang ga butuh Google
+  final MasukGoogle? google;
+
+  /// tombol "Masuk dengan Google" cuma muncul kalau ini true
+  bool get bisaGoogle => google?.tersedia ?? false;
+
+  /// akun Google tanpa sandi, konfirmasi hapus akunnya lewat Google
+  bool get tanpaSandi => state['punyaSandi'] == 'false';
 
   /// NF-14: token sesi disimpan di secure storage, bukan SharedPreferences
   final FlutterSecureStorage penyimpanan;
@@ -23,22 +35,32 @@ class AkunCubit extends Cubit<Map<String, String>> {
   bool get sudahMasuk => state['id'] != null;
   bool get tamu => state['peran'] == 'tamu';
 
-  /// dipanggil sekali pas aplikasi dibuka: lanjutin sesi yg masih berlaku
+  /// sesi tersimpan tapi belum bisa dicek karena ga ada koneksi (layar TanpaKoneksi)
+  bool get luring => state['luring'] == '1';
+
+  /// dipanggil pas aplikasi dibuka: lanjutin sesi yg masih berlaku.
+  /// dipanggil lagi dari tombol "Coba lagi" di layar TanpaKoneksi
   Future<void> pulihkan() async {
     final token = await penyimpanan.read(key: _kunciToken);
-    if (token == null) return;
+    if (token == null) {
+      if (luring) emit(const {});
+      return;
+    }
     final Map<String, String>? akun;
     try {
       akun = await layanan.sesi(token);
-    } on GagalAkun {
-      // server ga bisa dihubungi: token disimpen, dicoba lagi pas aplikasi dibuka lagi
+    } on GagalAkun catch (e) {
+      // server ga bisa dihubungi: token tetap disimpen, jangan dilempar ke
+      // layar masuk. tunggu di layar TanpaKoneksi sampai bisa dicek lagi
+      if (!isClosed) emit({'luring': '1', 'pesan': e.pesan});
       return;
     }
     if (akun == null) {
       await penyimpanan.delete(key: _kunciToken);
+      if (!isClosed) emit(const {});
       return;
     }
-    emit(akun);
+    if (!isClosed) emit(akun);
   }
 
   /// lempar GagalAkun kalau email / sandi salah
@@ -62,6 +84,22 @@ class AkunCubit extends Cubit<Map<String, String>> {
     );
   }
 
+  /// F-30b: false kalau pengguna batal milih akun.
+  /// lempar GagalAkun kalau Google / server nolak
+  Future<bool> masukGoogle() async {
+    final token = await google?.ambilIdToken();
+    if (token == null) return false;
+    try {
+      _mulaiSesi(await layanan.masukGoogle(token));
+    } on GagalAkun {
+      // ditolak server (misal email udah pakai sandi): akun Google-nya
+      // dilupain biar percobaan berikutnya bisa pilih akun lain
+      await google?.keluar();
+      rethrow;
+    }
+    return true;
+  }
+
   void _mulaiSesi(Map<String, String> akun) {
     penyimpanan.write(key: _kunciToken, value: akun['token']);
     emit(akun);
@@ -75,6 +113,7 @@ class AkunCubit extends Cubit<Map<String, String>> {
     final token = state['token'];
     emit(const {});
     await penyimpanan.delete(key: _kunciToken);
+    await google?.keluar();
     if (token != null) await layanan.keluar(token);
   }
 
@@ -94,6 +133,20 @@ class AkunCubit extends Cubit<Map<String, String>> {
     await layanan.hapusAkun(token, sandi);
     await penyimpanan.delete(key: _kunciToken);
     emit(const {});
+  }
+
+  /// F-62 buat akun Google tanpa sandi: pilih akun Google yang sama lagi.
+  /// false kalau batal milih akun
+  Future<bool> hapusAkunGoogle() async {
+    final token = state['token'];
+    if (token == null) return false;
+    final idToken = await google?.ambilIdToken();
+    if (idToken == null) return false;
+    await layanan.hapusAkun(token, '', idToken: idToken);
+    await penyimpanan.delete(key: _kunciToken);
+    await google?.keluar();
+    emit(const {});
+    return true;
   }
 
   /// khusus mode uji: pindah akun tanpa masuk ulang (tombol Ganti akun)

@@ -38,6 +38,9 @@ type Config struct {
 	// AdminEmail + AdminSandi bikin akun admin pas server nyala kalau belum ada.
 	// sandinya cuma dipakai sekali, ganti nanti lewat fitur ganti sandi
 	AdminEmail, AdminSandi string
+	// GoogleClientID web client ID OAuth (boleh lebih dari satu, pisah koma).
+	// kosong = masuk dengan Google dimatiin. ini bukan rahasia
+	GoogleClientID []string
 }
 
 func Baca() (Config, error) {
@@ -68,6 +71,11 @@ func Baca() (Config, error) {
 	c.FolderFoto = ambil("FOLDER_FOTO", "data/foto")
 	c.AdminEmail = strings.TrimSpace(os.Getenv("ADMIN_EMAIL"))
 	c.AdminSandi = os.Getenv("ADMIN_SANDI")
+	for _, id := range strings.Split(os.Getenv("GOOGLE_CLIENT_ID"), ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			c.GoogleClientID = append(c.GoogleClientID, id)
+		}
+	}
 	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
 	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")
 	c.R2Rahasia = os.Getenv("R2_SECRET_ACCESS_KEY")
