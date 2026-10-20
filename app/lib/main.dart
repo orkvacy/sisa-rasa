@@ -144,6 +144,7 @@ class _SinkronState extends State<_Sinkron> {
     _langganan
       ..add(pesanan.galat.listen(tampilkan))
       ..add(paket.galat.listen(tampilkan))
+      ..add(context.read<SaldoCubit>().galat.listen(tampilkan))
       ..add(akun.stream.listen(_akunBerubah));
     _akunBerubah(akun.state);
 
@@ -151,7 +152,14 @@ class _SinkronState extends State<_Sinkron> {
       _detak = Timer.periodic(const Duration(seconds: 5), (_) {
         if (!akun.sudahMasuk) return;
         pesanan.add(PesananDimuat());
-        if (++_putaran % 4 == 0) paket.muat();
+        if (++_putaran % 4 == 0) {
+          paket.muat();
+          // saldo mitra: pencairan harian dan rekening dari server
+          final nama = akun.state['nama'];
+          if (akun.state['peran'] == 'mitra' && nama != null) {
+            context.read<SaldoCubit>().muat(nama);
+          }
+        }
       });
     }
   }

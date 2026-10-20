@@ -266,8 +266,12 @@ class Pembayaran extends StatelessWidget {
             ),
             if (bloc.modeUji) ...[
               const SizedBox(height: 12),
-              const Text(
-                'Mode uji: pembayaran disimulasikan, tidak ada uang yang berpindah. Tekan "Saya sudah bayar" untuk melanjutkan.',
+              Text(
+                // server ngisi QRIS asli (QRIS statis yg dijadiin dinamis) tapi
+                // belum bisa ngecek lunas otomatis, jadi pengguna harus dikasih tau
+                tagihan['qrisAsli'] == '1' && metode == MetodeBayar.qris
+                    ? 'QR ini asli: kalau dibayar, uangnya benar-benar terkirim. Status lunas belum dicek otomatis, tekan "Saya sudah bayar" untuk melanjutkan.'
+                    : 'Mode uji: pembayaran disimulasikan, tidak ada uang yang berpindah. Tekan "Saya sudah bayar" untuk melanjutkan.',
                 textAlign: TextAlign.center,
                 style: _Gaya.keterangan,
               ),

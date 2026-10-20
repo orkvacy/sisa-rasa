@@ -17,11 +17,14 @@ type storeMemori struct {
 	paket   []Paket
 	pesanan []Pesanan
 	chat    []PesanChat
+	rek     map[string]Rekening
+	cair    map[string][]Pencairan
 	urut    int
 }
 
 func memoriBaru() *storeMemori {
-	return &storeMemori{nama: map[string]string{}, gerai: map[string]Gerai{}, tutup: map[string]bool{}}
+	return &storeMemori{nama: map[string]string{}, gerai: map[string]Gerai{}, tutup: map[string]bool{},
+		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}}
 }
 
 func (s *storeMemori) tambahMitra(id, nama string) { s.nama[id] = nama }
@@ -289,6 +292,77 @@ func (s *storeMemori) PesanBaru(_ context.Context, idAkun, peran string, setelah
 		}
 	}
 	return hasil, nil
+}
+
+func (s *storeMemori) Rekening(_ context.Context, id string) (*Rekening, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if r, ada := s.rek[id]; ada {
+		return &r, nil
+	}
+	return nil, nil
+}
+
+func (s *storeMemori) SimpanRekening(_ context.Context, id string, r Rekening, _ time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.rek[id] = r
+	return nil
+}
+
+func (s *storeMemori) DaftarPencairan(_ context.Context, id string) ([]Pencairan, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]Pencairan{}, s.cair[id]...), nil
+}
+
+func (s *storeMemori) pendapatan(id string) []int {
+	var hasil []int
+	for _, p := range s.pesanan {
+		if p.IDMitra == id && (p.Status == Selesai || p.Status == TidakDiambil) {
+			hasil = append(hasil, p.Subtotal)
+		}
+	}
+	return hasil
+}
+
+func (s *storeMemori) Pendapatan(_ context.Context, id string) ([]int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.pendapatan(id), nil
+}
+
+func (s *storeMemori) MitraBerekening(context.Context) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var id []string
+	for k := range s.rek {
+		id = append(id, k)
+	}
+	return id, nil
+}
+
+func (s *storeMemori) Cairkan(_ context.Context, id, kunci string,
+	hitung func(pendapatan []int, lama []Pencairan, r *Rekening) *Pencairan) (*Pencairan, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, c := range s.cair[id] {
+		if c.kunci == kunci {
+			return nil, nil
+		}
+	}
+	var r *Rekening
+	if rek, ada := s.rek[id]; ada {
+		r = &rek
+	}
+	p := hitung(s.pendapatan(id), s.cair[id], r)
+	if p == nil {
+		return nil, nil
+	}
+	p.ID, _ = idBaru()
+	p.kunci = kunci
+	s.cair[id] = append([]Pencairan{*p}, s.cair[id]...)
+	return p, nil
 }
 
 var _ Store = (*storeMemori)(nil)

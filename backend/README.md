@@ -17,6 +17,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `PATCH` | `/v1/mitra/paket/{id}/sisa` | `{sisa}` (F-44) |
 | `PATCH` | `/v1/mitra/paket/{id}/aktif` | `{aktif}` (F-45) |
 | `PUT` | `/v1/mitra/gerai/tutup` | `{tutup}` tutup gerai sementara (F-51) |
+| `GET` | `/v1/mitra/saldo` | `{rekening, tersedia, riwayat}` saldo dari pesanan selesai dikurangi komisi 10% dan pencairan (F-48, F-50) |
+| `PUT` | `/v1/mitra/rekening` | `{bank, nomor, nama}` nama harus sama dengan nama usaha (F-49) |
 | `POST` | `/v1/mitra/ambil` | `{kode}` scan / ketik kode ambil, pesanan selesai (F-46) |
 | `GET` | `/v1/pesanan` | Pesanan pembeli, atau pesanan masuk mitra (yang sudah dibayar) |
 | `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode}` + header **`Idempotency-Key`** |
@@ -51,6 +53,11 @@ Keamanan yang sudah dipasang:
 - Pesanan yang lewat batas bayar 15 menit dibatalkan server tiap 30 detik dan
   porsinya dikembalikan (F-40), walau tidak ada yang membuka aplikasi.
 - Kode ambil dibuat server setelah lunas, acak 4 huruf dari `crypto/rand`.
+- **Saldo tidak bisa cair dua kali.** Pencairan otomatis tiap hari 09.00 WITA
+  (NF-11) memakai kunci per tanggal (`harian-YYYY-MM-DD`, unik per mitra) dan
+  kunci transaksi per mitra. Walau job jalan dua kali atau server restart,
+  saldo hari itu hanya dicairkan sekali. Di luar production statusnya langsung
+  `Berhasil` (belum ada transfer bank asli); di production `Diproses`.
 
 ## Menjalankan di laptop
 
@@ -94,6 +101,7 @@ Keamanan yang sudah dipasang:
 | `DI_BELAKANG_PROXY` | kosong | Isi `1` kalau di belakang Coolify/Traefik, supaya IP asli dibaca dari `X-Forwarded-For` |
 | `ASAL_WEB` | kosong (`*` di dev) | Origin aplikasi web yang boleh memanggil API, dipisah koma. Contoh `https://app.sisarasa.id` |
 | `JAM_DEMO` | kosong | Opsional. Kunci "jam sekarang" ke jam tertentu, misal `16:20`, kalau mau demo paket sore di jam berapa pun. Kosong = jam asli (aplikasi yang tersambung server juga pakai jam asli). Ditolak di production |
+| `QRIS_STATIS` | kosong | Isi **teks** QRIS statis merchant (hasil scan gambar QRIS, diawali `000201`). Kalau diisi, pesanan QRIS dapat QR asli dengan nominal pesanan (tag 01 jadi 12, tag 54 nominal, CRC dihitung ulang). Status lunas belum dicek otomatis; tunggu Midtrans |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify

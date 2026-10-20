@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -48,7 +49,14 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
-	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo}
+	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo,
+		PencairanUji: cfg.Lingkungan != "production", QRISStatis: cfg.QRISStatis}
+	if cfg.QRISStatis != "" {
+		if err := toko.CekQRIS(cfg.QRISStatis); err != nil {
+			return fmt.Errorf("QRIS_STATIS: %w", err)
+		}
+		slog.Info("QRIS asli aktif")
+	}
 	if cfg.SemaiAkunContoh {
 		if err := akun.SemaiContoh(ctx, layananAkun); err != nil {
 			return err
@@ -58,6 +66,8 @@ func jalan() error {
 		}
 		slog.Info("akun contoh siap", "sandi", akun.SandiContoh)
 	}
+	// NF-11: saldo mitra dicairkan tiap hari 09.00 WITA
+	go layananToko.JadwalCairkan(ctx)
 	// F-40: pesanan yang lewat batas bayar dibatalin dan porsinya dibalikin,
 	// walau ga ada yang buka aplikasi
 	go func() {

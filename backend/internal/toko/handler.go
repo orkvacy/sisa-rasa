@@ -23,6 +23,8 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib func(http.Handler) http.Handle
 	mux.Handle("PATCH /v1/mitra/paket/{id}/aktif", h(l.handleAktif))
 	mux.Handle("PUT /v1/mitra/gerai/tutup", h(l.handleGerai))
 	mux.Handle("POST /v1/mitra/ambil", h(l.handleAmbil))
+	mux.Handle("GET /v1/mitra/saldo", h(l.handleSaldo))
+	mux.Handle("PUT /v1/mitra/rekening", h(l.handleRekening))
 
 	mux.Handle("GET /v1/pesanan", h(l.handleDaftar))
 	mux.Handle("POST /v1/pesanan", h(l.handleBuat))
@@ -286,5 +288,29 @@ func (l *Layanan) handleChatBaru(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, map[string]any{"pesan": daftar, "sekarang": sekarang})
+	return nil
+}
+
+// ---------- saldo ----------
+
+func (l *Layanan) handleSaldo(w http.ResponseWriter, r *http.Request) error {
+	saldo, err := l.SaldoSaya(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, saldo)
+	return nil
+}
+
+func (l *Layanan) handleRekening(w http.ResponseWriter, r *http.Request) error {
+	var isi Rekening
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	rek, err := l.SimpanRekening(r.Context(), akun.DariKonteks(r.Context()), isi)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]Rekening{"rekening": rek})
 	return nil
 }
