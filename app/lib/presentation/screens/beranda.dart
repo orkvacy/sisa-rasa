@@ -271,7 +271,7 @@ class _BerandaState extends State<Beranda> {
                   IconButton(
                     tooltip: 'Mitra favorit',
                     icon: const Icon(Icons.favorite_border, color: Warna.teks),
-                    onPressed: () => _segeraHadir('Mitra favorit'),
+                    onPressed: () => context.push(Rute.favorit),
                   ),
                 ],
               ),

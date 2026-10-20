@@ -9,6 +9,7 @@ import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/presentation/cubit/admin_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/percakapan_cubit.dart';
@@ -71,6 +72,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         BlocProvider(create: (context) => KeranjangCubit()),
         BlocProvider(create: (context) => SaldoCubit(layanan: sl())),
         BlocProvider(create: (context) => PercakapanCubit(layanan: sl())),
+        BlocProvider(create: (context) => FavoritCubit(layanan: sl())),
         // baru dibikin pas halaman admin dibuka
         BlocProvider(create: (context) => AdminCubit(layanan: sl())),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya
@@ -149,6 +151,7 @@ class _SinkronState extends State<_Sinkron> {
       ..add(pesanan.galat.listen(tampilkan))
       ..add(paket.galat.listen(tampilkan))
       ..add(context.read<SaldoCubit>().galat.listen(tampilkan))
+      ..add(context.read<FavoritCubit>().galat.listen(tampilkan))
       ..add(akun.stream.listen(_akunBerubah));
     _akunBerubah(akun.state);
 
@@ -171,8 +174,16 @@ class _SinkronState extends State<_Sinkron> {
 
   String? _idAkun;
 
+  String? _idFavorit;
+
   void _akunBerubah(Map<String, String> akun) {
     sl<SesiAktif>().token = akun['token'];
+    // mitra favorit punya akun yg lagi masuk, cuma buat pembeli
+    if (akun['id'] != _idFavorit) {
+      _idFavorit = akun['id'];
+      final favorit = context.read<FavoritCubit>()..kosongkan();
+      if (akun['peran'] == 'pembeli') favorit.muat();
+    }
     if (!pakaiServer || akun['id'] == _idAkun) return;
     _idAkun = akun['id'];
     // ganti akun / keluar: pesanan akun lama dibuang, lalu ambil punya akun baru

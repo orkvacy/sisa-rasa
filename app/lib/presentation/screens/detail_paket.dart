@@ -11,6 +11,7 @@ import 'package:sisa_rasa/presentation/widgets/kartu_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/timeline_ambil.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
@@ -355,26 +356,7 @@ class _DetailPaketState extends State<DetailPaket> {
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 8,
                     right: 16,
-                    child: CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.white,
-                      child: IconButton(
-                        tooltip: 'Simpan mitra',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Mitra favorit belum tersedia di versi ini',
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.favorite_border,
-                          color: Warna.teks,
-                        ),
-                      ),
-                    ),
+                    child: TombolFavorit(paket: paket),
                   ),
                 ],
               ),

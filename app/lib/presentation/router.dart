@@ -20,6 +20,7 @@ import 'package:sisa_rasa/presentation/screens/detail_pesanan.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_mitra.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_utama.dart';
 import 'package:sisa_rasa/presentation/screens/keranjang.dart';
+import 'package:sisa_rasa/presentation/screens/mitra_favorit.dart';
 import 'package:sisa_rasa/presentation/screens/kode_ambil.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/detail_pesanan_mitra.dart';
@@ -66,6 +67,7 @@ abstract final class Rute {
   static const cari = '/beranda/cari';
   static const keranjang = '/beranda/keranjang';
   static const checkout = '/beranda/checkout';
+  static const favorit = '/beranda/favorit';
   static String paket(String id) => '/beranda/paket/$id';
   // nama mitra dipake sebagai id sementara (data dummy belum punya id mitra),
   // di-encode biar spasi sama simbol aman di alamat
@@ -161,6 +163,7 @@ GoRouter buatRouter({required AkunCubit akun}) {
             lokasi.startsWith(Rute.pesanan) ||
             lokasi.startsWith(Rute.akun) ||
             lokasi == Rute.checkout ||
+            lokasi == Rute.favorit ||
             lokasi.startsWith('/mitra') ||
             lokasi == Rute.admin;
         if (perluAkun) return Rute.masukLalu(state.uri.toString());
@@ -257,6 +260,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
                     (context, state) => const Keranjang(),
                   ),
                   layarPenuh('checkout', (context, state) => const Checkout()),
+                  layarPenuh(
+                    'favorit',
+                    (context, state) => const MitraFavorit(),
+                  ),
                 ],
               ),
             ],

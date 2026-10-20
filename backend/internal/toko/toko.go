@@ -182,4 +182,5 @@ type Store interface {
 	StoreChat
 	StoreSaldo
 	StoreVerifikasi
+	StoreFavorit
 }
