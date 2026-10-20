@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -49,7 +50,13 @@ func jalan() error {
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
 	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo,
-		PencairanUji: cfg.Lingkungan != "production"}
+		PencairanUji: cfg.Lingkungan != "production", QRISStatis: cfg.QRISStatis}
+	if cfg.QRISStatis != "" {
+		if err := toko.CekQRIS(cfg.QRISStatis); err != nil {
+			return fmt.Errorf("QRIS_STATIS: %w", err)
+		}
+		slog.Info("QRIS asli aktif")
+	}
 	if cfg.SemaiAkunContoh {
 		if err := akun.SemaiContoh(ctx, layananAkun); err != nil {
 			return err

@@ -118,8 +118,18 @@ func ujiBuatPesananNgitungDanNahanStok(t *testing.T, siapkan func(*testing.T) si
 	if p.Tagihan["isiQr"] == "" || p.Tagihan["nomorVa"] == "" {
 		t.Fatalf("tagihan kosong: %v", p.Tagihan)
 	}
+	if p.Tagihan["qrisAsli"] != "" {
+		t.Fatal("tanpa QRIS_STATIS harusnya QR tiruan")
+	}
 	if x.sisa(t, x.sarapan.ID) != 1 || x.sisa(t, x.kue.ID) != 5 {
 		t.Fatal("stok ga berkurang")
+	}
+	// QRIS statis diisi: pesanan QRIS dapet QR asli dengan total di tag 54
+	x.l.QRISStatis = qrisContoh()
+	q, _, err := x.l.BuatPesanan(context.Background(), dimas, map[string]int{x.kue.ID: 1}, "qris", "kunci-qris-asli")
+	if err != nil || q.Tagihan["qrisAsli"] != "1" || CekQRIS(q.Tagihan["isiQr"]) != nil ||
+		!strings.Contains(q.Tagihan["isiQr"], fmt.Sprintf("54%02d%d", len(fmt.Sprint(q.Total)), q.Total)) {
+		t.Fatalf("QRIS asli: %v %v", q.Tagihan, err)
 	}
 }
 

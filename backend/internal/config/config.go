@@ -27,6 +27,9 @@ type Config struct {
 	// JamDemo kunci "jam sekarang" ke menit tertentu, sama kayak aplikasi demo
 	// yang dikunci di 16.20. diisi lewat JAM_DEMO=16:20, kosong = jam asli
 	JamDemo *int
+	// QRISStatis QRIS statis merchant (isi teks QR-nya, bukan gambar).
+	// kalau diisi, pesanan QRIS dapet QR asli dengan nominal pesanan
+	QRISStatis string
 }
 
 func Baca() (Config, error) {
@@ -53,6 +56,7 @@ func Baca() (Config, error) {
 		menit := j*60 + m
 		c.JamDemo = &menit
 	}
+	c.QRISStatis = strings.TrimSpace(os.Getenv("QRIS_STATIS"))
 	if c.DatabaseURL == "" {
 		return c, errors.New("DATABASE_URL belum diisi")
 	}

@@ -101,6 +101,7 @@ Keamanan yang sudah dipasang:
 | `DI_BELAKANG_PROXY` | kosong | Isi `1` kalau di belakang Coolify/Traefik, supaya IP asli dibaca dari `X-Forwarded-For` |
 | `ASAL_WEB` | kosong (`*` di dev) | Origin aplikasi web yang boleh memanggil API, dipisah koma. Contoh `https://app.sisarasa.id` |
 | `JAM_DEMO` | kosong | Opsional. Kunci "jam sekarang" ke jam tertentu, misal `16:20`, kalau mau demo paket sore di jam berapa pun. Kosong = jam asli (aplikasi yang tersambung server juga pakai jam asli). Ditolak di production |
+| `QRIS_STATIS` | kosong | Isi **teks** QRIS statis merchant (hasil scan gambar QRIS, diawali `000201`). Kalau diisi, pesanan QRIS dapat QR asli dengan nominal pesanan (tag 01 jadi 12, tag 54 nominal, CRC dihitung ulang). Status lunas belum dicek otomatis; tunggu Midtrans |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
 ## Deploy ke Coolify

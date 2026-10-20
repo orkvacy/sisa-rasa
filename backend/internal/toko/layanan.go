@@ -45,6 +45,9 @@ type Layanan struct {
 	// PencairanUji pencairan harian langsung dianggap berhasil karena belum ada
 	// transfer bank beneran. di production status awalnya Diproses
 	PencairanUji bool
+	// QRISStatis isi QRIS statis milik Sisa Rasa (env QRIS_STATIS). kalau diisi,
+	// pesanan QRIS dapet QR asli dengan nominal pesanan di dalamnya. kosong = QR tiruan
+	QRISStatis string
 }
 
 func (l *Layanan) sekarang() time.Time {
@@ -317,7 +320,7 @@ func (l *Layanan) susun(baru PesananBaru, paket []Paket) (Pesanan, error) {
 	if p.ID, err = idBaru(); err != nil {
 		return Pesanan{}, err
 	}
-	p.Tagihan = tagihanUji(p.ID, p.Total)
+	p.Tagihan = l.tagihan(p.ID, p.Total, p.Metode)
 	return p, nil
 }
 
@@ -447,7 +450,7 @@ func (l *Layanan) GantiMetode(ctx context.Context, a akun.Akun, id, metode strin
 			return Perubahan{}, galat(http.StatusConflict, "Metode hanya bisa diganti sebelum dibayar.")
 		}
 		p.Metode = metode
-		p.Tagihan = tagihanUji(p.ID, p.Total)
+		p.Tagihan = l.tagihan(p.ID, p.Total, metode)
 		return Perubahan{}, nil
 	})
 }
@@ -538,6 +541,19 @@ func (l *Layanan) Bersihkan(ctx context.Context) {
 }
 
 // ---------- alat bantu ----------
+
+// tagihan isi QR / nomor VA buat satu pesanan. QRIS pakai QR asli kalau
+// QRISStatis diisi, sisanya tiruan sampai Midtrans dipasang
+func (l *Layanan) tagihan(id string, total int, metode string) map[string]string {
+	t := tagihanUji(id, total)
+	if metode == "qris" && l.QRISStatis != "" {
+		if qr, err := QRISDinamis(l.QRISStatis, total); err == nil {
+			t["isiQr"] = qr
+			t["qrisAsli"] = "1"
+		}
+	}
+	return t
+}
 
 // tagihanUji isi QR / nomor VA tiruan, sama kayak PembayaranTiruan di aplikasi.
 // diganti tagihan Midtrans begitu pembayaran asli dipasang
