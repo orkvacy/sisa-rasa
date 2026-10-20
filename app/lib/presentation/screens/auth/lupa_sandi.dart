@@ -214,7 +214,7 @@ class _LupaSandiState extends State<LupaSandi> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Material(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               clipBehavior: Clip.antiAlias,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(
@@ -360,7 +360,7 @@ class _LupaSandiState extends State<LupaSandi> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Warna.softGreen,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,7 +461,7 @@ class _KotakKodeState extends State<_KotakKode> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: widget.galat
                               ? Warna.merah

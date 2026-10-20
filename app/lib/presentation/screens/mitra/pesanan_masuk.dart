@@ -55,7 +55,7 @@ class _PesananMasukState extends State<PesananMasuk> {
           const Text(
             'Pesanan masuk',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 22,
               height: 34 / 28,
               letterSpacing: -0.4,
               fontWeight: FontWeight.w800,
@@ -79,7 +79,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                       selected: segmen == status,
                       child: Material(
                         color: segmen == status
-                            ? Warna.gelap
+                            ? Warna.hijau
                             : Colors.transparent,
                         shape: const StadiumBorder(),
                         clipBehavior: Clip.antiAlias,
@@ -195,7 +195,7 @@ class _PesananMasukState extends State<PesananMasuk> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Warna.kraft,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -248,7 +248,7 @@ class _KartuPesanan extends StatelessWidget {
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Warna.garis),
       ),
       clipBehavior: Clip.antiAlias,
@@ -383,7 +383,7 @@ class _KartuPesanan extends StatelessWidget {
                           minimumSize: const Size(0, 48),
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: Text(

@@ -79,7 +79,7 @@ class SisaRasaText {
 
 /// tema aplikasi (terang + gelap), nilainya dari docs/DESAIN.md bagian 2-4
 class SisaRasaTema {
-  static const _radiusKontrol = 16.0;
+  static const _radiusKontrol = 12.0;
 
   static ThemeData terang() => _bangun(
     ColorScheme(
@@ -88,19 +88,20 @@ class SisaRasaTema {
       onPrimary: const Color(0xFFFFFFFF), // accent/on
       primaryContainer: const Color(0xFFE2E9E3), // accent/soft
       onPrimaryContainer: const Color(0xFF1A382B),
-      secondary: const Color(0xFF5E5A53),
+      secondary: const Color(0xFF6B6B6B),
       onSecondary: const Color(0xFFFFFFFF),
       error: const Color(0xFFB3261E), // signal/error
       onError: const Color(0xFFFFFFFF),
-      surface: const Color(0xFFF6F3EE), // bg/ground
-      onSurface: const Color(0xFF1D1C19), // text/primary
-      onSurfaceVariant: const Color(0xFF5E5A53), // text/secondary
+      // latar putih polos, hijau cuma di elemen (gaya Gojek)
+      surface: const Color(0xFFFFFFFF), // bg/ground
+      onSurface: const Color(0xFF1A1A1A), // text/primary
+      onSurfaceVariant: const Color(0xFF6B6B6B), // text/secondary
       surfaceContainerLowest: const Color(0xFFFFFFFF), // bg/surface
-      inverseSurface: const Color(0xFF1D1C19), // bg/inverse
+      inverseSurface: const Color(0xFF1A1A1A), // bg/inverse
       onInverseSurface: const Color(0xFFFFFFFF), // text/inverse
-      outline: const Color(0xFF8F887D), // line/control
-      outlineVariant: const Color(0xFFE4DED4), // line/default
-      scrim: const Color(0xFF1D1C19), // bg/scrim
+      outline: const Color(0xFF8F8F8F), // line/control
+      outlineVariant: const Color(0xFFEBEBEB), // line/default
+      scrim: const Color(0xFF1A1A1A), // bg/scrim
     ),
     SisaRasaColors.terang,
   );
@@ -160,7 +161,7 @@ class SisaRasaTema {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: cs.outlineVariant),
         ),
       ),
@@ -168,7 +169,7 @@ class SisaRasaTema {
       // satu tombol utama per layar, tinggi 52, radius 16
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radiusKontrol),
           ),
@@ -183,7 +184,7 @@ class SisaRasaTema {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(48),
           foregroundColor: cs.onSurface,
           side: BorderSide(color: cs.outline),
           shape: RoundedRectangleBorder(
@@ -202,8 +203,8 @@ class SisaRasaTema {
         filled: true,
         fillColor: cs.surfaceContainerLowest,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+          horizontal: 14,
+          vertical: 12,
         ),
         border: _garisIsian(cs.outline),
         enabledBorder: _garisIsian(cs.outline),
@@ -213,20 +214,29 @@ class SisaRasaTema {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: cs.surfaceContainerLowest,
-        selectedColor: cs.inverseSurface,
-        side: BorderSide(color: cs.outlineVariant),
+        // chip terpilih: hijau muda + tepi & teks hijau, bukan blok hitam
+        selectedColor: cs.primaryContainer,
+        side: WidgetStateBorderSide.resolveWith(
+          (state) => state.contains(WidgetState.selected)
+              ? BorderSide(color: cs.primary, width: 1.2)
+              : BorderSide(color: cs.outlineVariant),
+        ),
         shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        // fontFamily ditulis lagi: label chip ga ikut fontFamily dari ThemeData
         labelStyle: TextStyle(
-          fontSize: 14,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: cs.onSurface,
         ),
         secondaryLabelStyle: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: cs.onInverseSurface,
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: cs.primary,
         ),
-        checkmarkColor: cs.onInverseSurface,
+        checkmarkColor: cs.primary,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -238,20 +248,20 @@ class SisaRasaTema {
           color: cs.onInverseSurface,
         ),
         actionTextColor: cs.onInverseSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: cs.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: cs.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }

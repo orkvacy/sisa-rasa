@@ -13,7 +13,7 @@ class JudulAuth extends StatelessWidget {
     return Text(
       teks,
       style: const TextStyle(
-        fontSize: 32,
+        fontSize: 26,
         height: 40 / 32,
         letterSpacing: -0.6,
         fontWeight: FontWeight.w800,
@@ -122,8 +122,8 @@ class TombolAuth extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: Warna.hijau,
         disabledBackgroundColor: Warna.hijau.withValues(alpha: 0.6),
-        minimumSize: const Size.fromHeight(56),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 16,
@@ -193,7 +193,7 @@ class KotakGalat extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Warna.merahLembut,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

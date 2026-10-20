@@ -333,7 +333,7 @@ class _FormPaketState extends State<FormPaket> {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: Warna.garisKontrol),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
@@ -391,7 +391,7 @@ class _FormPaketState extends State<FormPaket> {
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -456,7 +456,7 @@ class _FormPaketState extends State<FormPaket> {
               style: FilledButton.styleFrom(
                 backgroundColor: Warna.hijau,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(
@@ -533,7 +533,7 @@ class _KotakFoto extends StatelessWidget {
         height: 150,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Warna.garisKontrol),
         ),
         alignment: Alignment.center,
@@ -549,7 +549,7 @@ class _KotakFoto extends StatelessWidget {
     }
     if (foto != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         child: SizedBox(
           height: 170,
           width: double.infinity,
@@ -580,14 +580,14 @@ class _KotakFoto extends StatelessWidget {
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Warna.garisKontrol),
       ),
       child: InkWell(
         onTap: onPilih,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         child: const SizedBox(
-          height: 150,
+          height: 120,
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -665,12 +665,12 @@ class _KolomJam extends StatelessWidget {
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         side: const BorderSide(color: Warna.garisKontrol),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(

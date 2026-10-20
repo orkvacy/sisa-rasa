@@ -42,7 +42,7 @@ class ProfilUsaha extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Warna.garis),
               ),
               child: Row(
@@ -94,7 +94,7 @@ class ProfilUsaha extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Warna.garis),
               ),
               child: Column(
@@ -139,7 +139,7 @@ class ProfilUsaha extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Warna.softGreen,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

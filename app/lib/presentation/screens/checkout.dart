@@ -405,7 +405,7 @@ class _CheckoutState extends State<Checkout> {
                 style: FilledButton.styleFrom(
                   backgroundColor: Warna.hijau,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: memproses
@@ -478,7 +478,7 @@ class _Kartu extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Warna.garis),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

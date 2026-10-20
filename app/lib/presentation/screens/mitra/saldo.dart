@@ -50,7 +50,7 @@ class _SaldoState extends State<Saldo> {
           const Text(
             'Saldo',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 22,
               height: 34 / 28,
               letterSpacing: -0.4,
               fontWeight: FontWeight.w800,
@@ -148,7 +148,7 @@ class _SaldoState extends State<Saldo> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: Warna.garis),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
@@ -197,15 +197,16 @@ class _KartuSaldo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Warna.momen,
-        borderRadius: BorderRadius.circular(24),
+        color: Warna.kartu,
+        border: Border.all(color: Warna.garis),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Saldo tersedia',
-            style: TextStyle(fontSize: 14, color: Colors.white70),
+            style: TextStyle(fontSize: 14, color: Warna.teksPendukung),
           ),
           const SizedBox(height: 2),
           FittedBox(
@@ -214,32 +215,32 @@ class _KartuSaldo extends StatelessWidget {
               rupiah(tersedia),
               key: const Key('saldo-tersedia'),
               style: const TextStyle(
-                fontSize: 32,
+                fontSize: 28,
                 height: 40 / 32,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: Warna.hijau,
               ),
             ),
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.schedule, size: 16, color: Colors.white),
+              const Icon(Icons.schedule, size: 16, color: Warna.teks),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   jadwal,
-                  style: const TextStyle(fontSize: 13, color: Colors.white),
+                  style: const TextStyle(fontSize: 13, color: Warna.teks),
                 ),
               ),
             ],
           ),
-          const Divider(height: 28, color: Colors.white24),
+          const Divider(height: 28, color: Warna.garis),
           Row(
             children: [
               const Icon(
                 Icons.account_balance_outlined,
-                color: Colors.white,
+                color: Warna.teks,
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -250,7 +251,7 @@ class _KartuSaldo extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Warna.teks,
                         ),
                       )
                     : Column(
@@ -261,7 +262,7 @@ class _KartuSaldo extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: Warna.teks,
                             ),
                           ),
                           Text(
@@ -270,7 +271,7 @@ class _KartuSaldo extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.white70,
+                              color: Warna.teksPendukung,
                             ),
                           ),
                         ],
@@ -279,7 +280,7 @@ class _KartuSaldo extends StatelessWidget {
               TextButton(
                 onPressed: onUbahRekening,
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
+                  foregroundColor: Warna.hijau,
                   textStyle: const TextStyle(
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 14,
@@ -309,7 +310,7 @@ class _KotakAngka extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Warna.garis),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

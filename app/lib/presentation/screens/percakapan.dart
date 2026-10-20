@@ -291,8 +291,8 @@ class _Gelembung extends StatelessWidget {
         color: punyaSaya ? Warna.hijau : Colors.white,
         border: punyaSaya ? null : Border.all(color: Warna.garis),
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(18),
-          topRight: const Radius.circular(18),
+          topLeft: const Radius.circular(12),
+          topRight: const Radius.circular(12),
           bottomLeft: Radius.circular(punyaSaya ? 18 : 4),
           bottomRight: Radius.circular(punyaSaya ? 4 : 18),
         ),

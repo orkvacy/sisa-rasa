@@ -275,7 +275,7 @@ class _KartuPeran extends StatelessWidget {
       child: Material(
         color: dipilih ? Warna.softGreen : Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(
             color: dipilih ? Warna.hijau : Warna.garis,
             width: dipilih ? 2 : 1,

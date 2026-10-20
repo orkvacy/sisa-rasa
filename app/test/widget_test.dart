@@ -93,8 +93,8 @@ void main() {
     expect(find.text('Sore ini'), findsOneWidget);
     // Ibis + Prime Cut tutup 17.00, kurang dari sejam dari 16.20 -> Flash sale (F-53)
     expect(find.text('Flash sale'), findsOneWidget);
-    expect(find.text('2 paket'), findsOneWidget);
-    expect(find.text('1 paket'), findsOneWidget);
+    // kartu flash sale cuma nampilin jam tutup, jumlah paket di halaman mitra
+    expect(find.text('Tutup 17.00'), findsNWidgets(2));
     expect(find.byType(NavigasiBawah), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Mitra sekitar'),
@@ -208,10 +208,17 @@ void main() {
     expect(find.text('Disiapkan'), findsOneWidget);
 
     // stok yg udah dibayar ga balik: breakfast habis, Ibis tinggal punya 1 paket
-    // (kartu Ibis + Prime Cut di Flash sale sama-sama 1 paket)
     await tester.tap(find.text('Beranda').last);
     await tester.pumpAndSettle();
-    expect(find.text('1 paket'), findsNWidgets(2));
+    final paket = tester
+        .element(find.text('Flash sale'))
+        .read<PaketCubit>()
+        .state;
+    expect(
+      paket.where((p) => p['mitra'] == 'Ibis Hotel' && p['sisaPorsi'] > 0),
+      hasLength(1),
+    );
+    expect(find.text('Ibis Hotel'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 

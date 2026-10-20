@@ -70,7 +70,7 @@ class Akun extends StatelessWidget {
           // Material dipake buat latar kartu, soalnya kalau Container berwarna efek pencet ListTile nya ketutup
           Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             // ListTile: baris siap pakai, ada leading (kiri), title, subtitle, trailing (kanan)
             child: ListTile(
@@ -132,19 +132,23 @@ class Akun extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Warna.momen,
-                borderRadius: BorderRadius.circular(20),
+                color: Warna.kartu,
+                border: Border.all(color: Warna.garis),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.eco_outlined, size: 18, color: Colors.white),
+                      Icon(Icons.eco_outlined, size: 18, color: Warna.hijau),
                       SizedBox(width: 8),
                       Text(
                         'Dampakmu hari ini',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Warna.teks,
+                        ),
                       ),
                     ],
                   ),
@@ -160,14 +164,14 @@ class Akun extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: Teks.subjudul,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: Warna.hijau,
                               ),
                             ),
                             const Text(
                               'porsi terselamatkan',
                               style: TextStyle(
                                 fontSize: Teks.kecil,
-                                color: Colors.white70,
+                                color: Warna.teksPendukung,
                               ),
                             ),
                           ],
@@ -182,14 +186,14 @@ class Akun extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: Teks.subjudul,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: Warna.hijau,
                               ),
                             ),
                             const Text(
                               'kamu hemat',
                               style: TextStyle(
                                 fontSize: Teks.kecil,
-                                color: Colors.white70,
+                                color: Warna.teksPendukung,
                               ),
                             ),
                           ],
@@ -217,7 +221,7 @@ class Akun extends StatelessWidget {
           ),
           Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
@@ -257,7 +261,7 @@ class Akun extends StatelessWidget {
           ),
           Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: const Column(
               children: [
@@ -288,7 +292,7 @@ class Akun extends StatelessWidget {
           ),
           Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
@@ -655,16 +659,19 @@ class _TombolGantiAkun extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
+    return TextButton.icon(
       onPressed: () => _pilih(context),
       icon: const Icon(Icons.swap_horiz, size: 18),
       label: const Text('Ganti akun'),
-      style: OutlinedButton.styleFrom(
+      style: TextButton.styleFrom(
         foregroundColor: Warna.hijau,
-        side: const BorderSide(color: Warna.garisKontrol),
-        // tema bikin tombol outlined selebar layar, di sini cukup seukuran isinya
-        minimumSize: const Size(0, 40),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        textStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

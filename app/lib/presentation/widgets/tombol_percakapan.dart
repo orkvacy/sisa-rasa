@@ -62,7 +62,7 @@ class TombolPercakapan extends StatelessWidget {
         side: const BorderSide(color: Warna.garisKontrol),
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(
           fontFamily: 'PlusJakartaSans',
           fontSize: 13,

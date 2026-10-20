@@ -22,18 +22,11 @@ class KartuPaket extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          // rata tanpa bayangan, antar paket cuma dipisah garis tipis
+          decoration: const BoxDecoration(
             color: Warna.kartu,
-            borderRadius: BorderRadius.circular(20),
-            // BoxShadow: bayangan tipis biar kartunya keliatan ngambang
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.07),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            border: Border(bottom: BorderSide(color: Warna.garis)),
           ),
           child: Row(
             children: [
@@ -42,14 +35,14 @@ class KartuPaket extends StatelessWidget {
                 children: [
                   // ClipRRect: motong sudut foto biar ikut bulet
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                     // GambarPaket: foto paket dari assets/images
                     child: Hero(
                       tag: 'foto-paket-${paket['id']}',
                       child: GambarPaket(
                         paket['foto'],
-                        width: 104,
-                        height: 104,
+                        width: 84,
+                        height: 84,
                         fit: BoxFit.cover,
                       ),
                     ),

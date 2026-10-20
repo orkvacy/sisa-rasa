@@ -158,7 +158,7 @@ class _KartuMitra extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Warna.kartu,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Warna.garis),
       ),
       child: Column(

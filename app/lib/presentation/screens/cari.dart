@@ -45,11 +45,11 @@ class _CariState extends State<Cari> {
             fillColor: Colors.white,
             contentPadding: EdgeInsets.zero,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Warna.garisKontrol),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: Warna.garisKontrol),
             ),
           ),

@@ -1,11 +1,11 @@
 class Teks {
-  static const double judulBesar = 30;
+  static const double judulBesar = 24;
 
-  static const double judul = 24;
+  static const double judul = 20;
 
-  static const double subjudul = 20;
+  static const double subjudul = 17;
 
-  static const double hargaBesar = 18;
+  static const double hargaBesar = 17;
 
   static const double nama = 16;
 
