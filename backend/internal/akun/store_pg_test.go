@@ -59,7 +59,28 @@ func TestStorePG(t *testing.T) {
 	if a, _ := l.Sesi(ctx, masuk.Token); a.Nama != "Rani Putri" {
 		t.Errorf("nama baru: %q", a.Nama)
 	}
-	if err := l.HapusAkun(ctx, masuk.Akun, "sandiaman1", ""); err != nil {
+	// foto profil + ganti sandi lewat SQL beneran
+	if _, err := l.AturFoto(ctx, masuk.Akun, "/v1/foto/abc.jpg"); err != nil {
+		t.Fatal(err)
+	}
+	if a, _ := l.Sesi(ctx, masuk.Token); a.Foto != "/v1/foto/abc.jpg" {
+		t.Errorf("foto: %q", a.Foto)
+	}
+	if _, err := l.AturFoto(ctx, masuk.Akun, ""); err != nil {
+		t.Fatal(err)
+	}
+	if a, _ := l.Cari(ctx, "rani@contoh.id"); a.Foto != "" {
+		t.Errorf("foto harus NULL lagi: %q", a.Foto)
+	}
+	ganti, err := l.GantiSandiSaya(ctx, masuk.Akun, "sandiaman1", "sandibaru1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Sesi(ctx, masuk.Token); err != ErrSesiTidakBerlaku {
+		t.Errorf("sesi lama setelah ganti sandi: %v", err)
+	}
+	masuk = ganti
+	if err := l.HapusAkun(ctx, masuk.Akun, "sandibaru1", ""); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := l.Sesi(ctx, masuk.Token); err != ErrSesiTidakBerlaku {

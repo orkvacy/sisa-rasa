@@ -38,6 +38,22 @@ abstract class LayananAkun {
   /// lempar GagalAkun kalau ditolak (misal akun mitra)
   Future<Map<String, String>> ubahNama(String token, String nama);
 
+  /// F-64: ganti kata sandi pakai sandi lama. sesi lain dicabut, balikin
+  /// data akun + 'token' sesi baru buat HP ini. lempar GagalAkun kalau sandi
+  /// lama salah / akun Google tanpa sandi
+  Future<Map<String, String>> gantiSandi(
+    String token,
+    String lama,
+    String baru,
+  );
+
+  /// F-63: unggah foto dari [jalurBerkas] jadi foto profil, balikin data akun
+  /// terbaru ('foto' isinya URL)
+  Future<Map<String, String>> aturFoto(String token, String jalurBerkas);
+
+  /// F-63: hapus foto profil, balik ke inisial nama
+  Future<Map<String, String>> hapusFoto(String token);
+
   /// F-62: hapus akun setelah sandinya dicek lagi. semua sesi ikut dicabut.
   /// akun Google tanpa sandi gantinya [idToken] dari masuk Google lagi.
   /// lempar GagalAkun kalau sandi salah / masih ada pesanan berjalan

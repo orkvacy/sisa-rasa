@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
-/// Satu kabar terbaru, tanpa antrean saat tombol jumlah ditekan cepat.
+/// kabar paket masuk / keluar keranjang, tanpa antrean kalau diketuk cepat.
+/// ubah jumlah biasa ga dikabarin: angkanya udah keliatan di samping tombol
 void kabarJumlah(
   BuildContext context, {
   required String nama,
   required int jumlah,
-  bool diKeranjang = true,
   double jarakBawah = 88,
 }) {
   final pesan = jumlah == 0
       ? '$nama dihapus dari keranjang'
-      : diKeranjang
-      ? '$nama: $jumlah porsi di keranjang'
-      : '$nama: $jumlah porsi dipilih';
+      : '$nama masuk keranjang';
   ScaffoldMessenger.of(context)
     ..clearSnackBars()
     ..removeCurrentSnackBar()

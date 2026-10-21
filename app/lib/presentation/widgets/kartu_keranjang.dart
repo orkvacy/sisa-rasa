@@ -4,7 +4,6 @@ import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
-import 'package:sisa_rasa/presentation/widgets/kabar_jumlah.dart';
 
 /// gaya kolom angka di tombol - +. semua garis sama padding dari tema dimatiin,
 /// soalnya padding 16 dari inputDecorationTheme bikin angkanya kedorong keluar kolom
@@ -92,16 +91,6 @@ class _KartuKeranjangState extends State<KartuKeranjang>
     widget.onJumlahBerubah(parsed.clamp(1, sisa));
   }
 
-  void _ubahDariTombol(int baru) {
-    widget.onJumlahBerubah(baru);
-    kabarJumlah(
-      context,
-      nama: widget.paket['nama'],
-      jumlah: baru,
-      jarakBawah: 144,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final int sisa = widget.paket['sisaPorsi'];
@@ -163,7 +152,7 @@ class _KartuKeranjangState extends State<KartuKeranjang>
                 tooltip: 'Kurangi porsi',
                 visualDensity: VisualDensity.compact,
                 onPressed: widget.jumlah > 1
-                    ? () => _ubahDariTombol(widget.jumlah - 1)
+                    ? () => widget.onJumlahBerubah(widget.jumlah - 1)
                     : null,
                 icon: const Icon(Icons.remove, size: 18),
               ),
@@ -192,7 +181,7 @@ class _KartuKeranjangState extends State<KartuKeranjang>
                 tooltip: 'Tambah porsi',
                 visualDensity: VisualDensity.compact,
                 onPressed: widget.jumlah < sisa
-                    ? () => _ubahDariTombol(widget.jumlah + 1)
+                    ? () => widget.onJumlahBerubah(widget.jumlah + 1)
                     : null,
                 icon: const Icon(Icons.add, size: 18),
               ),

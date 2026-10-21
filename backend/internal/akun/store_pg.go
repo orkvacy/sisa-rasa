@@ -40,9 +40,9 @@ func (s StorePG) AkunDariGoogle(ctx context.Context, sub string) (akunTersimpan,
 func (s StorePG) satuAkun(ctx context.Context, syarat string, arg any) (akunTersimpan, error) {
 	var a akunTersimpan
 	err := s.Pool.QueryRow(ctx, `
-		SELECT id, nama, email, peran, hash_sandi, COALESCE(google_sub, '')
+		SELECT id, nama, email, peran, hash_sandi, COALESCE(google_sub, ''), COALESCE(foto, '')
 		FROM akun WHERE `+syarat, arg,
-	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.HashSandi, &a.GoogleSub)
+	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.HashSandi, &a.GoogleSub, &a.Foto)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return a, ErrTidakAda
 	}
@@ -75,11 +75,11 @@ func (s StorePG) BuatSesi(ctx context.Context, tokenHash, idAkun string, kedaluw
 func (s StorePG) AkunDariSesi(ctx context.Context, tokenHash string, sekarang time.Time) (Akun, error) {
 	var a Akun
 	err := s.Pool.QueryRow(ctx, `
-		SELECT a.id, a.nama, a.email, a.peran, a.hash_sandi <> ''
+		SELECT a.id, a.nama, a.email, a.peran, a.hash_sandi <> '', COALESCE(a.foto, '')
 		FROM sesi s JOIN akun a ON a.id = s.id_akun
 		WHERE s.token_hash = $1 AND s.dicabut IS NULL AND s.kedaluwarsa > $2`,
 		tokenHash, sekarang,
-	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.PunyaSandi)
+	).Scan(&a.ID, &a.Nama, &a.Email, &a.Peran, &a.PunyaSandi, &a.Foto)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return a, ErrTidakAda
 	}
@@ -89,6 +89,12 @@ func (s StorePG) AkunDariSesi(ctx context.Context, tokenHash string, sekarang ti
 func (s StorePG) UbahNama(ctx context.Context, idAkun, nama string) error {
 	_, err := s.Pool.Exec(ctx,
 		`UPDATE akun SET nama = $2 WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, nama)
+	return err
+}
+
+func (s StorePG) AturFoto(ctx context.Context, idAkun, url string) error {
+	_, err := s.Pool.Exec(ctx,
+		`UPDATE akun SET foto = NULLIF($2, '') WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, url)
 	return err
 }
 
@@ -118,7 +124,7 @@ func (s StorePG) HapusAkun(ctx context.Context, idAkun string, sekarang time.Tim
 	// didaftarin lagi. hash '!' ga cocok sama sandi apa pun
 	if _, err := tx.Exec(ctx, `
 		UPDATE akun SET nama = 'Akun dihapus', email = 'dihapus-' || id || '@sisarasa.invalid',
-			hash_sandi = '!', google_sub = NULL, dihapus_pada = $2
+			hash_sandi = '!', google_sub = NULL, foto = NULL, dihapus_pada = $2
 		WHERE id = $1 AND dihapus_pada IS NULL`, idAkun, sekarang); err != nil {
 		return err
 	}

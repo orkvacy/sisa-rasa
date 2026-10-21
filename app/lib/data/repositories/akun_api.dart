@@ -134,6 +134,48 @@ class AkunApi implements LayananAkun {
   }
 
   @override
+  Future<Map<String, String>> gantiSandi(
+    String token,
+    String lama,
+    String baru,
+  ) async {
+    final res = await _kirim(
+      () => _klien.post(
+        _uri('/v1/akun/sandi'),
+        headers: _kepala(token),
+        body: jsonEncode({'lama': lama, 'baru': baru}),
+      ),
+    );
+    return _akunDanToken(_isi(res));
+  }
+
+  @override
+  Future<Map<String, String>> aturFoto(String token, String jalurBerkas) async {
+    final req = http.MultipartRequest('POST', _uri('/v1/akun/foto'))
+      ..headers['Authorization'] = 'Bearer $token'
+      ..files.add(await http.MultipartFile.fromPath('foto', jalurBerkas));
+    try {
+      // unggah foto lebih lama dari request biasa
+      final res = await http.Response.fromStream(
+        await _klien.send(req).timeout(const Duration(seconds: 60)),
+      );
+      return _akunDanToken(_isi(res));
+    } on TimeoutException {
+      throw _gagalTerhubung;
+    } on http.ClientException {
+      throw _gagalTerhubung;
+    }
+  }
+
+  @override
+  Future<Map<String, String>> hapusFoto(String token) async {
+    final res = await _kirim(
+      () => _klien.delete(_uri('/v1/akun/foto'), headers: _kepala(token)),
+    );
+    return _akunDanToken(_isi(res));
+  }
+
+  @override
   Future<void> hapusAkun(
     String token,
     String sandi, {

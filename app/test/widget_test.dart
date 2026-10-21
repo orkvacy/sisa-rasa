@@ -84,7 +84,7 @@ void main() {
   });
 
   tesKelolaPaket();
-  testWidgets('snackbar jumlah mengikuti ketukan terbaru dan tidak mengantre', (
+  testWidgets('snackbar cuma pas masuk / keluar keranjang, bukan tiap + / -', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
@@ -94,46 +94,34 @@ void main() {
     await bukaIbis(tester);
     await tester.tap(find.byTooltip('Tambah American Breakfast Set'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('American Breakfast Set: 1 porsi di keranjang'),
-      findsOneWidget,
-    );
-    await tester.tap(find.byTooltip('Tambah porsi').first);
-    await tester.pump();
-    await tester.tap(find.byTooltip('Kurangi porsi').first);
-    await tester.pumpAndSettle();
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(
-      find.text('American Breakfast Set: 1 porsi di keranjang'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('American Breakfast Set: 2 porsi di keranjang'),
-      findsNothing,
-    );
+    expect(find.text('American Breakfast Set masuk keranjang'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    // ubah jumlah: angkanya aja yg berubah, ga ada snackbar
+    await tester.tap(find.byTooltip('Tambah porsi').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.tap(find.byTooltip('Kurangi porsi').first);
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
 
+    // jadi 0: dikabarin dihapus
+    await tester.tap(find.byTooltip('Hapus dari keranjang').first);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('American Breakfast Set dihapus dari keranjang'),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    // detail paket: pilih porsi ga munculin snackbar
     await tester.tap(find.text('American Breakfast Set'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Tambah porsi'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('American Breakfast Set: 2 porsi dipilih'),
-      findsOneWidget,
-    );
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), '3');
-    await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
-    await tester.tap(find.byTooltip('Kurangi porsi'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('American Breakfast Set: 2 porsi dipilih'),
-      findsOneWidget,
-    );
   });
   testWidgets('beranda: flash sale, mitra sekitar, navigasi bawah', (
     tester,

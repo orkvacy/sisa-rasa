@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
+import 'package:sisa_rasa/presentation/screens/pilih_titik.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
@@ -919,11 +920,57 @@ class _KerangkaKartu extends StatelessWidget {
 }
 
 /// bilah lokasi di kiri atas beranda (F-66). lokasi aktif = jarak ke gerai
-/// dihitung dari GPS, kalau belum diminta / ditolak bisa diaktifin dari sini
+/// dihitung dari GPS atau dari titik yang dipilih sendiri di peta
 class _TombolLokasi extends StatelessWidget {
   const _TombolLokasi();
 
+  /// pilih sumber lokasi: GPS HP, atau titik manual di peta
   Future<void> _ketuk(BuildContext context) async {
+    final pilihan = await showModalBottomSheet<String>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
+      backgroundColor: Colors.white,
+      builder: (c) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('lokasi-gps'),
+              leading: const Icon(Icons.my_location, color: Warna.hijau),
+              title: const Text('Pakai lokasi saat ini'),
+              subtitle: const Text('Dari GPS HP'),
+              onTap: () => Navigator.pop(c, 'gps'),
+            ),
+            ListTile(
+              key: const Key('lokasi-peta'),
+              leading: const Icon(Icons.map_outlined, color: Warna.hijau),
+              title: const Text('Pilih titik di peta'),
+              subtitle: const Text(
+                'Misal saat GPS mati atau untuk alamat lain',
+              ),
+              onTap: () => Navigator.pop(c, 'peta'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    if (pilihan == 'gps') {
+      await _pakaiGps(context);
+    } else if (pilihan == 'peta') {
+      final lokasi = context.read<LokasiCubit>();
+      final titik = await pilihTitik(
+        context,
+        judul: 'Pilih lokasimu',
+        awal: lokasi.posisi,
+      );
+      if (titik != null) lokasi.aturManual(titik);
+    }
+  }
+
+  Future<void> _pakaiGps(BuildContext context) async {
     final lokasi = context.read<LokasiCubit>();
     if (lokasi.state['keSetelan'] == true) {
       final buka = await showDialog<bool>(
@@ -960,8 +1007,10 @@ class _TombolLokasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.watch<LokasiCubit>().state['status'];
+    final lokasi = context.watch<LokasiCubit>();
+    final status = lokasi.state['status'];
     final (ikon, teks) = switch (status) {
+      'aktif' when lokasi.manual => (Icons.place, 'Titik pilihanmu'),
       'aktif' => (Icons.my_location, 'Di sekitarmu'),
       'mencari' => (Icons.location_searching, 'Mencari lokasi…'),
       _ => (Icons.location_off_outlined, 'Aktifkan lokasi'),
@@ -995,10 +1044,8 @@ class _TombolLokasi extends StatelessWidget {
                 ),
               ),
             ),
-            if (!aktif) ...[
-              const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 18, color: Warna.teks),
-            ],
+            const SizedBox(width: 4),
+            const Icon(Icons.expand_more, size: 18, color: Warna.teks),
           ],
         ),
       ),

@@ -5,6 +5,8 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_lokasi.dart';
+import 'package:sisa_rasa/presentation/screens/pilih_titik.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 
 /// Layar 9a: Informasi Profil Usaha Mitra (SRS F-64).
@@ -142,7 +144,8 @@ class ProfilUsaha extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // F-66: titik gerai dari GPS, dipakai pembeli buat liat jarak
+            // F-66: titik gerai dari GPS atau dipilih di peta,
+            // dipakai pembeli buat liat jarak
             OutlinedButton.icon(
               key: const Key('pasang-titik'),
               onPressed: () => _pasangTitik(context, nama),
@@ -152,6 +155,26 @@ class ProfilUsaha extends StatelessWidget {
                     ? 'Perbarui titik dari lokasi saat ini'
                     : 'Pasang titik dari lokasi saat ini',
               ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Warna.hijau,
+                side: const BorderSide(color: Warna.hijau),
+              ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const Key('titik-peta'),
+              onPressed: () => _pilihDiPeta(
+                context,
+                nama,
+                adaTitik
+                    ? Posisi(
+                        (dataMitra!['lat'] as num).toDouble(),
+                        (dataMitra['lng'] as num).toDouble(),
+                      )
+                    : null,
+              ),
+              icon: const Icon(Icons.map_outlined, size: 18),
+              label: const Text('Pilih titik di peta'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Warna.hijau,
                 side: const BorderSide(color: Warna.hijau),
@@ -227,6 +250,20 @@ Future<void> _pasangTitik(BuildContext context, String nama) async {
     return;
   }
   paket.aturLokasi(nama, lokasi.state['lat'], lokasi.state['lng']);
+  pesan.showSnackBar(const SnackBar(content: Text('Titik gerai disimpan')));
+}
+
+/// mitra lagi ga di gerai: geser peta sampai pin pas di gerai
+Future<void> _pilihDiPeta(
+  BuildContext context,
+  String nama,
+  Posisi? awal,
+) async {
+  final paket = context.read<PaketCubit>();
+  final pesan = ScaffoldMessenger.of(context);
+  final titik = await pilihTitik(context, judul: 'Titik gerai', awal: awal);
+  if (titik == null) return;
+  paket.aturLokasi(nama, titik.lat, titik.lng);
   pesan.showSnackBar(const SnackBar(content: Text('Titik gerai disimpan')));
 }
 

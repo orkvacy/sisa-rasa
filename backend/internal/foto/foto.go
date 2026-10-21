@@ -1,4 +1,4 @@
-// Package foto ngurus foto paket yang diunggah mitra.
+// Package foto ngurus foto paket yang diunggah mitra dan foto profil akun.
 //
 // tiap foto di-decode lalu di-encode ulang jadi JPEG lebar maksimal 1200 px:
 // ukurannya kecil buat HP, file yang bukan gambar ketolak, dan metadata
@@ -100,33 +100,57 @@ func Unggah(simpan Penyimpanan) httpx.Handler {
 		if akun.DariKonteks(r.Context()).Peran != "mitra" {
 			return httpx.NewGalat(http.StatusForbidden, "Fitur ini khusus akun mitra.")
 		}
-		r.Body = http.MaxBytesReader(w, r.Body, BatasUnggah+(1<<20))
-		baca, err := r.MultipartReader()
+		url, err := terima(w, r, simpan)
 		if err != nil {
-			return httpx.NewGalat(http.StatusBadRequest, "Kirim foto sebagai multipart/form-data.")
+			return err
 		}
-		for {
-			bagian, err := baca.NextPart()
-			if err != nil {
-				return httpx.NewGalat(http.StatusBadRequest, "Field foto tidak ada.")
-			}
-			if bagian.FormName() != "foto" {
-				continue
-			}
-			isi, err := Proses(bagian)
-			if err != nil {
-				return err
-			}
-			nama, err := namaAcak()
-			if err != nil {
-				return err
-			}
-			url, err := simpan.Taruh(r.Context(), nama, isi)
-			if err != nil {
-				return err
-			}
-			httpx.TulisJSON(w, http.StatusCreated, map[string]string{"foto": url})
-			return nil
+		httpx.TulisJSON(w, http.StatusCreated, map[string]string{"foto": url})
+		return nil
+	}
+}
+
+// UnggahProfil POST /v1/akun/foto (multipart, field "foto"), semua peran.
+// fotonya langsung dipasang jadi foto profil lewat [atur] (akun.Layanan.AturFoto),
+// jawabannya {"akun": {...}}
+func UnggahProfil(simpan Penyimpanan,
+	atur func(context.Context, akun.Akun, string) (akun.Akun, error)) httpx.Handler {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		url, err := terima(w, r, simpan)
+		if err != nil {
+			return err
 		}
+		a, err := atur(r.Context(), akun.DariKonteks(r.Context()), url)
+		if err != nil {
+			return err
+		}
+		httpx.TulisJSON(w, http.StatusOK, map[string]akun.Akun{"akun": a})
+		return nil
+	}
+}
+
+// terima baca field "foto" dari multipart, proses, simpan, balikin URL-nya
+func terima(w http.ResponseWriter, r *http.Request, simpan Penyimpanan) (string, error) {
+	r.Body = http.MaxBytesReader(w, r.Body, BatasUnggah+(1<<20))
+	baca, err := r.MultipartReader()
+	if err != nil {
+		return "", httpx.NewGalat(http.StatusBadRequest, "Kirim foto sebagai multipart/form-data.")
+	}
+	for {
+		bagian, err := baca.NextPart()
+		if err != nil {
+			return "", httpx.NewGalat(http.StatusBadRequest, "Field foto tidak ada.")
+		}
+		if bagian.FormName() != "foto" {
+			continue
+		}
+		isi, err := Proses(bagian)
+		if err != nil {
+			return "", err
+		}
+		nama, err := namaAcak()
+		if err != nil {
+			return "", err
+		}
+		return simpan.Taruh(r.Context(), nama, isi)
 	}
 }

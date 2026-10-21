@@ -20,6 +20,10 @@ func Pasang(mux *http.ServeMux, l *Layanan, batasi func(http.Handler) http.Handl
 	mux.Handle("GET /v1/akun/saya", l.Wajib(httpx.Handler(handleSaya)))
 	mux.Handle("POST /v1/akun/keluar", httpx.Handler(l.handleKeluar))
 	mux.Handle("PATCH /v1/akun/saya", l.Wajib(httpx.Handler(l.handleUbahNama)))
+	// minta sandi lama, jadi dibatasi juga
+	mux.Handle("POST /v1/akun/sandi", batasi(l.Wajib(httpx.Handler(l.handleGantiSandi))))
+	// unggah foto profil ada di main.go (butuh penyimpanan foto), hapusnya di sini
+	mux.Handle("DELETE /v1/akun/foto", l.Wajib(httpx.Handler(l.handleHapusFoto)))
 	// minta sandi, jadi ikut dibatasi biar ga bisa dipakai nebak sandi
 	mux.Handle("POST /v1/akun/hapus", batasi(l.Wajib(httpx.Handler(l.handleHapus))))
 }
@@ -32,6 +36,31 @@ func (l *Layanan) handleUbahNama(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	a, err := l.UbahNama(r.Context(), DariKonteks(r.Context()), isi.Nama)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]Akun{"akun": a})
+	return nil
+}
+
+func (l *Layanan) handleGantiSandi(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Lama string `json:"lama"`
+		Baru string `json:"baru"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	hasil, err := l.GantiSandiSaya(r.Context(), DariKonteks(r.Context()), isi.Lama, isi.Baru)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, hasil)
+	return nil
+}
+
+func (l *Layanan) handleHapusFoto(w http.ResponseWriter, r *http.Request) error {
+	a, err := l.AturFoto(r.Context(), DariKonteks(r.Context()), "")
 	if err != nil {
 		return err
 	}

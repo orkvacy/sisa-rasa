@@ -16,6 +16,8 @@ type Akun struct {
 	// PunyaSandi false = akun dibikin lewat Google, belum pernah pasang sandi.
 	// aplikasi pakai ini buat nentuin konfirmasi hapus akun
 	PunyaSandi bool `json:"punyaSandi"`
+	// Foto URL foto profil (F-63), kosong = pakai inisial nama
+	Foto string `json:"foto,omitempty"`
 }
 
 // akunTersimpan isi baris tabel akun, termasuk hash sandinya
@@ -52,6 +54,8 @@ type Store interface {
 	// HapusAkun F-62: data pribadi dikosongkan, semua sesi dicabut, nama di
 	// pesanan lama dianonimkan. ErrPesananAktif kalau masih ada pesanan berjalan
 	HapusAkun(ctx context.Context, idAkun string, sekarang time.Time) error
+	// AturFoto F-63, [url] "" = hapus foto
+	AturFoto(ctx context.Context, idAkun, url string) error
 
 	StoreReset
 }

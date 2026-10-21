@@ -1,7 +1,13 @@
 # Sisa Rasa
 
-Aplikasi untuk menjual makanan berlebih dari hotel, restoran, dan bakery dengan
-harga diskon sebelum terbuang.
+Aplikasi mobile untuk menjual makanan berlebih dari hotel, restoran, dan bakery
+dengan harga diskon sebelum terbuang.
+
+| Folder | Isi |
+| --- | --- |
+| [`app/`](app) | Kode aplikasi mobile (Flutter) |
+| [`backend/`](backend) | Server API (Go) yang terhubung ke database PostgreSQL |
+| [`docs/`](docs) | PRD dan SRS |
 
 ## Kelompok
 
@@ -13,31 +19,190 @@ harga diskon sebelum terbuang.
 | 2409106056 | Muhammad Dzaki Rifa'I |
 | 2409106084 | Aulia Natasya |
 
-## Kenapa dibuat
+## Tentang aplikasi
 
 Tiap hari banyak makanan yang masih layak dibuang cuma karena tidak habis
 terjual sebelum toko tutup. Sementara itu ada mahasiswa dan keluarga yang lagi
-cari makanan murah. Aplikasi ini jadi jembatannya.
+cari makanan murah. Sisa Rasa jadi jembatannya: hotel, restoran, dan bakery
+(mitra) menjual makanan berlebih hari itu dengan harga diskon, pembeli memesan
+dan membayar lewat aplikasi, lalu mengambil sendiri di gerai sebelum jam tutup.
 
-Alurnya sederhana. Mitra mengunggah paket makanan berlebih hari itu dengan
-harga diskon, pembeli memesan dan membayar lewat aplikasi (QRIS, GoPay, atau
-VA) lalu dapat kode ambil, kemudian mengambil sendiri pada jam yang sudah
-ditentukan.
+Ada tiga peran, dibedakan dari akun waktu masuk:
 
-## Yang bisa dilakukan
+| Peran | Yang bisa dilakukan |
+| --- | --- |
+| **Pembeli** | Cari paket (urut terdekat, saring harga / diskon / bisa diambil sekarang), lihat jarak ke gerai dari GPS atau titik yang dipilih sendiri di peta, simpan mitra favorit, keranjang, pakai voucher, bayar lewat QRIS / GoPay / Virtual Account, pantau status pesanan, tunjukkan kode ambil, chat dengan mitra |
+| **Mitra** | Terbitkan dan kelola paket (foto, harga, porsi, jam ambil opsional), tandai paket habis, siapkan pesanan, pindai / ketik kode ambil, tutup gerai sementara, pasang titik lokasi gerai, lihat saldo dan atur rekening pencairan |
+| **Admin** | Verifikasi mitra baru, buat dan kelola voucher platform |
 
-Ada tiga peran, dibedakan lewat akun waktu login: pembeli, mitra, dan admin.
+Fitur akun berlaku untuk semua peran: daftar / masuk dengan email atau Google,
+lupa sandi lewat kode di email, ganti sandi, foto profil, dan hapus akun
+(khusus pembeli).
 
-Pembeli bisa mencari paket, lihat detailnya, masukkan ke keranjang, bayar lewat
-QRIS, GoPay, atau VA, lalu memantau status pesanannya sampai diambil. Mitra
-bisa mengelola paket dan stoknya, menyiapkan pesanan, memindai kode ambil, dan
-menerima saldo yang dicairkan otomatis ke rekening. Admin memverifikasi mitra
-dan memantau angka platform.
+Beberapa aturan yang bikin aplikasinya terasa nyata:
 
-Beberapa aturan yang bikin aplikasinya terasa nyata: stok berkurang tiap ada
-yang pesan, porsi ditahan 15 menit sampai dibayar, paket hilang sendiri kalau
-jam ambilnya sudah lewat, dan satu pesanan cuma boleh dari satu mitra karena
-diambil langsung di tempat.
+- Stok berkurang begitu ada yang pesan, dan porsinya ditahan 15 menit sampai
+  dibayar. Lewat dari itu pesanan batal sendiri dan porsinya kembali.
+- Satu pesanan cuma dari satu mitra, karena diambil langsung di tempat.
+- Paket hilang sendiri kalau jam ambilnya sudah lewat. Pesanan yang tidak
+  diambil sampai jam tutup jadi *Tidak diambil*.
+- Biaya layanan 10% untuk pembeli, komisi 10% dari mitra. Potongan voucher
+  ditanggung platform, jadi penerimaan mitra tidak berkurang.
+
+## Cara kerja aplikasi
+
+### Gambaran besar
+
+```
+┌──────────────────┐   HTTPS + JSON    ┌─────────────────────┐     SQL      ┌──────────────┐
+│ Aplikasi Flutter │ ────────────────▶ │  Server Go (REST)   │ ───────────▶ │  PostgreSQL  │
+│   (HP pembeli,   │ ◀──────────────── │  api.sisarasa.web.id│ ◀─────────── │ (VPS, sama   │
+│  mitra, admin)   │   token Bearer    └─────────────────────┘              │  dengan API) │
+└──────────────────┘                     │    │    │     │                  └──────────────┘
+                                         │    │    │     └─ Google: cek token masuk dengan Google
+                                         │    │    └─────── Resend: email kode lupa sandi
+                                         │    └──────────── Cloudflare R2: foto paket & profil
+                                         └───────────────── Midtrans: QRIS / GoPay / VA + webhook lunas
+```
+
+- **Aplikasi tidak pernah terhubung langsung ke database.** Semua data lewat
+  server Go. Aplikasi cuma tahu alamat server (`API_URL`), sedangkan alamat dan
+  sandi database hanya ada di server.
+- Setelah masuk, server memberi **token sesi**. Token disimpan di
+  `flutter_secure_storage` dan dikirim di tiap request
+  (`Authorization: Bearer <token>`). Di database yang disimpan hanya hash-nya.
+- Server memeriksa hak akses di tiap endpoint (pembeli tidak bisa memanggil
+  endpoint mitra / admin), memvalidasi ulang semua isian, lalu membaca /
+  menulis PostgreSQL.
+
+### Alur satu pesanan
+
+1. **Mitra terbitkan paket**: foto diunggah ke server (dikecilkan, EXIF
+   dibuang, disimpan di R2), data paket masuk tabel `paket`.
+2. **Pembeli pesan**: aplikasi mengirim `POST /v1/pesanan` dengan
+   `Idempotency-Key`. Server mengunci baris paket (`SELECT ... FOR UPDATE`),
+   mengurangi stok, membuat pesanan berstatus *menunggu bayar*, lalu meminta
+   tagihan ke Midtrans (QR / nomor VA / tautan GoPay).
+3. **Pembeli bayar** di e-wallet / m-banking. Midtrans mengirim **webhook** ke
+   server. Server mengecek tanda tangannya, menanyakan ulang status ke
+   Midtrans, lalu menandai pesanan lunas dan membuat kode ambil. Status lunas
+   tidak pernah ditentukan oleh aplikasi.
+4. **Aplikasi pembeli** memperbarui status otomatis dan menampilkan kode ambil.
+5. **Mitra** menyiapkan pesanan, lalu memindai kode ambil pembeli di gerai.
+   Pesanan selesai dan penerimaan bersihnya masuk saldo mitra.
+6. **Pencairan** saldo berjalan otomatis tiap hari 09.00 WITA, dengan kunci
+   unik per tanggal supaya tidak pernah cair dua kali.
+
+### Di dalam aplikasi Flutter
+
+Kode di `app/lib` memakai Clean Architecture. Arah ketergantungannya cuma satu:
+`presentation` → `domain` ← `data`.
+
+```
+lib/
+  main.dart         titik masuk aplikasi
+  injection.dart    GetIt, satu-satunya tempat memilih implementasi (tiruan / API)
+  core/             tema, warna, format rupiah / tanggal
+  domain/
+    aturan/         aturan bisnis: biaya layanan, status pesanan, voucher, jarak
+    repositories/   kontrak layanan (abstract), mis. LayananPaket, LayananAkun
+  data/
+    sumber/         data contoh + klien HTTP ke server
+    repositories/   implementasi kontrak: *Api (ke server) dan *Tiruan (di HP)
+  presentation/
+    bloc/ cubit/    state management
+    screens/        layar
+    widgets/        komponen yang dipakai beberapa layar
+    router.dart     semua rute GoRouter, termasuk pembagian halaman per peran
+```
+
+Layar hanya bicara dengan Cubit/BLoC, Cubit hanya bicara dengan kontrak di
+`domain/repositories`. Implementasinya dipilih di `injection.dart`:
+
+- **Dengan `API_URL`**: kelas `*Api` yang memanggil server Go (data asli).
+- **Tanpa `API_URL`**: kelas `*Tiruan` / `*Lokal` yang menyimpan data contoh
+  di memori HP. Berguna untuk mencoba tampilan tanpa server dan untuk tes.
+
+Aturan arah ketergantungan ini dijaga `test/arsitektur_test.dart`.
+
+## Cara menghubungkan dengan database
+
+Database Sisa Rasa adalah **PostgreSQL**, dan yang terhubung ke database adalah
+**server Go**, bukan aplikasi. Jadi menghubungkan aplikasi ke database berarti
+dua langkah: server Go disambungkan ke PostgreSQL, lalu aplikasi disambungkan ke
+server Go.
+
+```
+aplikasi ──(API_URL)──▶ server Go ──(DATABASE_URL)──▶ PostgreSQL
+```
+
+### 1. Siapkan PostgreSQL
+
+Pasang PostgreSQL (dipakai versi 18), lalu buat database kosong sekali saja:
+
+```powershell
+& 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -U postgres -c "CREATE DATABASE sisarasa_dev"
+```
+
+Tabel tidak perlu dibuat manual. Saat server menyala, migrasi di
+`backend/internal/db/migrasi/*.sql` dijalankan berurutan dan dicatat di tabel
+`schema_migrasi`, jadi migrasi yang sudah jalan tidak diulang. Tabel utamanya:
+
+| Tabel | Isi |
+| --- | --- |
+| `akun`, `sesi` | Akun pembeli / mitra / admin (sandi berupa hash bcrypt, foto profil) dan token sesi (hash) |
+| `gerai` | Data gerai mitra: status verifikasi, buka / tutup, titik lokasi |
+| `paket` | Paket makanan: harga, porsi, sisa, jam ambil, foto |
+| `pesanan`, `pesanan_isi` | Pesanan, status, pembayaran, kode ambil, voucher yang dipakai |
+| `pesan_chat` | Chat pembeli dan mitra per pesanan |
+| `rekening_mitra`, `pencairan` | Rekening tujuan dan riwayat pencairan saldo |
+| `favorit` | Mitra favorit pembeli |
+| `reset_sandi` | Kode lupa sandi (hash) |
+| `voucher` | Voucher platform |
+
+### 2. Sambungkan server Go ke database
+
+Alamat database diberikan lewat environment variable `DATABASE_URL`, tidak
+pernah ditulis di kode:
+
+```powershell
+cd backend
+$env:DATABASE_URL = "postgres://postgres:SANDI_POSTGRES@localhost:5432/sisarasa_dev?sslmode=disable"
+go run ./cmd/server
+```
+
+Server mendengarkan di `:8080`. Cek dengan membuka
+`http://localhost:8080/healthz`, jawabannya `{"status":"ok"}` kalau server
+berhasil terhubung ke database. Di lingkungan dev, akun contoh ikut dibuat
+dengan sandi `sisarasa123` (mis. `rani.amelia@gmail.com` untuk pembeli,
+`dapur.ibis@contoh.id` untuk mitra).
+
+### 3. Sambungkan aplikasi ke server
+
+Alamat server diberikan waktu menjalankan / build aplikasi:
+
+```powershell
+cd app
+flutter run --dart-define=API_URL=http://10.0.2.2:8080
+```
+
+`10.0.2.2` adalah alamat laptop dilihat dari emulator Android. Untuk HP
+sungguhan, pakai IP laptop di Wi-Fi yang sama (lihat dengan `ipconfig`),
+misalnya `http://192.168.1.10:8080`. Tanpa `API_URL`, aplikasi memakai data
+tiruan di HP dan tidak menyentuh database.
+
+### Di server production
+
+Server dan PostgreSQL berjalan di VPS yang sama lewat Coolify. `DATABASE_URL`
+diisi dengan *Postgres URL (internal)* dari Coolify, jadi port database tidak
+dibuka ke internet. APK untuk pengguna dibuat dengan alamat API publik:
+
+```powershell
+flutter build apk --release --split-per-abi --dart-define=API_URL=https://api.sisarasa.web.id --dart-define=GOOGLE_CLIENT_ID=<web client id>
+```
+
+Daftar lengkap environment variable server, endpoint API, dan langkah deploy
+ada di [backend/README.md](backend/README.md).
 
 ## Desain
 
@@ -129,16 +294,22 @@ Perbaikannya tetap lewat `main`: bikin `fix/<nama>` dari `main`, PR,
 merge, cek di staging, terus bikin tag patch baru (misal `v1.0.1`). Tidak ada
 branch production yang perlu di-merge balik.
 
-> **Status:** alur ini sudah disepakati, tapi build dan deploy otomatisnya
-> (GitHub Actions) belum dibuat. Sementara ini tes dan build masih dijalankan
-> manual sebelum merge.
+> **Status:** tes jalan otomatis di GitHub Actions (`.github/workflows/ci.yml`:
+> `flutter analyze`, `flutter test`, `go vet`, `go test` ke PostgreSQL) di tiap
+> PR. Server di-deploy otomatis oleh Coolify tiap ada merge ke `main`. Build APK
+> dan tag rilis masih dijalankan manual.
 
 ## Tech Stack
 
-- Flutter dan Dart, dengan GoRouter, Cubit/BLoC, dan Clean Architecture
-- Go dan PostgreSQL untuk backend
-- Dijalankan di VPS sendiri, PostgreSQL di server yang sama
-  (database `staging` dan `production` dipisah)
+- **Mobile:** Flutter dan Dart, GoRouter, Cubit/BLoC (flutter_bloc), GetIt,
+  Clean Architecture, flutter_secure_storage, flutter_map (OpenStreetMap),
+  geolocator, image_picker, mobile_scanner
+- **Server:** Go (`net/http`), pgx untuk PostgreSQL, bcrypt
+- **Database:** PostgreSQL 18, migrasi SQL ter-embed di server
+- **Layanan luar:** Midtrans (pembayaran), Cloudflare R2 (foto), Resend
+  (email), Google Sign-In
+- **Infrastruktur:** VPS dengan Coolify (Docker), PostgreSQL di server yang
+  sama, DNS dan CDN lewat Cloudflare
 
 ## Keamanan
 
@@ -202,47 +373,10 @@ dipikirin dari awal. Belum semuanya jadi, diterapkan bertahap sesuai SRS.
   di VPS yang sama.
 - Database di-backup tiap hari pakai `pg_dump` (cron) ke tempat terpisah.
 
-## Struktur folder (sementara)
-
-```
-docs/      dokumentasi
-app/       aplikasi Flutter
-backend/   server Go
-```
-
-Isi `app/lib` mengikuti Clean Architecture. Arah ketergantungannya cuma satu:
-`presentation` → `domain` ← `data`.
-
-```
-lib/
-  main.dart         titik masuk aplikasi
-  injection.dart    GetIt, satu-satunya tempat milih implementasi (tiruan / API)
-  core/             tema dan format angka/tanggal, dipakai semua lapisan
-  domain/
-    aturan/         aturan bisnis: biaya layanan, komisi, status pesanan, batas OTP
-    repositories/   kontrak layanan (abstract), mis. LayananPaket, LayananAkun
-  data/
-    sumber/         data contoh (dummy) selama backend belum ada
-    repositories/   implementasi kontrak: *Tiruan / *Lokal, nanti *Api
-  presentation/
-    bloc/ cubit/    state management
-    screens/        layar
-    widgets/        komponen yang dipakai beberapa layar
-    router.dart     semua rute GoRouter
-```
-
-Pas backend Go jadi, cukup bikin implementasi baru di `data/repositories/`
-lalu ganti barisnya di `injection.dart`. Berkas di `presentation/` tidak perlu
-diubah. Aturan ini dijaga `test/arsitektur_test.dart`.
-
 ## Dokumentasi
 
 - [PRD](docs/PRD.md) - latar belakang produk dan alasan perancangannya
-- [SRS](docs/srs.md) - daftar kebutuhan yang harus dipenuhi
-- [Rencana Increment](docs/RENCANA-INCREMENT.md) - metode dan urutan pengerjaan (ongoing)
-- [Milestone](docs/MILESTONE.md) - progress tiap checkpoint (ongoing)
-
-## Status
-
-Masih tahap awal. Dokumen perencanaan sudah jadi, aplikasinya baru mulai
-dikerjakan.
+- [SRS](docs/srs.md) - daftar kebutuhan yang harus dipenuhi (kode F-xx / NF-xx
+  di komentar kode merujuk ke sini)
+- [backend/README.md](backend/README.md) - endpoint API, environment variable,
+  deploy, dan tes server

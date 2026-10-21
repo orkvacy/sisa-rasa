@@ -4,7 +4,7 @@ import 'package:sisa_rasa/domain/repositories/layanan_lokasi.dart';
 
 /// lokasi pembeli buat ngitung jarak ke gerai (F-66). state:
 /// status ('belum' / 'mencari' / 'aktif' / 'gagal'), lat, lng,
-/// pesan + keSetelan kalau gagal
+/// manual (titik dipilih di peta), pesan + keSetelan kalau gagal
 class LokasiCubit extends Cubit<Map<String, dynamic>> {
   LokasiCubit({required this.layanan}) : super(const {'status': 'belum'});
 
@@ -13,8 +13,12 @@ class LokasiCubit extends Cubit<Map<String, dynamic>> {
   bool get aktif => state['status'] == 'aktif';
 
   /// pas aplikasi dibuka: kalau izinnya udah pernah dikasih, ambil lokasi
-  /// diam-diam. kalau belum, nunggu pengguna nekan "Aktifkan lokasi"
-  Future<void> mulai() => _ambil(minta: false, diam: true);
+  /// diam-diam. kalau belum, nunggu pengguna nekan "Aktifkan lokasi".
+  /// titik manual yg udah dipilih ga ditimpa
+  Future<void> mulai() async {
+    if (manual) return;
+    await _ambil(minta: false, diam: true);
+  }
 
   /// tombol "Aktifkan lokasi" / muat ulang lokasi
   Future<void> aktifkan() => _ambil(minta: true, diam: false);
@@ -36,6 +40,15 @@ class LokasiCubit extends Cubit<Map<String, dynamic>> {
       );
     }
   }
+
+  /// titik dipilih sendiri di peta: jarak dihitung dari sini, bukan GPS
+  void aturManual(Posisi p) =>
+      emit({'status': 'aktif', 'lat': p.lat, 'lng': p.lng, 'manual': true});
+
+  bool get manual => state['manual'] == true;
+
+  /// posisi yg lagi dipakai, null kalau belum aktif
+  Posisi? get posisi => aktif ? Posisi(state['lat'], state['lng']) : null;
 
   Future<void> bukaSetelan() => layanan.bukaSetelan(
     gpsMati: (state['pesan'] as String? ?? '').startsWith('GPS'),

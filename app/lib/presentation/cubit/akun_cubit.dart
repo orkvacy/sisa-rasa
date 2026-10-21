@@ -125,6 +125,30 @@ class AkunCubit extends Cubit<Map<String, String>> {
     emit({...state, ...baru, 'token': token});
   }
 
+  /// F-64: lempar GagalAkun kalau sandi lama salah. token baru dari server
+  /// disimpan, token lama udah dicabut
+  Future<void> gantiSandi(String lama, String baru) async {
+    final token = state['token'];
+    if (token == null) return;
+    _mulaiSesi(await layanan.gantiSandi(token, lama, baru));
+  }
+
+  /// F-63: lempar GagalAkun kalau unggahnya gagal
+  Future<void> aturFoto(String jalurBerkas) async {
+    final token = state['token'];
+    if (token == null) return;
+    final baru = await layanan.aturFoto(token, jalurBerkas);
+    emit({...state, ...baru, 'token': token});
+  }
+
+  Future<void> hapusFoto() async {
+    final token = state['token'];
+    if (token == null) return;
+    final baru = await layanan.hapusFoto(token);
+    // ...state dulu: 'foto' lama harus ilang, jadi pakai data baru apa adanya
+    emit({...baru, 'token': token});
+  }
+
   /// F-62: lempar GagalAkun kalau sandi salah / masih ada pesanan berjalan.
   /// berhasil = sama kayak keluar, token dihapus dari HP
   Future<void> hapusAkun(String sandi) async {

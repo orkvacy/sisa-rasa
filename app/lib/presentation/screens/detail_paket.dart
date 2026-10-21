@@ -13,7 +13,6 @@ import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/timeline_ambil.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
-import 'package:sisa_rasa/presentation/widgets/kabar_jumlah.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
@@ -35,19 +34,10 @@ class _DetailPaketState extends State<DetailPaket> {
     super.dispose();
   }
 
-  void aturJumlah(int nilai, {bool dariTombol = false}) {
+  void aturJumlah(int nilai) {
     final int sisa = widget.paket['sisaPorsi'];
-    final berubah = jumlah != nilai.clamp(1, sisa);
     setState(() => jumlah = nilai.clamp(1, sisa));
     jumlahController.text = '$jumlah';
-    if (dariTombol && berubah) {
-      kabarJumlah(
-        context,
-        nama: widget.paket['nama'],
-        jumlah: jumlah,
-        diKeranjang: false,
-      );
-    }
   }
 
   Future<void> tambahKeKeranjang() async {
@@ -411,7 +401,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           tooltip: 'Kurangi porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah > 1
-                              ? () => aturJumlah(jumlah - 1, dariTombol: true)
+                              ? () => aturJumlah(jumlah - 1)
                               : null,
                           icon: const Icon(Icons.remove, size: 18),
                         ),
@@ -443,7 +433,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           tooltip: 'Tambah porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah < sisa
-                              ? () => aturJumlah(jumlah + 1, dariTombol: true)
+                              ? () => aturJumlah(jumlah + 1)
                               : null,
                           icon: const Icon(Icons.add, size: 18),
                         ),
