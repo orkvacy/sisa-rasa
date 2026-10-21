@@ -270,7 +270,7 @@ class Akun extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                const _BarisMenu(
+                _BarisMenu(
                   ikon: Icons.dark_mode_outlined,
                   judul: 'Tampilan',
                   nilai: TemaCubit.label(modeTema),

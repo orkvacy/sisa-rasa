@@ -104,7 +104,7 @@ class KartuPaket extends StatelessWidget {
                   children: [
                     Text(
                       '${paket['mitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: Teks.keterangan,
                         color: Warna.teksPendukung,
                       ),

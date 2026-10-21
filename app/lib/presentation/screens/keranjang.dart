@@ -156,7 +156,7 @@ class _KeranjangState extends State<Keranjang> {
                               ),
                               Text(
                                 context.watch<LokasiCubit>().teks(pertama),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Warna.teksPendukung,
                                 ),
                               ),

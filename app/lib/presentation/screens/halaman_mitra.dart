@@ -105,7 +105,7 @@ class HalamanMitra extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${pertama['jenisMitra']} · ${pertama['alamat']} · ${context.watch<LokasiCubit>().teks(pertama)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Warna.teksPendukung,

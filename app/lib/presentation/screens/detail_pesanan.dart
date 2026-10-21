@@ -367,7 +367,7 @@ class _BagianRincian extends StatelessWidget {
             warnaNilai: Warna.hijau,
           ),
         ],
-        const Divider(height: 21, color: Warna.garis),
+        Divider(height: 21, color: Warna.garis),
         Row(
           children: [
             Expanded(

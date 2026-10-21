@@ -364,7 +364,7 @@ class _CheckoutState extends State<Checkout> {
                   warna: Warna.hijau,
                 ),
               ],
-              const Divider(height: 21, color: Warna.garis),
+              Divider(height: 21, color: Warna.garis),
               Row(
                 children: [
                         Expanded(
@@ -671,7 +671,7 @@ class _BarisVoucher extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_offer_outlined,
                 color: Warna.hijau,
                 size: 20,
@@ -679,7 +679,7 @@ class _BarisVoucher extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: v == null
-                    ? const Text(
+                    ? Text(
                         'Pakai voucher',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
@@ -691,14 +691,14 @@ class _BarisVoucher extends StatelessWidget {
                         children: [
                           Text(
                             '${v['voucher']['kode']} terpakai',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
                             ),
                           ),
                           Text(
                             'Kamu hemat ${rupiah(v['potongan'])} lagi',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: Warna.hijau,
                             ),
@@ -707,8 +707,8 @@ class _BarisVoucher extends StatelessWidget {
                       ),
               ),
               v == null
-                  ? const Padding(
-                      padding: EdgeInsets.only(right: 8),
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 8),
                       child: Icon(
                         Icons.chevron_right,
                         color: Warna.teksPendukung,
@@ -717,7 +717,7 @@ class _BarisVoucher extends StatelessWidget {
                   : IconButton(
                       tooltip: 'Lepas voucher',
                       onPressed: onHapus,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close,
                         size: 20,
                         color: Warna.teksPendukung,

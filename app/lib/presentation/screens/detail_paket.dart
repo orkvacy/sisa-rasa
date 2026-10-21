@@ -120,7 +120,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                 Expanded(
                                   child: Text(
                                     '${paket['mitra']} · ${paket['jenisMitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Warna.teksPendukung,
                                     ),
                                   ),

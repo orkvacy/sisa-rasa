@@ -124,15 +124,15 @@ class ProfilUsaha extends StatelessWidget {
                     label: 'Jam Pengambilan Paket',
                     nilai: '$buka - $tutup',
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
+                  Divider(height: 1, indent: 52, color: Warna.garis),
                   _InfoItem(
                     ikon: Icons.my_location,
                     label: 'Titik Lokasi Gerai',
                     nilai: adaTitik ? 'Terpasang' : 'Belum dipasang',
                     nilaiColor: adaTitik ? Warna.hijau : Warna.mendesak,
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
-                  const _InfoItem(
+                  Divider(height: 1, indent: 52, color: Warna.garis),
+                  _InfoItem(
                     ikon: Icons.verified_outlined,
                     label: 'Status Kemitraan',
                     nilai: 'Terverifikasi Aktif',
@@ -154,7 +154,7 @@ class ProfilUsaha extends StatelessWidget {
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Warna.hijau,
-                side: const BorderSide(color: Warna.hijau),
+                side: BorderSide(color: Warna.hijau),
               ),
             ),
             const SizedBox(height: 20),

@@ -244,7 +244,7 @@ class _BerandaState extends State<Beranda> {
                   const TombolKeranjang(),
                   IconButton(
                     tooltip: 'Mitra favorit',
-                    icon: const Icon(Icons.favorite_border, color: Warna.teks),
+                    icon: Icon(Icons.favorite_border, color: Warna.teks),
                     onPressed: () => context.push(Rute.favorit),
                   ),
                 ],
@@ -983,7 +983,7 @@ class _TombolLokasi extends StatelessWidget {
                   key: ValueKey(teks),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     height: 22 / 16,
                     fontWeight: FontWeight.w700,
@@ -994,7 +994,7 @@ class _TombolLokasi extends StatelessWidget {
             ),
             if (!aktif) ...[
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 18, color: Warna.teks),
+              Icon(Icons.chevron_right, size: 18, color: Warna.teks),
             ],
           ],
         ),
