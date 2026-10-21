@@ -120,7 +120,7 @@ Keamanan yang sudah dipasang:
 | `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
 | `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
 | `MIDTRANS_SERVER_KEY` | kosong | Server Key Midtrans (rahasia, isi di Coolify saja). Kosong = pembayaran mode uji |
-| `MIDTRANS_PRODUKSI` | kosong | Isi `1` kalau pakai kunci produksi. Kunci sandbox (diawali `SB-`) ditolak kalau ini `1`, dan sebaliknya |
+| `MIDTRANS_PRODUKSI` | kosong | Isi `1` kalau pakai kunci produksi (api.midtrans.com). Kosong = sandbox. Kunci berawalan `SB-` (akun Midtrans lama) ditolak kalau ini `1` |
 | `GOOGLE_CLIENT_ID` | kosong | Web client ID OAuth dari Google Cloud (bukan rahasia). Kosong = masuk dengan Google mati |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
