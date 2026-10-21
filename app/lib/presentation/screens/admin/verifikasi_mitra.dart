@@ -94,7 +94,7 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
         actions: [
           IconButton(
             tooltip: 'Voucher',
-            icon: const Icon(Icons.local_offer_outlined, color: Warna.hijau),
+            icon: Icon(Icons.local_offer_outlined, color: Warna.hijau),
             onPressed: () => context.push(Rute.adminVoucher),
           ),
           IconButton(

@@ -268,7 +268,7 @@ class Pembayaran extends StatelessWidget {
             // pembayaran asli lewat Midtrans: status lunas dikabari server sendiri
             if (tagihan['penyedia'] == 'midtrans') ...[
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Halaman ini lanjut sendiri setelah pembayaranmu diterima.',
                 textAlign: TextAlign.center,
                 style: _Gaya.keterangan,
