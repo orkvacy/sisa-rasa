@@ -55,6 +55,9 @@ func (s *storeMemori) lengkapi(p Paket) Paket {
 	}
 	p.GeraiTutup = s.tutup[p.IDMitra]
 	p.StatusGerai = s.statusDari(p.IDMitra).Status
+	if t := s.gerai[p.IDMitra].Titik; t != nil {
+		p.Lat, p.Lng = &t.Lat, &t.Lng
+	}
 	return p
 }
 
@@ -391,7 +394,9 @@ func (s *storeMemori) StatusGerai(_ context.Context, id string) (StatusGerai, er
 	if _, ada := s.nama[id]; !ada {
 		return StatusGerai{}, ErrTidakAda
 	}
-	return s.statusDari(id), nil
+	st := s.statusDari(id)
+	st.Titik = s.gerai[id].Titik
+	return st, nil
 }
 
 func (s *storeMemori) DaftarMitra(_ context.Context, status string) ([]MitraAdmin, error) {
@@ -443,6 +448,15 @@ func (s *storeMemori) AturFavorit(_ context.Context, idPembeli, idMitra string, 
 		daftar = append([]string{idMitra}, daftar...)
 	}
 	s.favorit[idPembeli] = daftar
+	return nil
+}
+
+func (s *storeMemori) AturLokasi(_ context.Context, idMitra string, t Titik) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	g := s.gerai[idMitra]
+	g.Titik = &t
+	s.gerai[idMitra] = g
 	return nil
 }
 

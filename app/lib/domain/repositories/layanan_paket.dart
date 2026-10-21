@@ -26,6 +26,9 @@ abstract class LayananPaket {
   /// F-51
   Future<void> aturGerai({required bool tutup});
 
+  /// F-66: titik gerai dari GPS HP mitra
+  Future<void> aturLokasi(double lat, double lng);
+
   /// F-37: status verifikasi gerai mitra yang lagi masuk, isinya
   /// status (StatusGerai) dan alasan kalau ditolak / dinonaktifkan admin
   Future<Map<String, dynamic>> statusGerai();

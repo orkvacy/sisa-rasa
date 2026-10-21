@@ -4,6 +4,7 @@ import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 
 /// Layar 9a: Informasi Profil Usaha Mitra (SRS F-64).
@@ -23,6 +24,7 @@ class ProfilUsaha extends StatelessWidget {
     // jam ambil paket hari ini, disimpan dalam menit (17 * 60 = 17.00)
     final buka = dataMitra?['mulai'] is int ? jam(dataMitra!['mulai']) : '-';
     final tutup = dataMitra?['tutup'] is int ? jam(dataMitra!['tutup']) : '-';
+    final adaTitik = dataMitra?['lat'] != null;
 
     return Scaffold(
       backgroundColor: Warna.latar,
@@ -123,6 +125,13 @@ class ProfilUsaha extends StatelessWidget {
                     nilai: '$buka - $tutup',
                   ),
                   const Divider(height: 1, indent: 52, color: Warna.garis),
+                  _InfoItem(
+                    ikon: Icons.my_location,
+                    label: 'Titik Lokasi Gerai',
+                    nilai: adaTitik ? 'Terpasang' : 'Belum dipasang',
+                    nilaiColor: adaTitik ? Warna.hijau : Warna.mendesak,
+                  ),
+                  const Divider(height: 1, indent: 52, color: Warna.garis),
                   const _InfoItem(
                     ikon: Icons.verified_outlined,
                     label: 'Status Kemitraan',
@@ -130,6 +139,22 @@ class ProfilUsaha extends StatelessWidget {
                     nilaiColor: Warna.hijau,
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            // F-66: titik gerai dari GPS, dipakai pembeli buat liat jarak
+            OutlinedButton.icon(
+              key: const Key('pasang-titik'),
+              onPressed: () => _pasangTitik(context, nama),
+              icon: const Icon(Icons.my_location, size: 18),
+              label: Text(
+                adaTitik
+                    ? 'Perbarui titik dari lokasi saat ini'
+                    : 'Pasang titik dari lokasi saat ini',
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Warna.hijau,
+                side: const BorderSide(color: Warna.hijau),
               ),
             ),
             const SizedBox(height: 20),
@@ -164,6 +189,45 @@ class ProfilUsaha extends StatelessWidget {
       ),
     );
   }
+}
+
+/// ambil GPS HP mitra lalu simpan jadi titik gerai. ditanya dulu biar mitra
+/// ga kepencet pas lagi di luar gerai
+Future<void> _pasangTitik(BuildContext context, String nama) async {
+  final yakin = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: const Text('Pasang titik gerai?'),
+      content: const Text(
+        'Pastikan kamu sedang berada di gerai. Titik ini dipakai pembeli untuk melihat jarak ke tempatmu.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(c, false),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(c, true),
+          child: const Text('Pasang'),
+        ),
+      ],
+    ),
+  );
+  if (yakin != true || !context.mounted) return;
+  final lokasi = context.read<LokasiCubit>();
+  final paket = context.read<PaketCubit>();
+  final pesan = ScaffoldMessenger.of(context);
+  await lokasi.aktifkan();
+  if (!lokasi.aktif) {
+    pesan.showSnackBar(
+      SnackBar(
+        content: Text(lokasi.state['pesan'] ?? 'Lokasi belum bisa diambil.'),
+      ),
+    );
+    return;
+  }
+  paket.aturLokasi(nama, lokasi.state['lat'], lokasi.state['lng']);
+  pesan.showSnackBar(const SnackBar(content: Text('Titik gerai disimpan')));
 }
 
 class _InfoItem extends StatelessWidget {

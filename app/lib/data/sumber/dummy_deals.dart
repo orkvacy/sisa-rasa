@@ -5,12 +5,15 @@
 ///
 /// isinya menu hotel & resto kelas menengah ke atas: makanan mahal yg
 /// masih layak, dijual murah sebelum jam tutup. foto asli (bukan AI),
-/// lisensi + kredit pembuatnya ada di assets/KREDIT_FOTO.md
+/// lisensi + kredit pembuatnya ada di assets/KREDIT_FOTO.md.
+/// lat/lng titik gerai perkiraan di Samarinda, sama kayak data contoh server
 final List<Map<String, dynamic>> dummyDeals = [
   {
     'id': 'p1',
     'nama': 'American Breakfast Set',
     'mitra': 'Ibis Hotel',
+    'lat': -0.4989,
+    'lng': 117.1497,
     'jenisMitra': 'Hotel',
     'kategori': 'Hidangan utama',
     'deskripsi':
@@ -31,6 +34,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p2',
     'nama': 'Sirloin Steak Black Pepper',
     'mitra': 'Prime Cut Steakhouse',
+    'lat': -0.4843,
+    'lng': 117.143,
     'jenisMitra': 'Restoran',
     'kategori': 'Hidangan utama',
     'deskripsi':
@@ -50,6 +55,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p3',
     'nama': 'Iga Bakar Madu',
     'mitra': 'Teras Nusantara',
+    'lat': -0.4655,
+    'lng': 117.1555,
     'jenisMitra': 'Restoran',
     'kategori': 'Hidangan utama',
     'deskripsi':
@@ -70,6 +77,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p4',
     'nama': 'Paket Buffet Makan Malam',
     'mitra': 'Bumi Senyiur',
+    'lat': -0.5007,
+    'lng': 117.1462,
     'jenisMitra': 'Hotel',
     'kategori': 'Buffet hotel',
     'deskripsi':
@@ -91,6 +100,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p5',
     'nama': 'Salmon Teriyaki Set',
     'mitra': 'Kaze Japanese Dining',
+    'lat': -0.487,
+    'lng': 117.1415,
     'jenisMitra': 'Restoran',
     'kategori': 'Hidangan utama',
     'deskripsi':
@@ -110,6 +121,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p6',
     'nama': 'Sourdough Country Loaf',
     'mitra': 'Maison Roti',
+    'lat': -0.495,
+    'lng': 117.1395,
     'jenisMitra': 'Bakery',
     'kategori': 'Pastry & roti',
     'deskripsi':
@@ -129,6 +142,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p7',
     'nama': 'Sushi Platter Nigiri',
     'mitra': 'Swiss-Belhotel',
+    'lat': -0.4972,
+    'lng': 117.1513,
     'jenisMitra': 'Hotel',
     'kategori': 'Hidangan utama',
     'deskripsi':
@@ -149,6 +164,8 @@ final List<Map<String, dynamic>> dummyDeals = [
     'id': 'p8',
     'nama': 'Petit Four & Macaron',
     'mitra': 'Ibis Hotel',
+    'lat': -0.4989,
+    'lng': 117.1497,
     'jenisMitra': 'Hotel',
     'kategori': 'Dessert',
     'deskripsi':

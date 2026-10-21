@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
@@ -118,7 +119,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    '${paket['mitra']} · ${paket['jenisMitra']} · ${paket['jarak']}',
+                                    '${paket['mitra']} · ${paket['jenisMitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
                                     style: const TextStyle(
                                       color: Warna.teksPendukung,
                                     ),

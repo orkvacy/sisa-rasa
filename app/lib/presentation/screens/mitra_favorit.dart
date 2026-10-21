@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
@@ -73,7 +74,7 @@ class _BarisFavorit extends StatelessWidget {
     final nama = mitra['nama'] as String;
     final keterangan = [
       mitra['jenis'],
-      if (adaPaket) paket.first['jarak'],
+      if (adaPaket) context.watch<LokasiCubit>().teks(paket.first),
       if (adaPaket) '${paket.length} paket',
     ].where((e) => e != null && '$e'.isNotEmpty).join(' · ');
 

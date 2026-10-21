@@ -133,6 +133,16 @@ class PaketCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   // mitra tutup / buka gerai sementara, paketnya ga tampil buat pembeli (F-51)
+  /// F-66: titik gerai mitra [mitra] dari GPS HP. di HP langsung diganti,
+  /// abis itu dikirim ke server
+  void aturLokasi(String mitra, double lat, double lng) {
+    emit([
+      for (final p in state)
+        if (p['mitra'] == mitra) {...p, 'lat': lat, 'lng': lng} else p,
+    ]);
+    _kirim(() => layanan.aturLokasi(lat, lng));
+  }
+
   void aturGerai(String mitra, {required bool buka}) {
     _kirim(() => layanan.aturGerai(tutup: !buka));
     emit([

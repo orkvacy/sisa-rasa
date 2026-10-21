@@ -11,6 +11,8 @@ import 'package:sisa_rasa/presentation/screens/cari.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/profil_usaha.dart';
 import 'package:sisa_rasa/presentation/widgets/kartu_paket.dart';
 
+import 'bantu_lokasi.dart';
+
 void main() {
   group('KartuPaket - Badge Meja Berbagi (F-22)', () {
     testWidgets(
@@ -32,7 +34,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: KartuPaket(paket: paket, onTap: () {}),
+              body: MultiBlocProvider(
+                providers: [lokasiUji()],
+                child: KartuPaket(paket: paket, onTap: () {}),
+              ),
             ),
           ),
         );
@@ -60,7 +65,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: KartuPaket(paket: paket, onTap: () {}),
+              body: MultiBlocProvider(
+                providers: [lokasiUji()],
+                child: KartuPaket(paket: paket, onTap: () {}),
+              ),
             ),
           ),
         );
@@ -93,8 +101,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: BlocProvider.value(
-            value: paketCubit,
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: paketCubit),
+              lokasiUji(),
+            ],
             child: Cari(onBukaPaket: (_) {}),
           ),
         ),
@@ -129,6 +140,7 @@ void main() {
                 BlocProvider.value(value: paketCubit),
                 // ikon keranjang di bilah atas beranda butuh KeranjangCubit
                 BlocProvider(create: (_) => KeranjangCubit()),
+                lokasiUji(),
               ],
               child: Beranda(onBukaMitra: (_) {}),
             ),
@@ -185,6 +197,7 @@ void main() {
         MaterialApp(
           home: MultiBlocProvider(
             providers: [
+              lokasiUji(),
               BlocProvider.value(value: akunCubit),
               BlocProvider.value(value: paketCubit),
             ],

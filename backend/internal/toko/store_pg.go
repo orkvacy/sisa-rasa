@@ -37,7 +37,7 @@ func petakan(err error) error {
 
 const kolomPaket = `
 	p.id, p.id_mitra, a.nama, COALESCE(g.jenis, 'Mitra'), COALESCE(g.alamat, ''),
-	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), COALESCE(g.status, 'menunggu'),
+	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), COALESCE(g.status, 'menunggu'), g.lat, g.lng,
 	p.nama, p.deskripsi, p.kategori,
 	p.foto, p.halal, p.meja_berbagi, p.harga_asli, p.harga_diskon, p.total_porsi,
 	p.sisa_porsi, p.mulai, p.tutup, p.nonaktif, p.dihapus`
@@ -50,7 +50,7 @@ const dariPaket = `
 func pindaiPaket(baris pgx.Row) (Paket, error) {
 	var p Paket
 	err := baris.Scan(&p.ID, &p.IDMitra, &p.Mitra, &p.JenisMitra, &p.Alamat,
-		&p.Jarak, &p.GeraiTutup, &p.StatusGerai, &p.Nama, &p.Deskripsi, &p.Kategori,
+		&p.Jarak, &p.GeraiTutup, &p.StatusGerai, &p.Lat, &p.Lng, &p.Nama, &p.Deskripsi, &p.Kategori,
 		&p.Foto, &p.Halal, &p.MejaBerbagi, &p.HargaAsli, &p.HargaDiskon, &p.TotalPorsi,
 		&p.SisaPorsi, &p.Mulai, &p.Tutup, &p.Nonaktif, &p.dihapus)
 	return p, err
@@ -88,10 +88,23 @@ func (s StorePG) satuPaket(ctx context.Context, idMitra, id string) (Paket, erro
 }
 
 func (s StorePG) SimpanGerai(ctx context.Context, idMitra string, g Gerai) error {
+	var lat, lng *float64
+	if g.Titik != nil {
+		lat, lng = &g.Titik.Lat, &g.Titik.Lng
+	}
 	_, err := s.Pool.Exec(ctx, `
-		INSERT INTO gerai (id_akun, jenis, alamat, jarak, status) VALUES ($1, $2, $3, $4, 'terverifikasi')
-		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4, status = 'terverifikasi'`,
-		idMitra, g.Jenis, g.Alamat, g.Jarak)
+		INSERT INTO gerai (id_akun, jenis, alamat, jarak, status, lat, lng)
+		VALUES ($1, $2, $3, $4, 'terverifikasi', $5, $6)
+		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4,
+			status = 'terverifikasi', lat = COALESCE($5, gerai.lat), lng = COALESCE($6, gerai.lng)`,
+		idMitra, g.Jenis, g.Alamat, g.Jarak, lat, lng)
+	return petakan(err)
+}
+
+func (s StorePG) AturLokasi(ctx context.Context, idMitra string, t Titik) error {
+	_, err := s.Pool.Exec(ctx, `
+		INSERT INTO gerai (id_akun, lat, lng) VALUES ($1, $2, $3)
+		ON CONFLICT (id_akun) DO UPDATE SET lat = $2, lng = $3`, idMitra, t.Lat, t.Lng)
 	return petakan(err)
 }
 

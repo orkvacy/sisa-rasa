@@ -7,6 +7,7 @@ import 'package:sisa_rasa/data/repositories/akun_api.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/favorit_api.dart';
 import 'package:sisa_rasa/data/repositories/favorit_lokal.dart';
+import 'package:sisa_rasa/data/repositories/lokasi_gps.dart';
 import 'package:sisa_rasa/data/repositories/google_asli.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
@@ -20,6 +21,7 @@ import 'package:sisa_rasa/data/sumber/klien_api.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_favorit.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_lokasi.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_paket.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_percakapan.dart';
@@ -40,7 +42,9 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     ..registerSingleton<SesiAktif>(sesi)
     // pembayaran masih tiruan di dua mode: server juga belum pakai Midtrans,
     // jadi layar pembayaran tetap nampilin keterangan mode uji
-    ..registerLazySingleton<LayananPembayaran>(PembayaranTiruan.new);
+    ..registerLazySingleton<LayananPembayaran>(PembayaranTiruan.new)
+    // GPS dipakai di dua mode, jaraknya dihitung di HP
+    ..registerLazySingleton<LayananLokasi>(LokasiGps.new);
 
   if (alamat.isEmpty) {
     sl

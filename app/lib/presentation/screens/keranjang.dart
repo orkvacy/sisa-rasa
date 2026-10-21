@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
@@ -154,7 +155,7 @@ class _KeranjangState extends State<Keranjang> {
                                 ),
                               ),
                               Text(
-                                pertama['jarak'],
+                                context.watch<LokasiCubit>().teks(pertama),
                                 style: const TextStyle(
                                   color: Warna.teksPendukung,
                                 ),

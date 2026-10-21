@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_jumlah.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
@@ -103,7 +104,7 @@ class HalamanMitra extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${pertama['jenisMitra']} · ${pertama['alamat']} · ${pertama['jarak']}',
+                      '${pertama['jenisMitra']} · ${pertama['alamat']} · ${context.watch<LokasiCubit>().teks(pertama)}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

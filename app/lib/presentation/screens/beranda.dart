@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
@@ -44,6 +45,7 @@ class _BerandaState extends State<Beranda> {
     'Jam tutup terdekat',
     'Harga termurah',
     'Diskon terbesar',
+    'Terdekat',
   ];
 
   /// rentang harga diskon per paket: (label, batas bawah, batas atas)
@@ -58,12 +60,6 @@ class _BerandaState extends State<Beranda> {
       kategoriDipilih != 'Semua' ||
       hargaDipilih != 'Semua harga' ||
       bisaSekarang;
-
-  void _segeraHadir(String fitur) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('Fitur $fitur segera hadir.')));
-  }
 
   void _urutkanDanSaring(BuildContext context) {
     var tempUrutan = urutanDipilih;
@@ -152,6 +148,11 @@ class _BerandaState extends State<Beranda> {
                   onPressed: () {
                     setState(() {
                       urutanDipilih = tempUrutan;
+                      // urut terdekat butuh lokasi: minta sekalian
+                      final lokasi = this.context.read<LokasiCubit>();
+                      if (tempUrutan == 'Terdekat' && !lokasi.aktif) {
+                        lokasi.aktifkan();
+                      }
                       hargaDipilih = tempHarga;
                       bisaSekarang = tempSekarang;
                     });
@@ -192,8 +193,14 @@ class _BerandaState extends State<Beranda> {
           cocokSekarang;
     }).toList();
 
-    final semuaMitra = _kelompokkanMitra(tampil);
-    if (urutanDipilih == 'Harga termurah') {
+    final lokasi = context.watch<LokasiCubit>();
+    final semuaMitra = _kelompokkanMitra(tampil, lokasi);
+    if (urutanDipilih == 'Terdekat' && lokasi.aktif) {
+      // gerai yang belum punya titik ditaruh paling bawah
+      semuaMitra.sort(
+        (a, b) => (a.km ?? double.infinity).compareTo(b.km ?? double.infinity),
+      );
+    } else if (urutanDipilih == 'Harga termurah') {
       semuaMitra.sort((a, b) => a.hargaTermurah.compareTo(b.hargaTermurah));
     } else if (urutanDipilih == 'Diskon terbesar') {
       semuaMitra.sort((a, b) => b.diskonTerbesar.compareTo(a.diskonTerbesar));
@@ -230,42 +237,8 @@ class _BerandaState extends State<Beranda> {
               padding: const EdgeInsets.fromLTRB(12, 4, 8, 0),
               child: Row(
                 children: [
-                  InkWell(
-                    onTap: () => _segeraHadir('Pilih area'),
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.place_outlined,
-                            size: 20,
-                            color: Warna.teks,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            'Samarinda Ulu',
-                            style: TextStyle(
-                              fontSize: 16,
-                              height: 22 / 16,
-                              fontWeight: FontWeight.w700,
-                              color: Warna.teks,
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 18,
-                            color: Warna.teks,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // Flexible: teks lokasi kepotong rapi di layar sempit / huruf besar
+                  const Flexible(child: _TombolLokasi()),
                   const Spacer(),
                   const TombolKeranjang(),
                   IconButton(
@@ -584,6 +557,7 @@ class _Mitra {
     required this.nama,
     required this.jenis,
     required this.jarak,
+    required this.km,
     required this.foto,
     required this.jumlahPaket,
     required this.hargaTermurah,
@@ -594,6 +568,8 @@ class _Mitra {
   final String nama;
   final String jenis;
   final String jarak;
+  // km dari lokasi pembeli, null kalau lokasi belum aktif / gerai belum punya titik
+  final double? km;
   final String foto;
   final int jumlahPaket;
   final int hargaTermurah;
@@ -604,7 +580,10 @@ class _Mitra {
 }
 
 /// paket dikumpulin per nama mitra
-List<_Mitra> _kelompokkanMitra(List<Map<String, dynamic>> paket) {
+List<_Mitra> _kelompokkanMitra(
+  List<Map<String, dynamic>> paket,
+  LokasiCubit lokasi,
+) {
   final kelompok = <String, List<Map<String, dynamic>>>{};
   for (final p in paket) {
     kelompok.putIfAbsent(p['mitra'], () => []).add(p);
@@ -614,7 +593,8 @@ List<_Mitra> _kelompokkanMitra(List<Map<String, dynamic>> paket) {
       _Mitra(
         nama: nama,
         jenis: isi.first['jenisMitra'],
-        jarak: isi.first['jarak'],
+        jarak: lokasi.teks(isi.first),
+        km: lokasi.km(isi.first),
         foto: isi.first['foto'],
         jumlahPaket: isi.length,
         hargaTermurah: isi.map((p) => p['hargaDiskon'] as int).reduce(min),
@@ -934,6 +914,94 @@ class _KerangkaKartu extends StatelessWidget {
           SizedBox(height: 8),
           Kerangka(lebar: 130, tinggi: 14),
         ],
+      ),
+    );
+  }
+}
+
+/// bilah lokasi di kiri atas beranda (F-66). lokasi aktif = jarak ke gerai
+/// dihitung dari GPS, kalau belum diminta / ditolak bisa diaktifin dari sini
+class _TombolLokasi extends StatelessWidget {
+  const _TombolLokasi();
+
+  Future<void> _ketuk(BuildContext context) async {
+    final lokasi = context.read<LokasiCubit>();
+    if (lokasi.state['keSetelan'] == true) {
+      final buka = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          title: const Text('Izinkan lokasi'),
+          content: Text(
+            '${lokasi.state['pesan']}\n\nLokasimu cuma dipakai di HP untuk menghitung jarak, tidak dikirim ke server.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: const Text('Nanti'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: const Text('Buka setelan'),
+            ),
+          ],
+        ),
+      );
+      if (buka == true) await lokasi.bukaSetelan();
+      return;
+    }
+    await lokasi.aktifkan();
+    if (!context.mounted) return;
+    final pesan = context.read<LokasiCubit>().state['pesan'];
+    if (pesan != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(pesan)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = context.watch<LokasiCubit>().state['status'];
+    final (ikon, teks) = switch (status) {
+      'aktif' => (Icons.my_location, 'Di sekitarmu'),
+      'mencari' => (Icons.location_searching, 'Mencari lokasi…'),
+      _ => (Icons.location_off_outlined, 'Aktifkan lokasi'),
+    };
+    final aktif = status == 'aktif';
+    return InkWell(
+      key: const Key('tombol-lokasi'),
+      onTap: status == 'mencari' ? null : () => _ketuk(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(ikon, size: 20, color: aktif ? Warna.hijau : Warna.teks),
+            const SizedBox(width: 6),
+            Flexible(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  teks,
+                  key: ValueKey(teks),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 22 / 16,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+              ),
+            ),
+            if (!aktif) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, size: 18, color: Warna.teks),
+            ],
+          ],
+        ),
       ),
     );
   }

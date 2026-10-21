@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
@@ -101,7 +103,7 @@ class KartuPaket extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${paket['mitra']} · ${paket['jarak']}',
+                      '${paket['mitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
                       style: const TextStyle(
                         fontSize: Teks.keterangan,
                         color: Warna.teksPendukung,
