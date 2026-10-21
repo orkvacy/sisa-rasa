@@ -189,7 +189,8 @@ const kolomPesanan = `
 	id, nomor, id_pembeli, id_mitra, nama_pembeli, nama_mitra, alamat, foto, mulai, tutup,
 	status, metode, kode, subtotal, harga_normal, biaya_layanan, total, dipesan_menit,
 	dibuat, batas_bayar, batas_menit, dibayar_pada, dibayar_menit, diambil_pada,
-	dibatalkan_pada, alasan, otomatis, oleh_mitra, tagihan, kunci_idempotensi, sidik_isi`
+	dibatalkan_pada, alasan, otomatis, oleh_mitra, tagihan, kunci_idempotensi, sidik_isi,
+	potongan, kode_voucher, id_voucher::text`
 
 func pindaiPesanan(baris pgx.Row) (Pesanan, error) {
 	var p Pesanan
@@ -197,7 +198,8 @@ func pindaiPesanan(baris pgx.Row) (Pesanan, error) {
 		&p.Alamat, &p.Foto, &p.Mulai, &p.Tutup, &p.Status, &p.Metode, &p.Kode,
 		&p.Subtotal, &p.HargaNormal, &p.BiayaLayanan, &p.Total, &p.Dipesan,
 		&p.Dibuat, &p.BatasBayar, &p.BatasMenit, &p.DibayarPada, &p.Dibayar, &p.DiambilPada,
-		&p.DibatalkanPada, &p.Alasan, &p.Otomatis, &p.OlehMitra, &p.Tagihan, &p.kunci, &p.sidik)
+		&p.DibatalkanPada, &p.Alasan, &p.Otomatis, &p.OlehMitra, &p.Tagihan, &p.kunci, &p.sidik,
+		&p.Potongan, &p.KodeVoucher, &p.idVoucher)
 	p.Hemat = p.HargaNormal - p.Subtotal
 	return p, err
 }
@@ -320,12 +322,14 @@ func (s StorePG) BuatPesanan(ctx context.Context, baru PesananBaru,
 	_, err = tx.Exec(ctx, `
 		INSERT INTO pesanan (id, nomor, id_pembeli, id_mitra, nama_pembeli, nama_mitra, alamat,
 			foto, mulai, tutup, status, metode, subtotal, harga_normal, biaya_layanan, total,
-			dipesan_menit, dibuat, batas_bayar, batas_menit, tagihan, kunci_idempotensi, sidik_isi)
+			dipesan_menit, dibuat, batas_bayar, batas_menit, tagihan, kunci_idempotensi, sidik_isi,
+			potongan, kode_voucher, id_voucher)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19, $20, $21, $22, $23)`,
+			$17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
 		p.ID, p.Nomor, p.IDAkun, p.IDMitra, p.NamaPembeli, p.Mitra, p.Alamat,
 		p.Foto, p.Mulai, p.Tutup, p.Status, p.Metode, p.Subtotal, p.HargaNormal, p.BiayaLayanan, p.Total,
-		p.Dipesan, p.Dibuat, p.BatasBayar, p.BatasMenit, p.Tagihan, p.kunci, p.sidik)
+		p.Dipesan, p.Dibuat, p.BatasBayar, p.BatasMenit, p.Tagihan, p.kunci, p.sidik,
+		p.Potongan, p.KodeVoucher, p.idVoucher)
 	if err != nil {
 		// nomor kembar, atau request kembar dengan kunci sama selesai duluan:
 		// Layanan ngulang, dan percobaan berikutnya ketemu pesanan lama di langkah 1
@@ -343,10 +347,34 @@ func (s StorePG) BuatPesanan(ctx context.Context, baru PesananBaru,
 			return Pesanan{}, false, petakan(err)
 		}
 	}
+	// 5. kuota voucher dipotong di transaksi yang sama: kalau keduluan pembeli lain
+	//    dan kuotanya abis, pesanan ini ikut batal (stok ga jadi berkurang)
+	if p.idVoucher != nil {
+		tag, err := tx.Exec(ctx, `
+			UPDATE voucher SET terpakai = terpakai + 1
+			WHERE id = $1 AND aktif AND (kuota IS NULL OR terpakai < kuota)`, *p.idVoucher)
+		if err != nil {
+			return Pesanan{}, false, petakan(err)
+		}
+		if tag.RowsAffected() == 0 {
+			return Pesanan{}, false, errVoucherHabis
+		}
+	}
 	if err := tx.Commit(ctx); err != nil {
 		return Pesanan{}, false, petakan(err)
 	}
 	return p, true, nil
+}
+
+func (s StorePG) PesananDariKunci(ctx context.Context, idPembeli, kunci string) (Pesanan, error) {
+	var id string
+	err := s.Pool.QueryRow(ctx, `
+		SELECT id FROM pesanan WHERE id_pembeli = $1 AND kunci_idempotensi = $2`,
+		idPembeli, kunci).Scan(&id)
+	if err != nil {
+		return Pesanan{}, petakan(err)
+	}
+	return s.Pesanan(ctx, id)
 }
 
 func (s StorePG) UbahPesanan(ctx context.Context, id string,
@@ -381,6 +409,13 @@ func (s StorePG) UbahPesanan(ctx context.Context, id string,
 		p.DibatalkanPada, p.Alasan, p.Otomatis, p.OlehMitra, p.Tagihan)
 	if err != nil {
 		return Pesanan{}, petakan(err)
+	}
+	if perubahan.KembalikanStok && p.idVoucher != nil {
+		// belum dibayar terus batal: kuota vouchernya balik
+		if _, err := tx.Exec(ctx, `
+			UPDATE voucher SET terpakai = GREATEST(terpakai - 1, 0) WHERE id = $1`, *p.idVoucher); err != nil {
+			return Pesanan{}, petakan(err)
+		}
 	}
 	if perubahan.KembalikanStok {
 		for _, isi := range p.Isi {

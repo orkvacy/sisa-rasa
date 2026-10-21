@@ -359,6 +359,14 @@ class _BagianRincian extends StatelessWidget {
           const SizedBox(height: 10),
           BarisNilai(label: 'Biaya layanan', nilai: rupiah(biaya)),
         ],
+        if ((pesanan['potongan'] ?? 0) > 0) ...[
+          const SizedBox(height: 10),
+          BarisNilai(
+            label: 'Voucher ${pesanan['kodeVoucher'] ?? ''}'.trim(),
+            nilai: '−${rupiah(pesanan['potongan'])}',
+            warnaNilai: Warna.hijau,
+          ),
+        ],
         const Divider(height: 21, color: Warna.garis),
         Row(
           children: [

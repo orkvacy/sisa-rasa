@@ -28,6 +28,13 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) h
 	mux.Handle("PUT /v1/favorit/{id}", h(l.handleAturFavorit))
 	mux.Handle("DELETE /v1/favorit/{id}", h(l.handleAturFavorit))
 
+	// voucher platform: pembeli cek / liat daftar, admin kelola
+	mux.Handle("GET /v1/voucher", h(l.handleVoucherTersedia))
+	mux.Handle("POST /v1/voucher/cek", h(l.handleCekVoucher))
+	mux.Handle("GET /v1/admin/voucher", h(l.handleDaftarVoucher))
+	mux.Handle("POST /v1/admin/voucher", h(l.handleBuatVoucher))
+	mux.Handle("PATCH /v1/admin/voucher/{id}", h(l.handleAturVoucher))
+
 	mux.Handle("GET /v1/mitra/paket", h(l.handlePaketSaya))
 	mux.Handle("POST /v1/mitra/paket", h(l.handleBuatPaket))
 	mux.Handle("PUT /v1/mitra/paket/{id}", h(l.handleUbahPaket))
@@ -178,14 +185,15 @@ func (l *Layanan) handleDaftar(w http.ResponseWriter, r *http.Request) error {
 
 func (l *Layanan) handleBuat(w http.ResponseWriter, r *http.Request) error {
 	var isi struct {
-		Isi    map[string]int `json:"isi"`
-		Metode string         `json:"metode"`
+		Isi     map[string]int `json:"isi"`
+		Metode  string         `json:"metode"`
+		Voucher string         `json:"voucher"`
 	}
 	if err := httpx.BacaJSON(w, r, &isi); err != nil {
 		return err
 	}
-	p, dibuat, err := l.BuatPesanan(r.Context(), akun.DariKonteks(r.Context()),
-		isi.Isi, isi.Metode, r.Header.Get("Idempotency-Key"))
+	p, dibuat, err := l.BuatPesananVoucher(r.Context(), akun.DariKonteks(r.Context()),
+		isi.Isi, isi.Metode, r.Header.Get("Idempotency-Key"), isi.Voucher)
 	if err != nil {
 		return err
 	}
@@ -420,5 +428,69 @@ func (l *Layanan) handleLokasi(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, t)
+	return nil
+}
+
+// ---------- voucher ----------
+
+func (l *Layanan) handleVoucherTersedia(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.VoucherTersedia(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]Voucher{"voucher": daftar})
+	return nil
+}
+
+func (l *Layanan) handleCekVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Kode     string `json:"kode"`
+		Subtotal int    `json:"subtotal"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	hasil, err := l.CekVoucher(r.Context(), akun.DariKonteks(r.Context()), isi.Kode, isi.Subtotal)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, hasil)
+	return nil
+}
+
+func (l *Layanan) handleDaftarVoucher(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.DaftarVoucher(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]Voucher{"voucher": daftar})
+	return nil
+}
+
+func (l *Layanan) handleBuatVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi IsianVoucher
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	v, err := l.BuatVoucher(r.Context(), akun.DariKonteks(r.Context()), isi)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusCreated, map[string]Voucher{"voucher": v})
+	return nil
+}
+
+func (l *Layanan) handleAturVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Aktif bool `json:"aktif"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	v, err := l.AturVoucherAktif(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), isi.Aktif)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]Voucher{"voucher": v})
 	return nil
 }

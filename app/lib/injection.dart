@@ -8,6 +8,8 @@ import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/favorit_api.dart';
 import 'package:sisa_rasa/data/repositories/favorit_lokal.dart';
 import 'package:sisa_rasa/data/repositories/lokasi_gps.dart';
+import 'package:sisa_rasa/data/repositories/voucher_api.dart';
+import 'package:sisa_rasa/data/repositories/voucher_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/google_asli.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
@@ -22,6 +24,7 @@ import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_favorit.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_lokasi.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_voucher.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_paket.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_percakapan.dart';
@@ -54,7 +57,8 @@ void daftarkanDependensi({String alamat = alamatApi}) {
       ..registerLazySingleton<LayananSaldo>(SaldoLokal.new)
       ..registerLazySingleton<LayananAdmin>(AdminTiruan.new)
       ..registerLazySingleton<MasukGoogle>(GoogleMati.new)
-      ..registerLazySingleton<LayananFavorit>(FavoritLokal.new);
+      ..registerLazySingleton<LayananFavorit>(FavoritLokal.new)
+      ..registerLazySingleton<LayananVoucher>(VoucherTiruan.new);
     return;
   }
   final klien = KlienApi(alamat: alamat, sesi: sesi);
@@ -66,6 +70,7 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     ..registerLazySingleton<LayananSaldo>(() => SaldoApi(klien))
     ..registerLazySingleton<LayananAdmin>(() => AdminApi(klien))
     ..registerLazySingleton<LayananFavorit>(() => FavoritApi(klien))
+    ..registerLazySingleton<LayananVoucher>(() => VoucherApi(klien))
     ..registerLazySingleton<MasukGoogle>(
       () => googleClientId.isEmpty
           ? const GoogleMati()

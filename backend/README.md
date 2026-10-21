@@ -32,7 +32,11 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `POST` | `/v1/mitra/foto` | Multipart field `foto` (JPG/PNG/WebP, maks 8 MB). Dikecilkan ke lebar 1200 px, EXIF dibuang, disimpan ke R2. Jawab `{foto: url}` |
 | `POST` | `/v1/mitra/ambil` | `{kode}` scan / ketik kode ambil, pesanan selesai (F-46) |
 | `GET` | `/v1/pesanan` | Pesanan pembeli, atau pesanan masuk mitra (yang sudah dibayar) |
-| `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode}` + header **`Idempotency-Key`** |
+| `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode, voucher?}` + header **`Idempotency-Key`**. Voucher mengurangi `total` (field `potongan`), `subtotal` dan penerimaan mitra tetap |
+| `GET` | `/v1/voucher` | Pembeli: voucher publik yang sedang berlaku dan boleh dipakai akun ini |
+| `POST` | `/v1/voucher/cek` | `{kode, subtotal}` → `{voucher, potongan}` cek voucher di checkout sebelum bayar |
+| `GET` `POST` | `/v1/admin/voucher` | Admin: daftar / buat voucher `{kode, judul, persen, maksPotongan, minBelanja, mulai, berakhir, kuota?, khususBaru, publik}` |
+| `PATCH` | `/v1/admin/voucher/{id}` | Admin: `{aktif}` nyalakan / matikan voucher |
 | `GET` | `/v1/pesanan/{id}` | Satu pesanan |
 | `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Dengan Midtrans: status ditanya ke Midtrans, 409 kalau belum dibayar. Tanpa Midtrans (mode uji): langsung lunas |
 | `POST` | `/v1/pembayaran/midtrans` | Webhook Midtrans (tanpa sesi). Tanda tangan SHA512 dicek, status ditanya ulang ke Midtrans, lalu pesanan lunas / batal. Idempoten |

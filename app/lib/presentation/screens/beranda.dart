@@ -416,8 +416,9 @@ class _BerandaState extends State<Beranda> {
                               ),
                             ),
                           ),
+                          // keterangan ngalah duluan kalau layarnya sempit
                           Text(
-                            'Tutup kurang dari 1 jam',
+                            'Tutup < 1 jam',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -860,11 +861,12 @@ class _KerangkaBeranda extends StatelessWidget {
           children: [
             const Kerangka(lebar: 120, tinggi: 20),
             const SizedBox(height: 12),
+            // dua kartu bagi rata lebar layar, biar muat di HP sempit
             const Row(
               children: [
-                _KerangkaKartu(),
+                Expanded(child: _KerangkaKartu()),
                 SizedBox(width: 12),
-                _KerangkaKartu(),
+                Expanded(child: _KerangkaKartu()),
               ],
             ),
             const SizedBox(height: 24),
@@ -903,18 +905,15 @@ class _KerangkaKartu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 168,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Kerangka(lebar: 168, tinggi: 96, radius: 12),
-          SizedBox(height: 10),
-          Kerangka(lebar: 90, tinggi: 12),
-          SizedBox(height: 8),
-          Kerangka(lebar: 130, tinggi: 14),
-        ],
-      ),
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Kerangka(tinggi: 96, radius: 12),
+        SizedBox(height: 10),
+        Kerangka(lebar: 90, tinggi: 12),
+        SizedBox(height: 8),
+        Kerangka(lebar: 120, tinggi: 14),
+      ],
     );
   }
 }
