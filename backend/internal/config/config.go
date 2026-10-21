@@ -82,9 +82,10 @@ func Baca() (Config, error) {
 	}
 	c.MidtransServerKey = strings.TrimSpace(os.Getenv("MIDTRANS_SERVER_KEY"))
 	c.MidtransProduksi = os.Getenv("MIDTRANS_PRODUKSI") == "1"
-	// kunci sandbox diawali SB-, jangan sampai ketuker sama mode produksi
-	if c.MidtransServerKey != "" && c.MidtransProduksi == strings.HasPrefix(c.MidtransServerKey, "SB-") {
-		return c, errors.New("MIDTRANS_SERVER_KEY ga cocok sama MIDTRANS_PRODUKSI: kunci sandbox diawali SB-")
+	// akun Midtrans lama: kunci sandbox diawali SB-. akun baru ga pakai awalan,
+	// jadi cuma yang jelas sandbox (SB-) yang ditolak di mode produksi
+	if c.MidtransProduksi && strings.HasPrefix(c.MidtransServerKey, "SB-") {
+		return c, errors.New("MIDTRANS_SERVER_KEY ini kunci sandbox (diawali SB-), tapi MIDTRANS_PRODUKSI=1")
 	}
 	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
 	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")
