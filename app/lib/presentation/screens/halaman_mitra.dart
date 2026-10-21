@@ -16,6 +16,7 @@ import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
 import 'package:sisa_rasa/presentation/widgets/animasi.dart';
+import 'package:sisa_rasa/presentation/widgets/kabar_jumlah.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
 /// isinya info gerai sama semua paket aktifnya, jadi pembeli bisa ambil
@@ -29,8 +30,13 @@ class HalamanMitra extends StatelessWidget {
     final keranjangCubit = context.read<KeranjangCubit>();
     // keranjang isi mitra lain: tanya dulu (F-07)
     final gantiMitra = await cekGantiMitra(context, paket);
-    if (gantiMitra == null) return;
+    if (gantiMitra == null || !context.mounted) return;
     keranjangCubit.tambah(paket, 1, gantiMitra: gantiMitra);
+    kabarJumlah(
+      context,
+      nama: paket['nama'],
+      jumlah: keranjangCubit.state[paket['id']]!,
+    );
   }
 
   @override
@@ -181,6 +187,11 @@ class HalamanMitra extends StatelessWidget {
                             } else {
                               cubit.ubahJumlah(paket['id'], baru);
                             }
+                            kabarJumlah(
+                              context,
+                              nama: paket['nama'],
+                              jumlah: baru,
+                            );
                           },
                         ),
                       ),

@@ -297,8 +297,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
                   ),
                   layarPenuh(
                     'detail/:id',
-                    (context, state) =>
-                        DetailPesanan(idPesanan: state.pathParameters['id']!),
+                    (context, state) => DetailPesanan(
+                      idPesanan: state.pathParameters['id']!,
+                      baruDibayar: state.extra == 'pembayaran-berhasil',
+                    ),
                   ),
                   layarPenuh(
                     'kode-ambil/:kode',

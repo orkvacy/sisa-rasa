@@ -17,15 +17,27 @@ import 'package:sisa_rasa/domain/aturan/percakapan.dart';
 
 /// detail satu pesanan (figma v3: pembeli/status pesanan, F-41).
 /// kepala hijau, tahapan Dibayar -> Disiapkan -> Siap diambil, lalu rinciannya
-class DetailPesanan extends StatelessWidget {
-  const DetailPesanan({required this.idPesanan, super.key});
+class DetailPesanan extends StatefulWidget {
+  const DetailPesanan({
+    required this.idPesanan,
+    this.baruDibayar = false,
+    super.key,
+  });
 
   final String idPesanan;
+  final bool baruDibayar;
+
+  @override
+  State<DetailPesanan> createState() => _DetailPesananState();
+}
+
+class _DetailPesananState extends State<DetailPesanan> {
+  bool _centangDitampilkan = false;
 
   @override
   Widget build(BuildContext context) {
     final pesanan = context.select<PesananBloc, Map<String, dynamic>?>(
-      (bloc) => bloc.cari(idPesanan),
+      (bloc) => bloc.cari(widget.idPesanan),
     );
     // pesanannya ga ketemu (misal kebuka dari link lama)
     if (pesanan == null) {
@@ -60,7 +72,19 @@ class DetailPesanan extends StatelessWidget {
                     child: ListView(
                       padding: EdgeInsets.zero,
                       children: [
-                        _BagianStatus(pesanan: pesanan),
+                        _BagianStatus(
+                          pesanan: pesanan,
+                          animasiDibayar:
+                              widget.baruDibayar &&
+                              !_centangDitampilkan &&
+                              pesanan['dibayarPada'] != null &&
+                              {
+                                StatusPesanan.disiapkan,
+                                StatusPesanan.siapDiambil,
+                                StatusPesanan.selesai,
+                              }.contains(pesanan['status']),
+                          onCentang: () => _centangDitampilkan = true,
+                        ),
                         const SizedBox(height: 8),
                         _BagianLokasi(pesanan: pesanan),
                         const SizedBox(height: 8),
@@ -111,9 +135,15 @@ class DetailPesanan extends StatelessWidget {
 
 /// tahapan + kotak status, isinya beda tiap status
 class _BagianStatus extends StatelessWidget {
-  const _BagianStatus({required this.pesanan});
+  const _BagianStatus({
+    required this.pesanan,
+    required this.animasiDibayar,
+    required this.onCentang,
+  });
 
   final Map<String, dynamic> pesanan;
+  final bool animasiDibayar;
+  final VoidCallback onCentang;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +153,11 @@ class _BagianStatus extends StatelessWidget {
     return BlokPutih(
       children: [
         if (!batal) ...[
-          TahapanPesanan(status: status),
+          TahapanPesanan(
+            status: status,
+            animasiDibayar: animasiDibayar,
+            onCentang: onCentang,
+          ),
           const SizedBox(height: 16),
         ],
         switch (status) {
