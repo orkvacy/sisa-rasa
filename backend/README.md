@@ -9,6 +9,9 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/healthz` | Cek server + koneksi database |
 | `POST` | `/v1/akun/daftar` | `{nama, email, sandi, peran}` → `{akun, token}` (F-29) |
 | `POST` | `/v1/akun/masuk` | `{email, sandi}` → `{akun, token}` (F-30) |
+| `POST` | `/v1/akun/lupa-sandi` | `{email}` kirim kode 6 angka ke email (berlaku 10 menit). Selalu 204, terdaftar atau tidak |
+| `POST` | `/v1/akun/lupa-sandi/cek` | `{email, kode}` → `{tiket}`. Salah 5 kali = kode hangus |
+| `POST` | `/v1/akun/lupa-sandi/atur` | `{tiket, sandi}` ganti sandi, semua sesi lama dicabut |
 | `POST` | `/v1/akun/google` | `{idToken}` masuk / daftar pembeli pakai Google. Token diperiksa ke kunci publik Google. Email yang sudah terdaftar pakai sandi ditolak 409 (tidak disambung otomatis) |
 | `GET` | `/v1/akun/saya` | Header `Authorization: Bearer <token>` → `{akun}` |
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
@@ -121,6 +124,8 @@ Keamanan yang sudah dipasang:
 | `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
 | `MIDTRANS_SERVER_KEY` | kosong | Server Key Midtrans (rahasia, isi di Coolify saja). Kosong = pembayaran mode uji |
 | `MIDTRANS_PRODUKSI` | kosong | Isi `1` kalau pakai kunci produksi (api.midtrans.com). Kosong = sandbox. Kunci berawalan `SB-` (akun Midtrans lama) ditolak kalau ini `1` |
+| `RESEND_API_KEY` | kosong | Kunci API Resend untuk email kode lupa sandi (rahasia, isi di Coolify saja). Kosong = fitur lupa sandi mati (di dev kodenya hanya ditulis ke log) |
+| `EMAIL_PENGIRIM` | `Sisa Rasa <noreply@sisarasa.web.id>` | Alamat pengirim, domainnya harus sudah diverifikasi di Resend |
 | `GOOGLE_CLIENT_ID` | kosong | Web client ID OAuth dari Google Cloud (bukan rahasia). Kosong = masuk dengan Google mati |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 

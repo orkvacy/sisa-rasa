@@ -52,4 +52,6 @@ type Store interface {
 	// HapusAkun F-62: data pribadi dikosongkan, semua sesi dicabut, nama di
 	// pesanan lama dianonimkan. ErrPesananAktif kalau masih ada pesanan berjalan
 	HapusAkun(ctx context.Context, idAkun string, sekarang time.Time) error
+
+	StoreReset
 }

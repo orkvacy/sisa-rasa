@@ -23,6 +23,7 @@ import (
 	"github.com/orkvacy/sisa-rasa/backend/internal/foto"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
 	"github.com/orkvacy/sisa-rasa/backend/internal/midtrans"
+	"github.com/orkvacy/sisa-rasa/backend/internal/surel"
 	"github.com/orkvacy/sisa-rasa/backend/internal/toko"
 )
 
@@ -51,6 +52,13 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
+	// F-61 email kode atur ulang sandi
+	switch {
+	case cfg.ResendKunci != "":
+		layananAkun.Pengirim = &surel.Resend{Kunci: cfg.ResendKunci, Dari: cfg.EmailPengirim}
+	case cfg.Dev():
+		layananAkun.Pengirim = surel.Log{}
+	}
 	if len(cfg.GoogleClientID) > 0 {
 		layananAkun.Google = &akun.PemeriksaGoogle{ClientID: cfg.GoogleClientID}
 	}

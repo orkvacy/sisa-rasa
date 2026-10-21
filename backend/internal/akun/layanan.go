@@ -41,6 +41,10 @@ type Layanan struct {
 	// Google pemeriksa ID token. kosong = masuk dengan Google dimatiin
 	// (GOOGLE_CLIENT_ID belum diisi)
 	Google Google
+	// Pengirim email kode atur ulang sandi (Resend). kosong = fitur mati
+	Pengirim Pengirim
+	// KirimLangsung email dikirim sebelum jawaban (tes), bukan di belakang
+	KirimLangsung bool
 
 	// hash pura-pura buat email yg ga terdaftar, biar waktu jawabnya sama
 	// kayak sandi salah dan ga bisa dipake nebak email terdaftar
