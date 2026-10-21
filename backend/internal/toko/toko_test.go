@@ -445,6 +445,7 @@ var skenario = map[string]func(*testing.T, func(*testing.T) siap){
 	"Saldo":                          ujiSaldo,
 	"Verifikasi":                     ujiVerifikasi,
 	"Favorit":                        ujiFavorit,
+	"Gerbang":                        ujiGerbang,
 }
 
 func TestSkenarioMemori(t *testing.T) {

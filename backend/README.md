@@ -30,7 +30,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/v1/pesanan` | Pesanan pembeli, atau pesanan masuk mitra (yang sudah dibayar) |
 | `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode}` + header **`Idempotency-Key`** |
 | `GET` | `/v1/pesanan/{id}` | Satu pesanan |
-| `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Sementara selalu lunas, mode uji |
+| `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Dengan Midtrans: status ditanya ke Midtrans, 409 kalau belum dibayar. Tanpa Midtrans (mode uji): langsung lunas |
+| `POST` | `/v1/pembayaran/midtrans` | Webhook Midtrans (tanpa sesi). Tanda tangan SHA512 dicek, status ditanya ulang ke Midtrans, lalu pesanan lunas / batal. Idempoten |
 | `POST` | `/v1/pesanan/{id}/batal` | `{alasan}` pembeli batal sebelum bayar, porsi kembali (F-55) |
 | `GET` | `/v1/admin/mitra?status=` | Khusus admin: daftar mitra, filter status opsional (F-36) |
 | `POST` | `/v1/admin/mitra/{id}/periksa` | Khusus admin: `{status, alasan}` setujui / tolak / nonaktifkan mitra. Alasan wajib untuk ditolak & nonaktif (F-37, F-38) |
@@ -117,6 +118,8 @@ Keamanan yang sudah dipasang:
 | `R2_PUBLIK` | | Alamat publik bucket, misal `https://cdn.sisarasa.web.id` |
 | `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
 | `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
+| `MIDTRANS_SERVER_KEY` | kosong | Server Key Midtrans (rahasia, isi di Coolify saja). Kosong = pembayaran mode uji |
+| `MIDTRANS_PRODUKSI` | kosong | Isi `1` kalau pakai kunci produksi. Kunci sandbox (diawali `SB-`) ditolak kalau ini `1`, dan sebaliknya |
 | `GOOGLE_CLIENT_ID` | kosong | Web client ID OAuth dari Google Cloud (bukan rahasia). Kosong = masuk dengan Google mati |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 
