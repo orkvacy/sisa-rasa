@@ -135,7 +135,6 @@ class _LupaSandiState extends State<LupaSandi> {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
     return PopScope(
       // tombol kembali HP mundur satu langkah dulu, bukan langsung nutup layar
       canPop: langkah == 0,
@@ -164,7 +163,11 @@ class _LupaSandiState extends State<LupaSandi> {
 
   Widget _keterangan(String teks) => Text(
     teks,
-    style: TextStyle(fontSize: 15, height: 22 / 15, color: Warna.teksPendukung),
+    style: const TextStyle(
+      fontSize: 15,
+      height: 22 / 15,
+      color: Warna.teksPendukung,
+    ),
   );
 
   Widget _langkahEmail() {
@@ -218,7 +221,7 @@ class _LupaSandiState extends State<LupaSandi> {
                   horizontal: 16,
                   vertical: 4,
                 ),
-                leading: Icon(Icons.help_outline, color: Warna.teks),
+                leading: const Icon(Icons.help_outline, color: Warna.teks),
                 title: const Text(
                   'Tidak bisa buka email?',
                   style: TextStyle(fontWeight: FontWeight.w700),
@@ -226,7 +229,7 @@ class _LupaSandiState extends State<LupaSandi> {
                 subtitle: const Text(
                   'Hubungi admin Sisa Rasa, sertakan nama dan email akunmu.',
                 ),
-                trailing: Icon(Icons.mail_outline, color: Warna.teks),
+                trailing: const Icon(Icons.mail_outline, color: Warna.teks),
                 onTap: () => ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(
@@ -267,7 +270,7 @@ class _LupaSandiState extends State<LupaSandi> {
             child: Text(
               'Mode uji: email belum benar-benar dikirim. Kodenya $kodeUji',
               key: const Key('kode-uji'),
-              style: TextStyle(fontSize: 13, color: Warna.mendesak),
+              style: const TextStyle(fontSize: 13, color: Warna.mendesak),
             ),
           ),
         ],
@@ -280,20 +283,23 @@ class _LupaSandiState extends State<LupaSandi> {
         ),
         if (galat != null) ...[
           const SizedBox(height: 8),
-          Text(galat!, style: TextStyle(fontSize: 13, color: Warna.merah)),
+          Text(
+            galat!,
+            style: const TextStyle(fontSize: 13, color: Warna.merah),
+          ),
         ],
         const SizedBox(height: 12),
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text(
+            const Text(
               'Belum dapat kode? ',
               style: TextStyle(color: Warna.teksPendukung),
             ),
             if (sisaDetik > 0)
               Text(
                 'Kirim ulang dalam 0:${sisaDetik.toString().padLeft(2, '0')}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   color: Warna.teks,
                 ),
@@ -356,7 +362,7 @@ class _LupaSandiState extends State<LupaSandi> {
             color: Warna.softGreen,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
+          child: const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.shield_outlined, size: 20, color: Warna.hijau),
@@ -471,7 +477,7 @@ class _KotakKodeState extends State<_KotakKode> {
                       ),
                       child: Text(
                         i < isi.length ? isi[i] : '',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: Warna.teks,

@@ -87,7 +87,7 @@ class _LembarVoucherState extends State<_LembarVoucher> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
+              const Text(
                 'Voucher',
                 style: TextStyle(
                   fontSize: 18,
@@ -129,7 +129,7 @@ class _LembarVoucherState extends State<_LembarVoucher> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Voucher tersedia',
                 style: TextStyle(
                   fontSize: 14,
@@ -145,8 +145,8 @@ class _LembarVoucherState extends State<_LembarVoucher> {
                         child: Center(child: CircularProgressIndicator()),
                       )
                     : cubit.tersedia.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'Belum ada voucher untukmu saat ini. Punya kode promo? Ketik di atas.',
                           style: TextStyle(
@@ -218,7 +218,7 @@ class _KartuVoucher extends StatelessWidget {
                   color: Warna.softGreen,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.local_offer_outlined,
                   color: Warna.hijau,
                   size: 20,
@@ -231,7 +231,7 @@ class _KartuVoucher extends StatelessWidget {
                   children: [
                     Text(
                       voucher['judul'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Warna.teks,
@@ -242,7 +242,7 @@ class _KartuVoucher extends StatelessWidget {
                         ringkasVoucher(voucher, rupiah),
                         if (minBelanja > 0) 'min. ${rupiah(minBelanja)}',
                       ].join(' · '),
-                      style: TextStyle(fontSize: 12, color: Warna.teks),
+                      style: const TextStyle(fontSize: 12, color: Warna.teks),
                     ),
                     Text(
                       alasan ??
@@ -262,7 +262,7 @@ class _KartuVoucher extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 voucher['kode'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'JetBrainsMono',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,

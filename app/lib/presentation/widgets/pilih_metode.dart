@@ -61,7 +61,7 @@ class BarisMetode extends StatelessWidget {
                       ? Container(
                           width: 10,
                           height: 10,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Warna.hijau,
                           ),
@@ -77,7 +77,7 @@ class BarisMetode extends StatelessWidget {
                     children: [
                       Text(
                         judul ?? MetodeBayar.nama(metode),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           height: 20 / 14,
                           fontWeight: FontWeight.w600,
@@ -87,7 +87,7 @@ class BarisMetode extends StatelessWidget {
                       const SizedBox(height: 1),
                       Text(
                         keterangan ?? MetodeBayar.keterangan(metode),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           height: 16 / 12,
                           letterSpacing: 0.1,
@@ -99,7 +99,7 @@ class BarisMetode extends StatelessWidget {
                   ),
                 ),
                 if (panah)
-                  Icon(
+                  const Icon(
                     Icons.chevron_right,
                     size: 18,
                     color: Warna.teksPendukung,
@@ -125,7 +125,7 @@ class LogoMetode extends StatelessWidget {
       width: 44,
       height: 32,
       decoration: BoxDecoration(
-        color: Warna.kartu,
+        color: Colors.white,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -133,7 +133,7 @@ class LogoMetode extends StatelessWidget {
       child: MetodeBayar.isVa(metode)
           ? Text(
               MetodeBayar.namaBank(metode),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -166,7 +166,7 @@ Future<String?> pilihMetode(
     useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: Warna.kartu,
+    backgroundColor: Colors.white,
     builder: (sheetContext) => SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -176,7 +176,7 @@ Future<String?> pilihMetode(
           children: [
             Text(
               hanyaBank ? 'Pilih bank' : 'Ganti metode pembayaran',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Warna.teks,

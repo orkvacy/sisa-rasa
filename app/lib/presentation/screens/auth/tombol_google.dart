@@ -40,15 +40,14 @@ class _TombolGoogleState extends State<TombolGoogle> {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
     if (!context.read<AkunCubit>().bisaGoogle) return const SizedBox.shrink();
     return OutlinedButton(
       key: const Key('masuk-google'),
       onPressed: memuat ? null : masuk,
       style: OutlinedButton.styleFrom(
         foregroundColor: Warna.teks,
-        backgroundColor: Warna.kartu,
-        side: BorderSide(color: Warna.garisKontrol),
+        backgroundColor: Colors.white,
+        side: const BorderSide(color: Warna.garisKontrol),
         minimumSize: const Size.fromHeight(48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
@@ -63,7 +62,7 @@ class _TombolGoogleState extends State<TombolGoogle> {
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2.5),
             )
-          : Row(
+          : const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // huruf G sederhana, logo resmi Google belum dimasukin ke aset

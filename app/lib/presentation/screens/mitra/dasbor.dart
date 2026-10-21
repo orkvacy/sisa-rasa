@@ -33,7 +33,6 @@ class Dasbor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
     // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
     final nama = context.watch<AkunCubit>().state['nama'];
     if (nama == null) return const SizedBox.shrink();
@@ -90,7 +89,7 @@ class Dasbor extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.storefront_outlined,
                               size: 16,
                               color: Warna.teksPendukung,
@@ -101,14 +100,14 @@ class Dasbor extends StatelessWidget {
                                 '$nama · $jenis',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                   color: Warna.teksPendukung,
                                 ),
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.chevron_right,
                               size: 16,
                               color: Warna.teksPendukung,
@@ -122,7 +121,7 @@ class Dasbor extends StatelessWidget {
                       jamSekarang < 18 * 60
                           ? 'Dapur sore ini'
                           : 'Dapur malam ini',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 22,
                         height: 34 / 28,
                         letterSpacing: -0.4,
@@ -146,7 +145,7 @@ class Dasbor extends StatelessWidget {
                     backgroundColor: Warna.softGreen,
                     child: Text(
                       inisial(nama),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         color: Warna.hijau,
                       ),
@@ -163,7 +162,7 @@ class Dasbor extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
             decoration: BoxDecoration(
-              color: Warna.kartu,
+              color: Colors.white,
               border: Border.all(color: Warna.garis),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -186,7 +185,7 @@ class Dasbor extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             buka ? 'Gerai buka' : 'Gerai tutup sementara',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
@@ -199,7 +198,7 @@ class Dasbor extends StatelessWidget {
                         buka
                             ? 'Paketmu tampil untuk pembeli'
                             : 'Paketmu disembunyikan dari pembeli',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: Warna.teksPendukung,
@@ -235,7 +234,7 @@ class Dasbor extends StatelessWidget {
                   children: [
                     Text(
                       '$porsi',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 30,
                         height: 44 / 40,
                         fontWeight: FontWeight.w800,
@@ -243,7 +242,7 @@ class Dasbor extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'porsi terselamatkan hari ini',
                         style: TextStyle(fontSize: 14, color: Warna.teks),
@@ -251,7 +250,7 @@ class Dasbor extends StatelessWidget {
                     ),
                   ],
                 ),
-                Divider(height: 28, color: Warna.garis),
+                const Divider(height: 28, color: Warna.garis),
                 Row(
                   children: [
                     Expanded(
@@ -285,7 +284,7 @@ class Dasbor extends StatelessWidget {
           _Kartu(
             children: antrean.isEmpty
                 ? [
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Text(
                         'Belum ada pesanan yang perlu disiapkan.',
@@ -301,7 +300,7 @@ class Dasbor extends StatelessWidget {
                             context.push(Rute.mitraDetailPesanan(p['id'])),
                       ),
                       if (p != antrean.take(3).last)
-                        Divider(height: 1, color: Warna.garis),
+                        const Divider(height: 1, color: Warna.garis),
                     ],
                   ],
           ),
@@ -317,7 +316,7 @@ class Dasbor extends StatelessWidget {
           _Kartu(
             children: paket.isEmpty
                 ? [
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Text(
                         'Belum ada paket aktif hari ini.',
@@ -329,7 +328,7 @@ class Dasbor extends StatelessWidget {
                     for (final p in paket) ...[
                       _BarisPaket(paket: p),
                       if (p != paket.last)
-                        Divider(height: 1, color: Warna.garis),
+                        const Divider(height: 1, color: Warna.garis),
                     ],
                   ],
           ),
@@ -354,14 +353,17 @@ class _Angka extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             nilai,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: Warna.teks,
             ),
           ),
         ),
-        Text(label, style: TextStyle(fontSize: 12, color: Warna.teksPendukung)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Warna.teksPendukung),
+        ),
       ],
     );
   }
@@ -385,7 +387,7 @@ class _JudulBagian extends StatelessWidget {
         Expanded(
           child: Text(
             judul,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: Warna.teks,
@@ -396,7 +398,7 @@ class _JudulBagian extends StatelessWidget {
           onPressed: onAksi,
           child: Text(
             aksi,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Warna.hijau,
@@ -418,7 +420,7 @@ class _Kartu extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Warna.kartu,
+        color: Colors.white,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -454,7 +456,7 @@ class _BarisAntrean extends StatelessWidget {
               backgroundColor: Warna.softGreen,
               child: Text(
                 inisial(pembeli.replaceAll('.', '')),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: Warna.hijau,
@@ -468,7 +470,7 @@ class _BarisAntrean extends StatelessWidget {
                 children: [
                   Text(
                     pembeli,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Warna.teks,
@@ -478,7 +480,10 @@ class _BarisAntrean extends StatelessWidget {
                     '${isi[0]['jumlah']}× ${isi[0]['nama']}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Warna.teksPendukung,
+                    ),
                   ),
                 ],
               ),
@@ -489,7 +494,7 @@ class _BarisAntrean extends StatelessWidget {
               children: [
                 Text(
                   pesanan['kode'],
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'JetBrainsMono',
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -557,7 +562,7 @@ class _BarisPaket extends StatelessWidget {
                   paket['nama'],
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Warna.teks,
@@ -565,7 +570,10 @@ class _BarisPaket extends StatelessWidget {
                 ),
                 Text(
                   '${jam(paket['mulai'])} – ${jam(paket['tutup'])}',
-                  style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Warna.teksPendukung,
+                  ),
                 ),
               ],
             ),
@@ -664,7 +672,7 @@ class _BannerVerifikasiState extends State<_BannerVerifikasi> {
               children: [
                 Text(
                   judul,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     color: Warna.teks,
                   ),
@@ -672,7 +680,10 @@ class _BannerVerifikasiState extends State<_BannerVerifikasi> {
                 const SizedBox(height: 2),
                 Text(
                   [isi, if (alasan != null) 'Alasan: $alasan'].join('\n'),
-                  style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Warna.teksPendukung,
+                  ),
                 ),
               ],
             ),

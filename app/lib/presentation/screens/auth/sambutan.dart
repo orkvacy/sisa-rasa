@@ -30,7 +30,7 @@ class Sambutan extends StatelessWidget {
                     child: const _MosaikFoto(),
                   ),
                   const SizedBox(height: 28),
-                  Text(
+                  const Text(
                     'Makanan enak yang belum sempat habis.',
                     style: TextStyle(
                       fontSize: 26,
@@ -41,7 +41,7 @@ class Sambutan extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
+                  const Text(
                     'Ambil sisa dapur hotel, resto, dan bakery di Samarinda dengan harga separuh, sebelum mereka tutup.',
                     style: TextStyle(
                       fontSize: 15,
@@ -53,8 +53,7 @@ class Sambutan extends StatelessWidget {
                   FilledButton(
                     onPressed: () => context.push(Rute.daftar),
                     style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Warna.hijau,
                       minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -72,8 +71,8 @@ class Sambutan extends StatelessWidget {
                     onPressed: () => context.push(Rute.masuk),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Warna.teks,
-                      backgroundColor: Warna.kartu,
-                      side: BorderSide(color: Warna.garisKontrol),
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Warna.garisKontrol),
                       minimumSize: const Size.fromHeight(48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -157,7 +156,7 @@ class _MosaikFoto extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.schedule, size: 16, color: Warna.mendesak),

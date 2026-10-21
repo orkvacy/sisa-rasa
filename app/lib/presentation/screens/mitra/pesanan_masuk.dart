@@ -54,12 +54,11 @@ class _PesananMasukState extends State<PesananMasuk> {
     final selesai = dengan(StatusPesanan.selesai);
     final bersih = selesai.fold<int>(0, (a, p) => a + penerimaanBersih(p));
 
-    final cs = Theme.of(context).colorScheme;
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, ruangBawahMitra),
         children: [
-          Text(
+          const Text(
             'Pesanan masuk',
             style: TextStyle(
               fontSize: 22,
@@ -86,7 +85,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                       selected: segmen == status,
                       child: Material(
                         color: segmen == status
-                            ? cs.primary
+                            ? Warna.hijau
                             : Colors.transparent,
                         shape: const StadiumBorder(),
                         clipBehavior: Clip.antiAlias,
@@ -108,7 +107,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                       color: segmen == status
-                                          ? cs.onPrimary
+                                          ? Colors.white
                                           : Warna.teksPendukung,
                                     ),
                                   ),
@@ -120,19 +119,17 @@ class _PesananMasukState extends State<PesananMasuk> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: segmen == status
-                                          ? cs.onPrimary
+                                          ? Colors.white
                                           : Warna.latar,
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
                                       '${dengan(status).length}',
                                       key: Key('jumlah-mitra-$status'),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: segmen == status
-                                            ? cs.primary
-                                            : Warna.teksPendukung,
+                                        color: Warna.teks,
                                       ),
                                     ),
                                   ),
@@ -151,12 +148,16 @@ class _PesananMasukState extends State<PesananMasuk> {
             const SizedBox(height: 10),
             Row(
               children: [
-                Icon(Icons.schedule, size: 16, color: Warna.teksPendukung),
+                const Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: Warna.teksPendukung,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     '$menungguBayar pesanan lagi menunggu dibayar pembeli',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Warna.teksPendukung,
@@ -179,7 +180,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                   _ => 'Belum ada pesanan selesai hari ini.',
                 },
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Warna.teksPendukung),
+                style: const TextStyle(color: Warna.teksPendukung),
               ),
             ),
           for (final (i, p) in daftar.indexed) ...[
@@ -204,13 +205,13 @@ class _PesananMasukState extends State<PesananMasuk> {
             ),
             child: Row(
               children: [
-                Icon(Icons.bar_chart, color: Warna.teks),
+                const Icon(Icons.bar_chart, color: Warna.teks),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Rekap hari ini',
                         style: TextStyle(
                           fontSize: 14,
@@ -220,7 +221,7 @@ class _PesananMasukState extends State<PesananMasuk> {
                       ),
                       Text(
                         '${selesai.length} pesanan selesai · ${rupiah(bersih)} bersih',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Warna.teksPendukung,
                         ),
@@ -251,10 +252,10 @@ class _KartuPesanan extends StatelessWidget {
     final bloc = context.read<PesananBloc>();
 
     return Material(
-      color: Warna.kartu,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Warna.garis),
+        side: const BorderSide(color: Warna.garis),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -269,7 +270,7 @@ class _KartuPesanan extends StatelessWidget {
                   Expanded(
                     child: Text(
                       pesanan['kode'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'JetBrainsMono',
                         fontSize: 22,
                         letterSpacing: 2,
@@ -292,7 +293,7 @@ class _KartuPesanan extends StatelessWidget {
                       color: Warna.softGreen,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Lunas',
                       style: TextStyle(
                         fontSize: 11,
@@ -323,7 +324,7 @@ class _KartuPesanan extends StatelessWidget {
                         Text(
                           '${isi[0]['jumlah']}× ${isi[0]['nama']}'
                           '${isi.length > 1 ? ' +${isi.length - 1} lainnya' : ''}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Warna.teks,
@@ -334,7 +335,7 @@ class _KartuPesanan extends StatelessWidget {
                                   pesanan['diambilPada'] != null
                               ? '${pesanan['namaPembeli']} · diambil ${tanggalSingkat(pesanan['diambilPada'])}'
                               : '${pesanan['namaPembeli']} · ambil ${jam(pesanan['mulai'])} – ${jam(pesanan['tutup'])}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Warna.teksPendukung,
                           ),
@@ -351,7 +352,7 @@ class _KartuPesanan extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Penerimaan bersih',
                           style: TextStyle(
                             fontSize: 12,
@@ -360,7 +361,7 @@ class _KartuPesanan extends StatelessWidget {
                         ),
                         Text(
                           rupiah(penerimaanBersih(pesanan)),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: Warna.teks,

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:sisa_rasa/core/theme/warna.dart';
 
 /// isi tab bawah (pembeli & mitra). semua tab tetap hidup biar scroll-nya
 /// ga ke-reset, tab yg baru dipilih muncul pelan: memudar masuk sambil naik
@@ -16,10 +15,7 @@ class TabBerganti extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         for (final (i, isi) in anak.indexed)
-          KeyedSubtree(
-            key: ValueKey('$i-${Warna.modeGelap}'),
-            child: _SatuTab(aktif: i == indeks, child: isi),
-          ),
+          _SatuTab(aktif: i == indeks, child: isi),
       ],
     );
   }

@@ -47,7 +47,7 @@ class _SaldoState extends State<Saldo> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, ruangBawahMitra),
         children: [
-          Text(
+          const Text(
             'Saldo',
             style: TextStyle(
               fontSize: 22,
@@ -82,7 +82,7 @@ class _SaldoState extends State<Saldo> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -105,7 +105,7 @@ class _SaldoState extends State<Saldo> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Riwayat',
                   style: TextStyle(
@@ -124,7 +124,7 @@ class _SaldoState extends State<Saldo> {
             ],
           ),
           if (riwayat.isEmpty)
-            Padding(
+            const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Text(
                 'Belum ada dana masuk. Saldo bertambah setelah pesanan diambil pembeli.',
@@ -136,7 +136,7 @@ class _SaldoState extends State<Saldo> {
             const SizedBox(height: 8),
             Text(
               judul,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: Warna.teksPendukung,
@@ -146,7 +146,7 @@ class _SaldoState extends State<Saldo> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Warna.kartu,
+                color: Colors.white,
                 border: Border.all(color: Warna.garis),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -154,7 +154,8 @@ class _SaldoState extends State<Saldo> {
                 children: [
                   for (final e in isi) ...[
                     _BarisRiwayat(entri: e),
-                    if (e != isi.last) Divider(height: 1, color: Warna.garis),
+                    if (e != isi.last)
+                      const Divider(height: 1, color: Warna.garis),
                   ],
                 ],
               ),
@@ -203,7 +204,7 @@ class _KartuSaldo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Saldo tersedia',
             style: TextStyle(fontSize: 14, color: Warna.teksPendukung),
           ),
@@ -213,7 +214,7 @@ class _KartuSaldo extends StatelessWidget {
             child: Text(
               rupiah(tersedia),
               key: const Key('saldo-tersedia'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 28,
                 height: 40 / 32,
                 fontWeight: FontWeight.w800,
@@ -224,24 +225,28 @@ class _KartuSaldo extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.schedule, size: 16, color: Warna.teks),
+              const Icon(Icons.schedule, size: 16, color: Warna.teks),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   jadwal,
-                  style: TextStyle(fontSize: 13, color: Warna.teks),
+                  style: const TextStyle(fontSize: 13, color: Warna.teks),
                 ),
               ),
             ],
           ),
-          Divider(height: 28, color: Warna.garis),
+          const Divider(height: 28, color: Warna.garis),
           Row(
             children: [
-              Icon(Icons.account_balance_outlined, color: Warna.teks, size: 22),
+              const Icon(
+                Icons.account_balance_outlined,
+                color: Warna.teks,
+                size: 22,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: rek == null
-                    ? Text(
+                    ? const Text(
                         'Belum ada rekening pencairan',
                         style: TextStyle(
                           fontSize: 14,
@@ -254,7 +259,7 @@ class _KartuSaldo extends StatelessWidget {
                         children: [
                           Text(
                             rekeningSingkat(rek['bank'], rek['nomor']),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
@@ -264,7 +269,7 @@ class _KartuSaldo extends StatelessWidget {
                             'a.n. ${rek['nama']}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Warna.teksPendukung,
                             ),
@@ -303,7 +308,7 @@ class _KotakAngka extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Warna.kartu,
+        color: Colors.white,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -314,7 +319,7 @@ class _KotakAngka extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               nilai,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -324,7 +329,7 @@ class _KotakAngka extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
+            style: const TextStyle(fontSize: 12, color: Warna.teksPendukung),
           ),
         ],
       ),
@@ -371,7 +376,7 @@ class _BarisRiwayat extends StatelessWidget {
               children: [
                 Text(
                   judul,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Warna.teks,
@@ -379,7 +384,10 @@ class _BarisRiwayat extends StatelessWidget {
                 ),
                 Text(
                   keterangan,
-                  style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Warna.teksPendukung,
+                  ),
                 ),
               ],
             ),

@@ -22,7 +22,7 @@ class TombolFavorit extends StatelessWidget {
     );
     return CircleAvatar(
       radius: 22,
-      backgroundColor: Warna.latar,
+      backgroundColor: Colors.white,
       child: IconButton(
         tooltip: suka ? 'Hapus dari favorit' : 'Simpan mitra',
         onPressed: () {

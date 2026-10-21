@@ -88,7 +88,7 @@ class _KeranjangState extends State<Keranjang> {
             // TextButton: tombol tulisan doang tanpa latar
             TextButton(
               onPressed: () => _konfirmasiKosongkan(context),
-              child: Text(
+              child: const Text(
                 'Kosongkan',
                 style: TextStyle(
                   color: Warna.hijau,
@@ -119,7 +119,7 @@ class _KeranjangState extends State<Keranjang> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.shopping_bag_outlined,
                         size: 64,
                         color: Warna.teksPendukung,
@@ -133,7 +133,7 @@ class _KeranjangState extends State<Keranjang> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      const Text(
                         'Pilih paket di Beranda, lalu ambil sendiri di jam yang ditentukan.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Warna.teksPendukung),
@@ -158,7 +158,7 @@ class _KeranjangState extends State<Keranjang> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Warna.kartu,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -178,7 +178,7 @@ class _KeranjangState extends State<Keranjang> {
                                 ),
                                 Text(
                                   context.watch<LokasiCubit>().teks(pertama),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Warna.teksPendukung,
                                   ),
                                 ),
@@ -216,7 +216,7 @@ class _KeranjangState extends State<Keranjang> {
                                 color: Warna.latar,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Row(
+                              child: const Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Icon(
@@ -224,7 +224,7 @@ class _KeranjangState extends State<Keranjang> {
                                     size: 18,
                                     color: Warna.teksPendukung,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'Satu pesanan hanya dari satu mitra, karena diambil langsung di tempat.',
@@ -245,7 +245,7 @@ class _KeranjangState extends State<Keranjang> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Warna.kartu,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -253,7 +253,7 @@ class _KeranjangState extends State<Keranjang> {
                           children: [
                             Row(
                               children: [
-                                Expanded(
+                                const Expanded(
                                   child: Text(
                                     'Ambil hari ini',
                                     style: TextStyle(
@@ -274,7 +274,7 @@ class _KeranjangState extends State<Keranjang> {
                                     sudahBuka(pertama)
                                         ? 'Tutup ${sisaWaktu(pertama['tutup'])} lagi'
                                         : 'Buka ${sisaWaktu(pertama['mulai'])} lagi',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: Teks.keterangan,
                                       fontWeight: FontWeight.w700,
                                       color: Warna.mendesak,
@@ -299,7 +299,7 @@ class _KeranjangState extends State<Keranjang> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Warna.kartu,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -309,7 +309,7 @@ class _KeranjangState extends State<Keranjang> {
                                 Expanded(
                                   child: Text(
                                     'Harga normal · $porsi porsi',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Warna.teksPendukung,
                                     ),
                                   ),
@@ -320,7 +320,7 @@ class _KeranjangState extends State<Keranjang> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Expanded(
+                                const Expanded(
                                   child: Text(
                                     'Kamu hemat',
                                     style: TextStyle(
@@ -330,15 +330,15 @@ class _KeranjangState extends State<Keranjang> {
                                 ),
                                 Text(
                                   '−${rupiah(hargaNormal - total)}',
-                                  style: TextStyle(color: Warna.hijau),
+                                  style: const TextStyle(color: Warna.hijau),
                                 ),
                               ],
                             ),
                             // Divider: garis pemisah horizontal
-                            Divider(height: 24, color: Warna.garis),
+                            const Divider(height: 24, color: Warna.garis),
                             Row(
                               children: [
-                                Expanded(
+                                const Expanded(
                                   child: Text(
                                     'Subtotal',
                                     style: TextStyle(
@@ -373,11 +373,11 @@ class _KeranjangState extends State<Keranjang> {
                         12 + MediaQuery.of(context).padding.bottom,
                       ),
                       decoration: BoxDecoration(
-                        color: Warna.kartu,
+                        color: Colors.white,
                         // BoxShadow: bayangan ke atas, sama kayak bar total di modul
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: Colors.grey.shade300,
                             blurRadius: 10,
                             offset: const Offset(0, -3),
                           ),
@@ -410,7 +410,7 @@ class _KeranjangState extends State<Keranjang> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          const Text(
                             'Bayar di langkah berikutnya lewat QRIS, GoPay, atau VA.',
                             style: TextStyle(
                               fontSize: Teks.kecil,

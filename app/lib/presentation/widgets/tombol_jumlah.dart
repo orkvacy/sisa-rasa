@@ -105,7 +105,7 @@ class PengaturJumlah extends StatelessWidget {
                 child: Text(
                   '$jumlah',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Warna.teks,
