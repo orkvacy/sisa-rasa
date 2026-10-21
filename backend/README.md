@@ -22,6 +22,7 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `PUT` `DELETE` | `/v1/mitra/paket/{id}` | Ubah / hapus paket (F-18) |
 | `PATCH` | `/v1/mitra/paket/{id}/sisa` | `{sisa}` (F-44) |
 | `PATCH` | `/v1/mitra/paket/{id}/aktif` | `{aktif}` (F-45) |
+| `PUT` | `/v1/mitra/gerai/lokasi` | `{lat, lng}` titik gerai dari GPS HP mitra. Paket ikut membawa `lat`/`lng`, jarak dihitung di HP pembeli (lokasi pembeli tidak dikirim ke server) |
 | `PUT` | `/v1/mitra/gerai/tutup` | `{tutup}` tutup gerai sementara (F-51) |
 | `GET` | `/v1/mitra/saldo` | `{rekening, tersedia, riwayat}` saldo dari pesanan selesai dikurangi komisi 10% dan pencairan (F-48, F-50) |
 | `PUT` | `/v1/mitra/rekening` | `{bank, nomor, nama}` nama harus sama dengan nama usaha (F-49) |

@@ -35,6 +35,7 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) h
 	mux.Handle("PATCH /v1/mitra/paket/{id}/sisa", h(l.handleSisa))
 	mux.Handle("PATCH /v1/mitra/paket/{id}/aktif", h(l.handleAktif))
 	mux.Handle("PUT /v1/mitra/gerai/tutup", h(l.handleGerai))
+	mux.Handle("PUT /v1/mitra/gerai/lokasi", h(l.handleLokasi))
 	mux.Handle("POST /v1/mitra/ambil", h(l.handleAmbil))
 	mux.Handle("GET /v1/mitra/saldo", h(l.handleSaldo))
 	mux.Handle("PUT /v1/mitra/rekening", h(l.handleRekening))
@@ -407,5 +408,17 @@ func (l *Layanan) handleNotifikasi(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	return nil
+}
+
+func (l *Layanan) handleLokasi(w http.ResponseWriter, r *http.Request) error {
+	var t Titik
+	if err := httpx.BacaJSON(w, r, &t); err != nil {
+		return err
+	}
+	if err := l.AturLokasi(r.Context(), akun.DariKonteks(r.Context()), t); err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, t)
 	return nil
 }

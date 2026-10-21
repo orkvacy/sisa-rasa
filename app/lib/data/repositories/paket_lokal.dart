@@ -32,6 +32,9 @@ class PaketLokal implements LayananPaket {
   @override
   Future<void> aturGerai({required bool tutup}) async {}
 
+  @override
+  Future<void> aturLokasi(double lat, double lng) async {}
+
   /// mitra contoh udah diverifikasi semua
   @override
   Future<Map<String, dynamic>> statusGerai() async => {

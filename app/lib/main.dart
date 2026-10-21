@@ -11,6 +11,7 @@ import 'package:sisa_rasa/presentation/cubit/admin_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/percakapan_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/saldo_cubit.dart';
@@ -73,6 +74,8 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         BlocProvider(create: (context) => SaldoCubit(layanan: sl())),
         BlocProvider(create: (context) => PercakapanCubit(layanan: sl())),
         BlocProvider(create: (context) => FavoritCubit(layanan: sl())),
+        // izinnya udah pernah dikasih: lokasi langsung diambil diam-diam
+        BlocProvider(create: (context) => LokasiCubit(layanan: sl())..mulai()),
         // baru dibikin pas halaman admin dibuka
         BlocProvider(create: (context) => AdminCubit(layanan: sl())),
         // PesananBloc nahan / ngelepas stok lewat PaketCubit yg dipasang di atasnya

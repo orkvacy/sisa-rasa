@@ -54,6 +54,10 @@ class PaketApi implements LayananPaket {
       klien.patch('/v1/mitra/paket/$id/aktif', {'aktif': aktif});
 
   @override
+  Future<void> aturLokasi(double lat, double lng) =>
+      klien.put('/v1/mitra/gerai/lokasi', {'lat': lat, 'lng': lng});
+
+  @override
   Future<void> aturGerai({required bool tutup}) =>
       klien.put('/v1/mitra/gerai/tutup', {'tutup': tutup});
 

@@ -11,6 +11,7 @@ import (
 )
 
 // gerai + paket contoh, sama kayak data_deals.dart di aplikasi.
+// titiknya perkiraan di sekitar pusat Samarinda, cuma buat demo jarak.
 // cuma disemai di dev / server demo (SEMAI_AKUN_CONTOH=1)
 type geraiContoh struct {
 	nama, email string
@@ -26,7 +27,7 @@ type paketContoh struct {
 func jam(j, m int) int { return j*60 + m }
 
 var contoh = []geraiContoh{
-	{"Ibis Hotel", "dapur.ibis@contoh.id", Gerai{"Hotel", "Jl. Mulawarman 2, Samarinda", "1,9 km"}, []paketContoh{
+	{"Ibis Hotel", "dapur.ibis@contoh.id", Gerai{"Hotel", "Jl. Mulawarman 2, Samarinda", "1,9 km", &Titik{-0.4989, 117.1497}}, []paketContoh{
 		{IsianPaket{Nama: "American Breakfast Set", Kategori: "Hidangan utama", Halal: true,
 			Deskripsi: "Dua telur mata sapi, sosis sapi, beef bacon, hash brown, dan roti panggang dari buffet sarapan hotel.",
 			Foto:      "assets/images/paket/american_breakfast.jpg", HargaAsli: 85000, HargaDiskon: 34000,
@@ -36,37 +37,37 @@ var contoh = []geraiContoh{
 			Foto:      "assets/images/paket/petit_four.jpg", HargaAsli: 95000, HargaDiskon: 38000,
 			TotalPorsi: 6, Mulai: jam(15, 0), Tutup: jam(17, 0)}, 4},
 	}},
-	{"Prime Cut Steakhouse", "dapur.primecut@contoh.id", Gerai{"Restoran", "Jl. Juanda 12, Samarinda", "1,5 km"}, []paketContoh{
+	{"Prime Cut Steakhouse", "dapur.primecut@contoh.id", Gerai{"Restoran", "Jl. Juanda 12, Samarinda", "1,5 km", &Titik{-0.4843, 117.143}}, []paketContoh{
 		{IsianPaket{Nama: "Sirloin Steak Black Pepper", Kategori: "Hidangan utama",
 			Deskripsi: "Sirloin 200 g dimasak medium, kentang panggang, jamur tumis, dan saus lada hitam. Sisa persiapan makan siang.",
 			Foto:      "assets/images/paket/sirloin.jpg", HargaAsli: 245000, HargaDiskon: 62000,
 			TotalPorsi: 4, Mulai: jam(15, 0), Tutup: jam(17, 0)}, 3},
 	}},
-	{"Teras Nusantara", "dapur.teras@contoh.id", Gerai{"Restoran", "Jl. Pramuka 21, Samarinda", "0,8 km"}, []paketContoh{
+	{"Teras Nusantara", "dapur.teras@contoh.id", Gerai{"Restoran", "Jl. Pramuka 21, Samarinda", "0,8 km", &Titik{-0.4655, 117.1555}}, []paketContoh{
 		{IsianPaket{Nama: "Iga Bakar Madu", Kategori: "Hidangan utama", Halal: true,
 			Deskripsi: "Iga sapi bakar bumbu madu, nasi putih, lalapan, dan sambal matah. Dimasak siang ini.",
 			Foto:      "assets/images/paket/iga_bakar.jpg", HargaAsli: 125000, HargaDiskon: 50000,
 			TotalPorsi: 6, Mulai: jam(16, 30), Tutup: jam(18, 0)}, 2},
 	}},
-	{"Bumi Senyiur", "dapur.bumisenyiur@contoh.id", Gerai{"Hotel", "Jl. Pangeran Diponegoro 17, Samarinda", "1,2 km"}, []paketContoh{
+	{"Bumi Senyiur", "dapur.bumisenyiur@contoh.id", Gerai{"Hotel", "Jl. Pangeran Diponegoro 17, Samarinda", "1,2 km", &Titik{-0.5007, 117.1462}}, []paketContoh{
 		{IsianPaket{Nama: "Paket Buffet Makan Malam", Kategori: "Buffet hotel", Halal: true,
 			Deskripsi: "Sisa buffet: smoked salmon, dua hidangan utama, salad, dan dessert. Isinya berganti tiap hari dan ditentukan dapur, jadi tidak bisa dipilih.",
 			Foto:      "assets/images/paket/buffet_hotel.jpg", HargaAsli: 250000, HargaDiskon: 95000,
 			TotalPorsi: 10, Mulai: jam(17, 0), Tutup: jam(19, 0)}, 4},
 	}},
-	{"Kaze Japanese Dining", "dapur.kaze@contoh.id", Gerai{"Restoran", "Jl. Juanda 8, Samarinda", "2,5 km"}, []paketContoh{
+	{"Kaze Japanese Dining", "dapur.kaze@contoh.id", Gerai{"Restoran", "Jl. Juanda 8, Samarinda", "2,5 km", &Titik{-0.487, 117.1415}}, []paketContoh{
 		{IsianPaket{Nama: "Salmon Teriyaki Set", Kategori: "Hidangan utama",
 			Deskripsi: "Salmon panggang saus teriyaki, nasi Jepang, sup miso, salad, dan buah. Sisa set makan siang.",
 			Foto:      "assets/images/paket/salmon_teriyaki.jpg", HargaAsli: 145000, HargaDiskon: 58000,
 			TotalPorsi: 12, Mulai: jam(18, 0), Tutup: jam(20, 0)}, 8},
 	}},
-	{"Maison Roti", "dapur.maison@contoh.id", Gerai{"Bakery", "Jl. Awang Long 5, Samarinda", "3,1 km"}, []paketContoh{
+	{"Maison Roti", "dapur.maison@contoh.id", Gerai{"Bakery", "Jl. Awang Long 5, Samarinda", "3,1 km", &Titik{-0.495, 117.1395}}, []paketContoh{
 		{IsianPaket{Nama: "Sourdough Country Loaf", Kategori: "Pastry & roti",
 			Deskripsi: "Satu loaf sourdough fermentasi 24 jam, dipanggang pagi ini. Tahan sampai dua hari di suhu ruang.",
 			Foto:      "assets/images/paket/sourdough.jpg", HargaAsli: 90000, HargaDiskon: 36000,
 			TotalPorsi: 6, Mulai: jam(19, 0), Tutup: jam(21, 0)}, 5},
 	}},
-	{"Swiss-Belhotel", "dapur.swissbel@contoh.id", Gerai{"Hotel", "Jl. Mulawarman 6, Samarinda", "2,2 km"}, []paketContoh{
+	{"Swiss-Belhotel", "dapur.swissbel@contoh.id", Gerai{"Hotel", "Jl. Mulawarman 6, Samarinda", "2,2 km", &Titik{-0.4972, 117.1513}}, []paketContoh{
 		{IsianPaket{Nama: "Sushi Platter Nigiri", Kategori: "Hidangan utama",
 			Deskripsi: "Delapan nigiri dan satu gulung maki dari restoran Jepang hotel. Disimpan dingin, sebaiknya dimakan malam ini.",
 			Foto:      "assets/images/paket/sushi.jpg", HargaAsli: 220000, HargaDiskon: 88000,

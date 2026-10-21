@@ -27,6 +27,10 @@ type Paket struct {
 	Alamat     string `json:"alamat"`
 	Jarak      string `json:"jarak"`
 	GeraiTutup bool   `json:"geraiTutup"`
+	// titik gerai. jarak ke pembeli dihitung di HP, lokasi pembeli ga dikirim ke server.
+	// null kalau mitranya belum masang titik
+	Lat *float64 `json:"lat"`
+	Lng *float64 `json:"lng"`
 	// StatusGerai verifikasi mitra (F-37). pembeli cuma liat yang terverifikasi
 	StatusGerai string `json:"statusGerai"`
 	Nama        string `json:"nama"`
@@ -65,6 +69,14 @@ type Gerai struct {
 	Jenis  string
 	Alamat string
 	Jarak  string
+	// Titik koordinat gerai, nil = belum dipasang
+	Titik *Titik
+}
+
+// Titik koordinat lintang / bujur (WGS84, sama kayak GPS di HP)
+type Titik struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
 }
 
 // IsiPesanan satu paket di dalam pesanan, disalin pas dipesan
@@ -156,6 +168,8 @@ type Store interface {
 	SemuaPaket(ctx context.Context, idMitra string) ([]Paket, error)
 	PaketMitra(ctx context.Context, idMitra string) ([]Paket, error)
 	SimpanGerai(ctx context.Context, idMitra string, g Gerai) error
+	// AturLokasi titik gerai dari GPS HP mitra
+	AturLokasi(ctx context.Context, idMitra string, t Titik) error
 	AturGerai(ctx context.Context, idMitra string, tutup bool) error
 	BuatPaket(ctx context.Context, idMitra string, isi IsianPaket) (Paket, error)
 	// UbahPaket: kalau total porsi diganti, sisa ikut geser sebanyak selisihnya
