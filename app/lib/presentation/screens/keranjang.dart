@@ -77,7 +77,7 @@ class _KeranjangState extends State<Keranjang> {
             // TextButton: tombol tulisan doang tanpa latar
             TextButton(
               onPressed: () => _konfirmasiKosongkan(context),
-              child: const Text(
+              child: Text(
                 'Kosongkan',
                 style: TextStyle(
                   color: Warna.hijau,
@@ -97,7 +97,7 @@ class _KeranjangState extends State<Keranjang> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.shopping_bag_outlined,
                       size: 64,
                       color: Warna.teksPendukung,
@@ -111,7 +111,7 @@ class _KeranjangState extends State<Keranjang> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Pilih paket di Beranda, lalu ambil sendiri di jam yang ditentukan.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Warna.teksPendukung),
@@ -135,7 +135,7 @@ class _KeranjangState extends State<Keranjang> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Warna.kartu,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -155,9 +155,7 @@ class _KeranjangState extends State<Keranjang> {
                               ),
                               Text(
                                 pertama['jarak'],
-                                style: const TextStyle(
-                                  color: Warna.teksPendukung,
-                                ),
+                                style: TextStyle(color: Warna.teksPendukung),
                               ),
                             ],
                           ),
@@ -179,7 +177,7 @@ class _KeranjangState extends State<Keranjang> {
                               color: Warna.latar,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Row(
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Icon(
@@ -208,7 +206,7 @@ class _KeranjangState extends State<Keranjang> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Warna.kartu,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -216,7 +214,7 @@ class _KeranjangState extends State<Keranjang> {
                         children: [
                           Row(
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Ambil hari ini',
                                   style: TextStyle(color: Warna.teksPendukung),
@@ -235,7 +233,7 @@ class _KeranjangState extends State<Keranjang> {
                                   sudahBuka(pertama)
                                       ? 'Tutup ${sisaWaktu(pertama['tutup'])} lagi'
                                       : 'Buka ${sisaWaktu(pertama['mulai'])} lagi',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: Teks.keterangan,
                                     fontWeight: FontWeight.w700,
                                     color: Warna.mendesak,
@@ -260,7 +258,7 @@ class _KeranjangState extends State<Keranjang> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Warna.kartu,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -270,9 +268,7 @@ class _KeranjangState extends State<Keranjang> {
                               Expanded(
                                 child: Text(
                                   'Harga normal · $porsi porsi',
-                                  style: const TextStyle(
-                                    color: Warna.teksPendukung,
-                                  ),
+                                  style: TextStyle(color: Warna.teksPendukung),
                                 ),
                               ),
                               Text(rupiah(hargaNormal)),
@@ -281,7 +277,7 @@ class _KeranjangState extends State<Keranjang> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Kamu hemat',
                                   style: TextStyle(color: Warna.teksPendukung),
@@ -289,15 +285,15 @@ class _KeranjangState extends State<Keranjang> {
                               ),
                               Text(
                                 '−${rupiah(hargaNormal - total)}',
-                                style: const TextStyle(color: Warna.hijau),
+                                style: TextStyle(color: Warna.hijau),
                               ),
                             ],
                           ),
                           // Divider: garis pemisah horizontal
-                          const Divider(height: 24, color: Warna.garis),
+                          Divider(height: 24, color: Warna.garis),
                           Row(
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Subtotal',
                                   style: TextStyle(color: Warna.teksPendukung),
@@ -330,11 +326,11 @@ class _KeranjangState extends State<Keranjang> {
                       12 + MediaQuery.of(context).padding.bottom,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Warna.kartu,
                       // BoxShadow: bayangan ke atas, sama kayak bar total di modul
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.shade300,
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, -3),
                         ),
@@ -365,7 +361,7 @@ class _KeranjangState extends State<Keranjang> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Bayar di langkah berikutnya lewat QRIS, GoPay, atau VA.',
                           style: TextStyle(
                             fontSize: Teks.kecil,

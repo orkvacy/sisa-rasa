@@ -41,6 +41,7 @@ class _PesananState extends State<Pesanan> {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     // cuma pesanan punya akun yg lagi dipake, tiap ada perubahan status tab ini ikut update
     // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
     final idAkun = context.watch<AkunCubit>().state['id'];
@@ -100,7 +101,7 @@ class _PesananState extends State<Pesanan> {
           NavigasiBawah.ruangBawah,
         ),
         children: [
-          const Text(
+          Text(
             'Pesanan',
             style: TextStyle(
               fontSize: 22,
@@ -136,7 +137,7 @@ class _PesananState extends State<Pesanan> {
       padding: const EdgeInsets.only(top: 48),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.receipt_long_outlined,
             size: 56,
             color: Warna.teksPendukung,
@@ -148,7 +149,7 @@ class _PesananState extends State<Pesanan> {
             _ => 'Tidak ada pesanan yang dibatalkan',
           }, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Pesanan yang kamu buat akan muncul di sini beserta kode ambilnya.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Warna.teksPendukung),
@@ -180,10 +181,10 @@ class _PesananState extends State<Pesanan> {
     };
 
     return Material(
-      color: Colors.white,
+      color: Warna.kartu,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Warna.garis),
+        side: BorderSide(color: Warna.garis),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -196,18 +197,14 @@ class _PesananState extends State<Pesanan> {
               // atas: nama mitra + pil status
               Row(
                 children: [
-                  const Icon(
-                    Icons.storefront_outlined,
-                    size: 18,
-                    color: Warna.teks,
-                  ),
+                  Icon(Icons.storefront_outlined, size: 18, color: Warna.teks),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       pesanan['mitra'],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         height: 20 / 13,
                         fontWeight: FontWeight.w700,
@@ -240,7 +237,7 @@ class _PesananState extends State<Pesanan> {
                         Text(
                           '${isi[0]['jumlah']}× ${isi[0]['nama']}'
                           '${isi.length > 1 ? ' +${isi.length - 1} lainnya' : ''}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             height: 20 / 13,
                             fontWeight: FontWeight.w600,
@@ -250,7 +247,7 @@ class _PesananState extends State<Pesanan> {
                         const SizedBox(height: 2),
                         Text(
                           keterangan,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             height: 16 / 12,
                             letterSpacing: 0.1,
@@ -264,7 +261,7 @@ class _PesananState extends State<Pesanan> {
                   const SizedBox(width: 12),
                   Text(
                     rupiah(pesanan['total']),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       height: 20 / 13,
                       fontWeight: FontWeight.w700,
@@ -289,7 +286,7 @@ class _PesananState extends State<Pesanan> {
 
   /// belum dibayar: hitung mundur batas bayar (F-40) sama tombol bayar
   List<Widget> _bawahMenungguBayar(Map<String, dynamic> pesanan) {
-    const gaya = TextStyle(
+    final gaya = TextStyle(
       fontSize: 12,
       height: 16 / 12,
       letterSpacing: 0.1,
@@ -301,13 +298,13 @@ class _PesananState extends State<Pesanan> {
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.schedule, size: 16, color: Warna.mendesak),
+          Icon(Icons.schedule, size: 16, color: Warna.mendesak),
           const SizedBox(width: 6),
           // Expanded + Wrap: turun baris kalau layarnya sempit (NF-01)
           Expanded(
             child: Wrap(
               children: [
-                const Text('Bayar dalam ', style: gaya),
+                Text('Bayar dalam ', style: gaya),
                 // kalau waktunya abis pas tab ini lagi kebuka, pesanannya batal sendiri
                 HitungMundur(
                   batas: pesanan['batasBayar'],
@@ -320,7 +317,7 @@ class _PesananState extends State<Pesanan> {
                   ),
                   style: gaya,
                 ),
-                const Text(', lewat itu batal otomatis', style: gaya),
+                Text(', lewat itu batal otomatis', style: gaya),
               ],
             ),
           ),
@@ -395,7 +392,7 @@ class _PesananState extends State<Pesanan> {
             Expanded(
               child: Text(
                 'Dana ${rupiah(pesanan['total'])} kembali ke ${MetodeBayar.nama(pesanan['metode'])}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: Warna.teks,
@@ -437,6 +434,7 @@ class _SaringStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -452,7 +450,7 @@ class _SaringStatus extends StatelessWidget {
                 button: true,
                 selected: aktif == nama,
                 child: Material(
-                  color: aktif == nama ? Warna.hijau : Colors.transparent,
+                  color: aktif == nama ? cs.primary : Colors.transparent,
                   shape: const StadiumBorder(),
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
@@ -483,7 +481,7 @@ class _SaringStatus extends StatelessWidget {
                                     ? FontWeight.w700
                                     : FontWeight.w600,
                                 color: aktif == nama
-                                    ? Colors.white
+                                    ? cs.onPrimary
                                     : Warna.teksPendukung,
                               ),
                             ),
@@ -496,17 +494,19 @@ class _SaringStatus extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: aktif == nama
-                                      ? Colors.white
+                                      ? cs.onPrimary
                                       : Warna.latar,
                                   borderRadius: BorderRadius.circular(999),
                                 ),
                                 child: Text(
                                   '$jumlahBerlangsung',
                                   key: const Key('jumlah-berlangsung'),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: Warna.teks,
+                                    color: aktif == nama
+                                        ? cs.primary
+                                        : Warna.teksPendukung,
                                   ),
                                 ),
                               ),
@@ -536,7 +536,7 @@ class _JudulKelompok extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
       child: Text(
         teks,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           height: 16 / 12,
           letterSpacing: 0.1,
@@ -630,8 +630,8 @@ class _TombolGaris extends StatelessWidget {
       label: Text(teks, maxLines: 1, overflow: TextOverflow.ellipsis),
       style: OutlinedButton.styleFrom(
         foregroundColor: Warna.teks,
-        backgroundColor: Colors.white,
-        side: const BorderSide(color: Warna.garisKontrol),
+        backgroundColor: Warna.kartu,
+        side: BorderSide(color: Warna.garisKontrol),
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -654,6 +654,7 @@ class _Catatan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -669,7 +670,7 @@ class _Catatan extends StatelessWidget {
           Expanded(
             child: Text(
               teks,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 height: 16 / 12,
                 fontWeight: FontWeight.w500,

@@ -48,7 +48,7 @@ class HalamanMitra extends StatelessWidget {
       return Scaffold(
         backgroundColor: Warna.latar,
         appBar: AppBar(backgroundColor: Warna.latar, title: Text(nama)),
-        body: const Center(
+        body: Center(
           child: Padding(
             padding: EdgeInsets.all(32),
             child: Text(
@@ -92,7 +92,7 @@ class HalamanMitra extends StatelessWidget {
                   children: [
                     Text(
                       nama,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         height: 32 / 26,
                         letterSpacing: -0.78,
@@ -103,7 +103,7 @@ class HalamanMitra extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${pertama['jenisMitra']} · ${pertama['alamat']} · ${pertama['jarak']}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Warna.teksPendukung,
@@ -138,7 +138,7 @@ class HalamanMitra extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Paket hari ini',
                         style: TextStyle(
@@ -151,7 +151,7 @@ class HalamanMitra extends StatelessWidget {
                     ),
                     Text(
                       '${daftar.length} paket',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: Warna.teksPendukung,
@@ -270,7 +270,7 @@ class _TombolBulat extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 22,
-      backgroundColor: Colors.white,
+      backgroundColor: Warna.kartu,
       child: IconButton(
         tooltip: tooltip,
         onPressed: onPressed,
@@ -302,7 +302,7 @@ class _Lencana extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             teks,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 16 / 12,
               letterSpacing: 0.1,
@@ -328,14 +328,14 @@ class _KartuTutup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.schedule, size: 16, color: Warna.mendesak),
+        Icon(Icons.schedule, size: 16, color: Warna.mendesak),
         const SizedBox(width: 6),
         // satu teks biar bisa kepotong rapi di layar sempit / huruf besar
         Expanded(
           child: Text.rich(
             TextSpan(
               text: 'Tutup ${jam(tutup)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Warna.mendesak,
@@ -343,7 +343,7 @@ class _KartuTutup extends StatelessWidget {
               children: [
                 TextSpan(
                   text: ' · ${sisaWaktu(tutup)} lagi',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Warna.teksPendukung,
@@ -402,7 +402,7 @@ class _BarisPaketMitra extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Warna.garis)),
         ),
         child: Row(
@@ -440,7 +440,7 @@ class _BarisPaketMitra extends StatelessWidget {
                             ),
                             child: Text(
                               'Sisa $sisa',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: Warna.mendesak,
@@ -472,7 +472,7 @@ class _BarisPaketMitra extends StatelessWidget {
                     paket['deskripsi'],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       height: 16 / 12,
                       color: Warna.teksPendukung,
@@ -495,7 +495,7 @@ class _BarisPaketMitra extends StatelessWidget {
                             ),
                             Text(
                               rupiah(paket['hargaAsli']),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: Warna.teksPendukung,
                                 decoration: TextDecoration.lineThrough,
@@ -563,7 +563,7 @@ class _PilHabis extends StatelessWidget {
         color: Warna.garis,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: const Text(
+      child: Text(
         'Habis',
         style: TextStyle(
           fontSize: 12,

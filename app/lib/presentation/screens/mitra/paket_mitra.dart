@@ -61,7 +61,7 @@ class _PaketMitraState extends State<PaketMitra> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Paket',
                   style: TextStyle(
@@ -139,7 +139,7 @@ class _PaketMitraState extends State<PaketMitra> {
                     ? 'Belum ada paket. Tekan Paket baru untuk mulai menjual sisa makanan hari ini.'
                     : 'Tidak ada paket yang cocok.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Warna.teksPendukung),
+                style: TextStyle(color: Warna.teksPendukung),
               ),
             ),
           for (final (i, p) in tampil.indexed) ...[
@@ -184,10 +184,10 @@ class _KartuPaket extends StatelessWidget {
       // paket nonaktif dipudarin
       opacity: nonaktif ? 0.55 : 1,
       child: Material(
-        color: Colors.white,
+        color: Warna.kartu,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Warna.garis),
+          side: BorderSide(color: Warna.garis),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -215,7 +215,7 @@ class _KartuPaket extends StatelessWidget {
                         children: [
                           Text(
                             paket['nama'],
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
@@ -223,7 +223,7 @@ class _KartuPaket extends StatelessWidget {
                           ),
                           Text(
                             '${jam(paket['mulai'])} – ${jam(paket['tutup'])} · ${rupiah(paket['hargaDiskon'])}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: Warna.teksPendukung,
                             ),
@@ -259,7 +259,7 @@ class _KartuPaket extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Divider(height: 24, color: Warna.garis),
+                Divider(height: 24, color: Warna.garis),
                 // sisa porsi langsung dari daftar (F-44)
                 Row(
                   children: [
@@ -267,7 +267,7 @@ class _KartuPaket extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Sisa porsi',
                             style: TextStyle(
                               fontSize: 12,
@@ -276,7 +276,7 @@ class _KartuPaket extends StatelessWidget {
                           ),
                           Text(
                             '$sisa dari $total',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,

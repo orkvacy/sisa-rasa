@@ -63,9 +63,9 @@ class _KodeAmbilState extends State<KodeAmbil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Warna.latar,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         leading: IconButton(
@@ -73,7 +73,7 @@ class _KodeAmbilState extends State<KodeAmbil> {
           onPressed: () => context.pop(),
           icon: const Icon(Icons.close),
         ),
-        title: const Text(
+        title: Text(
           'Kode ambil',
           style: TextStyle(
             fontSize: 16,
@@ -118,7 +118,7 @@ class _KodeAmbilState extends State<KodeAmbil> {
               const SizedBox(height: 12),
               Text(
                 'Geser untuk kode pesanan lain (${posisi + 1} dari ${daftar.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: Warna.teksPendukung,
@@ -134,7 +134,7 @@ class _KodeAmbilState extends State<KodeAmbil> {
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Warna.teks,
-                    side: const BorderSide(color: Warna.garisKontrol),
+                    side: BorderSide(color: Warna.garisKontrol),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -173,7 +173,7 @@ class _Kode extends StatelessWidget {
           Text(
             'Tunjukkan ke kasir ${pesanan['mitra']}',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Warna.teksPendukung,
@@ -185,24 +185,24 @@ class _Kode extends StatelessWidget {
             data: pesanan['kode'],
             size: 240,
             backgroundColor: Colors.white,
-            eyeStyle: const QrEyeStyle(
+            eyeStyle: QrEyeStyle(
               eyeShape: QrEyeShape.square,
-              color: Warna.teks,
+              color: Warna.qrModul,
             ),
-            dataModuleStyle: const QrDataModuleStyle(
+            dataModuleStyle: QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
-              color: Warna.teks,
+              color: Warna.qrModul,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             pesanan['kode'],
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'JetBrainsMono',
               fontSize: 34,
               letterSpacing: 4,
               fontWeight: FontWeight.w700,
-              color: Warna.teks,
+              color: Warna.qrModul,
             ),
           ),
           const SizedBox(height: 12),
@@ -250,10 +250,10 @@ class _Chip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             teks,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Warna.teks,
+              color: Warna.qrModul,
             ),
           ),
         ],

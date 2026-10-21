@@ -13,9 +13,11 @@ import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/percakapan_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/saldo_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/tema_cubit.dart';
 import 'package:sisa_rasa/injection.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/tema.dart';
+import 'package:sisa_rasa/core/theme/warna.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,15 +28,23 @@ Future<void> main() async {
   // biar yg udah masuk ga sempet liat layar Sambutan
   final akun = AkunCubit(layanan: sl(), google: sl());
   await akun.pulihkan();
-  runApp(SisaRasaApp(akun: akun));
+  final tema = TemaCubit();
+  await tema.pulihkan();
+  runApp(SisaRasaApp(akun: akun, tema: tema));
 }
 
 class SisaRasaApp extends StatefulWidget {
-  /// [akun] boleh kosong (di tes), nanti dibikin sendiri dan mulai dari [akunAwal].
+  /// [akun] dan [tema] boleh kosong (di tes), nanti dibikin sendiri dan mulai dari [akunAwal].
   /// dependensinya harus udah didaftarin dulu lewat daftarkanDependensi()
-  const SisaRasaApp({this.akun, this.akunAwal = const {}, super.key});
+  const SisaRasaApp({
+    this.akun,
+    this.tema,
+    this.akunAwal = const {},
+    super.key,
+  });
 
   final AkunCubit? akun;
+  final TemaCubit? tema;
   final Map<String, String> akunAwal;
 
   @override
@@ -46,6 +56,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
   late final akun =
       widget.akun ??
       AkunCubit(layanan: sl(), google: sl(), awal: widget.akunAwal);
+  late final tema = widget.tema ?? TemaCubit();
   // router dibikin sekali aja, kalau di build bakal ke-reset tiap digambar ulang
   late final GoRouter router = buatRouter(akun: akun);
   // buat nampilin galat dari server di layar mana pun
@@ -55,6 +66,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
   void dispose() {
     router.dispose();
     akun.close();
+    tema.close();
     super.dispose();
   }
 
@@ -66,6 +78,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
       providers: [
         // BlocProvider: nyediain satu cubit/bloc biar bisa diambil halaman di bawahnya
         BlocProvider.value(value: akun),
+        BlocProvider.value(value: tema),
         // isi tiap cubit diambil dari repository yg didaftarin di injection.dart
         BlocProvider(create: (context) => PaketCubit(layanan: sl())..muat()),
         BlocProvider(create: (context) => KeranjangCubit()),
@@ -96,18 +109,28 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
       child: _Sinkron(
         pesanGalat: pesanGalat,
         // MaterialApp.router: akar aplikasi, halamannya diatur GoRouter (lihat presentation/router.dart)
-        child: MaterialApp.router(
-          scaffoldMessengerKey: pesanGalat,
-          title: 'Sisa Rasa',
-          debugShowCheckedModeBanner: false,
-          // tema dari figma v3 (token warna + tipografi), lihat core/theme/tema.dart
-          theme: SisaRasaTema.terang(),
-          darkTheme: SisaRasaTema.gelap(),
-          // dikunci terang dulu, layar-layar masih pake Warna statis.
-          // ganti ke ThemeMode.system kalau semua layar udah pindah ke tema
-          themeMode: ThemeMode.light,
-          // halaman awal (yg ada navigation bar nya) ditentuin router di Rute.utama
-          routerConfig: router,
+        child: BlocBuilder<TemaCubit, ThemeMode>(
+          builder: (context, modeTema) {
+            final platformDark =
+                WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+                Brightness.dark;
+            Warna.modeGelap =
+                modeTema == ThemeMode.dark ||
+                (modeTema == ThemeMode.system && platformDark);
+
+            return MaterialApp.router(
+              key: ValueKey(Warna.modeGelap),
+              scaffoldMessengerKey: pesanGalat,
+              title: 'Sisa Rasa',
+              debugShowCheckedModeBanner: false,
+              // tema dari figma v3 (token warna + tipografi), lihat core/theme/tema.dart
+              theme: SisaRasaTema.terang(),
+              darkTheme: SisaRasaTema.gelap(),
+              themeMode: modeTema,
+              // halaman awal (yg ada navigation bar nya) ditentuin router di Rute.utama
+              routerConfig: router,
+            );
+          },
         ),
       ),
     );
@@ -129,7 +152,7 @@ class _Sinkron extends StatefulWidget {
   State<_Sinkron> createState() => _SinkronState();
 }
 
-class _SinkronState extends State<_Sinkron> {
+class _SinkronState extends State<_Sinkron> with WidgetsBindingObserver {
   final _langganan = <StreamSubscription<Object?>>[];
   Timer? _detak;
   var _putaran = 0;
@@ -137,6 +160,7 @@ class _SinkronState extends State<_Sinkron> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final akun = context.read<AkunCubit>();
     final pesanan = context.read<PesananBloc>();
     final paket = context.read<PaketCubit>();
@@ -182,7 +206,14 @@ class _SinkronState extends State<_Sinkron> {
   }
 
   @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _detak?.cancel();
     for (final l in _langganan) {
       l.cancel();

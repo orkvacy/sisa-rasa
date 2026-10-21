@@ -80,7 +80,7 @@ class _PercakapanState extends State<Percakapan> {
       child: Scaffold(
         backgroundColor: Warna.latar,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Warna.latar,
           surfaceTintColor: Colors.transparent,
           titleSpacing: 0,
           leading: IconButton(
@@ -95,7 +95,7 @@ class _PercakapanState extends State<Percakapan> {
                 backgroundColor: Warna.softGreen,
                 child: Text(
                   inisial(lawan.replaceAll('.', '')),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                     color: Warna.hijau,
@@ -111,7 +111,7 @@ class _PercakapanState extends State<Percakapan> {
                       lawan,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Warna.teks,
@@ -121,7 +121,7 @@ class _PercakapanState extends State<Percakapan> {
                       '${pesanan['kode'] ?? ''} · ${StatusPesanan.label(pesanan['status'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Warna.teksPendukung,
                       ),
@@ -206,7 +206,7 @@ class _Kosong extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.chat_bubble_outline,
               size: 40,
               color: Warna.teksPendukung,
@@ -217,7 +217,7 @@ class _Kosong extends StatelessWidget {
                   ? 'Belum ada pesan. Kabari pembeli kalau pesanannya sudah siap.'
                   : 'Belum ada pesan. Kabari mitra kalau kamu terlambat atau sudah sampai.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Warna.teksPendukung),
+              style: TextStyle(color: Warna.teksPendukung),
             ),
           ],
         ),
@@ -243,7 +243,7 @@ class _JudulHari extends StatelessWidget {
         ),
         child: Text(
           teks,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: Warna.teksPendukung,
@@ -380,13 +380,13 @@ class _KolomKirimState extends State<_KolomKirim> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Warna.kartu,
       child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Divider(height: 1, color: Warna.garis),
+            Divider(height: 1, color: Warna.garis),
             // pesan cepat (F-69)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -466,12 +466,12 @@ class _Tertutup extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Icon(Icons.lock_outline, size: 18, color: Warna.teks),
+              Icon(Icons.lock_outline, size: 18, color: Warna.teks),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   teks,
-                  style: const TextStyle(fontSize: 13, color: Warna.teks),
+                  style: TextStyle(fontSize: 13, color: Warna.teks),
                 ),
               ),
             ],

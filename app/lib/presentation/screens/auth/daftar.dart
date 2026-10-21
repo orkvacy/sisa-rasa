@@ -95,6 +95,7 @@ class _DaftarState extends State<Daftar> {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     return Scaffold(
       backgroundColor: Warna.latar,
       appBar: AppBar(
@@ -139,7 +140,7 @@ class _DaftarState extends State<Daftar> {
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Peran tidak bisa diubah setelah akun dibuat.',
                 style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
               ),
@@ -203,7 +204,7 @@ class _DaftarState extends State<Daftar> {
                     padding: const EdgeInsets.only(top: 12),
                     child: Text.rich(
                       TextSpan(
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           height: 20 / 14,
                           color: Warna.teks,
@@ -212,7 +213,7 @@ class _DaftarState extends State<Daftar> {
                           const TextSpan(text: 'Saya setuju dengan '),
                           TextSpan(
                             text: 'Ketentuan & Kebijakan privasi',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Warna.hijau,
                               decoration: TextDecoration.underline,
@@ -232,7 +233,7 @@ class _DaftarState extends State<Daftar> {
                 padding: const EdgeInsets.only(left: 12, top: 4),
                 child: Text(
                   galat['setuju']!,
-                  style: const TextStyle(fontSize: 12, color: Warna.merah),
+                  style: TextStyle(fontSize: 12, color: Warna.merah),
                 ),
               ),
             const SizedBox(height: 16),
@@ -293,7 +294,7 @@ class _KartuPeran extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   judul,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Warna.teks,
@@ -302,10 +303,7 @@ class _KartuPeran extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   keterangan,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Warna.teksPendukung,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
                 ),
               ],
             ),

@@ -66,7 +66,7 @@ class TimelineAmbil extends StatelessWidget {
                   children: [
                     Text(
                       label[i],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: Teks.kecil,
                         color: Warna.teksPendukung,
                       ),

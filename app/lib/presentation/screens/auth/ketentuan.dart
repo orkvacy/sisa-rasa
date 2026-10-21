@@ -56,7 +56,7 @@ class Ketentuan extends StatelessWidget {
           onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
         ),
-        title: const Text(
+        title: Text(
           'Ketentuan & privasi',
           style: TextStyle(
             fontSize: 18,
@@ -68,7 +68,7 @@ class Ketentuan extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
         children: [
-          const Text(
+          Text(
             'Berlaku sejak 1 Oktober 2026',
             style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
           ),
@@ -76,7 +76,7 @@ class Ketentuan extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               '${i + 1}. $judul',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -85,7 +85,7 @@ class Ketentuan extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               isi,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 height: 24 / 15,
                 color: Warna.teksPendukung,

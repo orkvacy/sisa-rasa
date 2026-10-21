@@ -98,7 +98,7 @@ class _CheckoutState extends State<Checkout> {
       },
       child: keranjang.isEmpty
           // sekejap pas keranjang udah dikosongin tapi halamannya belum keganti
-          ? const Scaffold(backgroundColor: Warna.latar)
+          ?       Scaffold(backgroundColor: Warna.latar)
           : _isi(context, keranjang, paketCubit),
     );
   }
@@ -130,7 +130,7 @@ class _CheckoutState extends State<Checkout> {
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
-        title: const Text(
+        title:       Text(
           'Checkout',
           style: TextStyle(
             fontSize: 18,
@@ -156,7 +156,7 @@ class _CheckoutState extends State<Checkout> {
                       color: Warna.softGreen,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child:       Icon(
                       Icons.schedule,
                       size: 20,
                       color: Warna.hijau,
@@ -167,7 +167,7 @@ class _CheckoutState extends State<Checkout> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Ambil hari ini', style: _Gaya.keterangan),
+                              Text('Ambil hari ini', style: _Gaya.keterangan),
                         const SizedBox(height: 2),
                         Text(
                           '${jam(pertama['mulai'])} – ${jam(pertama['tutup'])}',
@@ -199,10 +199,10 @@ class _CheckoutState extends State<Checkout> {
                   ),
                 ],
               ),
-              const Divider(height: 24, color: Warna.garis),
+                    Divider(height: 24, color: Warna.garis),
               Row(
                 children: [
-                  const Icon(
+                        Icon(
                     Icons.storefront_outlined,
                     size: 20,
                     color: Warna.teks,
@@ -220,7 +220,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   TextButton(
                     onPressed: () => bukaPeta(context, pertama['alamat']),
-                    child: const Text(
+                    child:       Text(
                       'Peta',
                       style: TextStyle(
                         fontSize: 14,
@@ -240,7 +240,7 @@ class _CheckoutState extends State<Checkout> {
             children: [
               Row(
                 children: [
-                  const Expanded(child: Text('Pesananmu', style: _Gaya.judul)),
+                        Expanded(child: Text('Pesananmu', style: _Gaya.judul)),
                   Text('$porsi porsi', style: _Gaya.keterangan),
                 ],
               ),
@@ -263,7 +263,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                          Icon(
                       Icons.eco_outlined,
                       size: 16,
                       color: Warna.hijau,
@@ -285,7 +285,7 @@ class _CheckoutState extends State<Checkout> {
           // metode bayar (F-10)
           _Kartu(
             children: [
-              const Text('Metode pembayaran', style: _Gaya.judul),
+                    Text('Metode pembayaran', style: _Gaya.judul),
               const SizedBox(height: 8),
               BarisMetode(
                 metode: MetodeBayar.qris,
@@ -317,7 +317,7 @@ class _CheckoutState extends State<Checkout> {
           // rincian harga (F-09)
           _Kartu(
             children: [
-              const Text('Rincian pembayaran', style: _Gaya.judul),
+                    Text('Rincian pembayaran', style: _Gaya.judul),
               const SizedBox(height: 10),
               _BarisRincian(
                 label: 'Harga normal ($porsi porsi)',
@@ -337,10 +337,10 @@ class _CheckoutState extends State<Checkout> {
                   nilai: rupiah(biaya),
                 ),
               ],
-              const Divider(height: 21, color: Warna.garis),
+                    Divider(height: 21, color: Warna.garis),
               Row(
                 children: [
-                  const Expanded(
+                        Expanded(
                     child: Text('Total bayar', style: _Gaya.judul),
                   ),
                   Text(rupiah(total), style: _Gaya.harga),
@@ -370,8 +370,8 @@ class _CheckoutState extends State<Checkout> {
           16,
           16 + MediaQuery.of(context).padding.bottom,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration:       BoxDecoration(
+          color: Warna.kartu,
           border: Border(top: BorderSide(color: Warna.garis)),
         ),
         child: Row(
@@ -437,26 +437,26 @@ class _CheckoutState extends State<Checkout> {
 
 /// gaya teks yg dipake berulang di checkout (token figma v3)
 abstract final class _Gaya {
-  static const keterangan = TextStyle(
+  static TextStyle get keterangan => TextStyle(
     fontSize: 12,
     height: 16 / 12,
     letterSpacing: 0.1,
     fontWeight: FontWeight.w500,
     color: Warna.teksPendukung,
   );
-  static const judul = TextStyle(
+  static TextStyle get judul => TextStyle(
     fontSize: 16,
     height: 22 / 16,
     fontWeight: FontWeight.w600,
     color: Warna.teks,
   );
-  static const tebal = TextStyle(
+  static TextStyle get tebal => TextStyle(
     fontSize: 14,
     height: 20 / 14,
     fontWeight: FontWeight.w700,
     color: Warna.teks,
   );
-  static const harga = TextStyle(
+  static TextStyle get harga => TextStyle(
     fontSize: 20,
     height: 24 / 20,
     letterSpacing: -0.2,
@@ -476,7 +476,7 @@ class _Kartu extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Warna.kartu,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(12),
       ),

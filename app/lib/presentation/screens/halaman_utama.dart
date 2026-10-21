@@ -31,6 +31,7 @@ class HalamanUtama extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     // 0 beranda, 1 pesanan, 2 akun
     final tabAktif = shell.currentIndex;
 

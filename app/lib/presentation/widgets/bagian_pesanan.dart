@@ -59,7 +59,7 @@ class BlokPutih extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: Warna.kartu,
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +70,7 @@ class BlokPutih extends StatelessWidget {
                 Expanded(
                   child: Text(
                     judul!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       height: 22 / 16,
                       fontWeight: FontWeight.w700,
@@ -202,14 +202,14 @@ class _Lingkaran extends StatelessWidget {
         // halo muda cuma di tahap yg lagi berjalan
         color: aktif
             ? (mendesak ? Warna.mendesakLembut : Warna.softGreen)
-            : Colors.white,
+            : Warna.kartu,
       ),
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: terisi ? warna : Colors.white,
+          color: terisi ? warna : Warna.kartu,
           border: terisi ? null : Border.all(color: Warna.garisKontrol),
         ),
         child: Icon(
@@ -260,7 +260,7 @@ class KotakKeterangan extends StatelessWidget {
           Text(
             teks,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 16 / 12,
               letterSpacing: 0.1,
@@ -347,7 +347,7 @@ class BarisIkon extends StatelessWidget {
         Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Warna.softGreen,
             shape: BoxShape.circle,
           ),
@@ -360,7 +360,7 @@ class BarisIkon extends StatelessWidget {
             children: [
               Text(
                 judul,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   height: 20 / 14,
                   fontWeight: FontWeight.w700,
@@ -370,7 +370,7 @@ class BarisIkon extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 teks,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   height: 16 / 12,
                   letterSpacing: 0.1,
@@ -399,7 +399,7 @@ class BagianIsiPesanan extends StatelessWidget {
       judul: 'Detail pesanan',
       kanan: Text(
         'Total item: ${pesanan['porsi']}',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           letterSpacing: 0.1,
           fontWeight: FontWeight.w500,
@@ -427,7 +427,7 @@ class BagianIsiPesanan extends StatelessWidget {
                   children: [
                     Text(
                       item['nama'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 20 / 14,
                         fontWeight: FontWeight.w600,
@@ -438,7 +438,7 @@ class BagianIsiPesanan extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         item['deskripsi'],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           height: 16 / 12,
                           letterSpacing: 0.1,
@@ -456,7 +456,7 @@ class BagianIsiPesanan extends StatelessWidget {
                 children: [
                   Text(
                     rupiah((item['harga'] as int) * (item['jumlah'] as int)),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       height: 20 / 14,
                       fontWeight: FontWeight.w700,
@@ -466,7 +466,7 @@ class BagianIsiPesanan extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '${item['jumlah']}×',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Warna.teksPendukung,
@@ -487,14 +487,14 @@ class BarisNilai extends StatelessWidget {
   const BarisNilai({
     required this.label,
     required this.nilai,
-    this.warnaNilai = Warna.teks,
+    this.warnaNilai,
     this.kanan,
     super.key,
   });
 
   final String label;
   final String nilai;
-  final Color warnaNilai;
+  final Color? warnaNilai;
   final Widget? kanan;
 
   @override
@@ -504,7 +504,7 @@ class BarisNilai extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               height: 20 / 14,
               fontWeight: FontWeight.w500,
@@ -518,7 +518,7 @@ class BarisNilai extends StatelessWidget {
             fontSize: 14,
             height: 20 / 14,
             fontWeight: FontWeight.w600,
-            color: warnaNilai,
+            color: warnaNilai ?? Warna.teks,
           ),
         ),
         ?kanan,
@@ -552,7 +552,7 @@ class BagianInfoPesanan extends StatelessWidget {
                 const SnackBar(content: Text('ID pesanan disalin')),
               );
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.content_copy_outlined,
               size: 18,
               color: Warna.teks,

@@ -75,7 +75,7 @@ class Pembayaran extends StatelessWidget {
     final pesanan = bloc.cari(idPesanan);
 
     if (pesanan == null) {
-      return const Scaffold(
+      return       Scaffold(
         backgroundColor: Warna.latar,
         body: Center(child: Text('Pesanan tidak ditemukan')),
       );
@@ -122,7 +122,7 @@ class Pembayaran extends StatelessWidget {
             MetodeBayar.isVa(metode)
                 ? MetodeBayar.nama(metode)
                 : 'Bayar dengan ${MetodeBayar.nama(metode)}',
-            style: const TextStyle(
+            style:       TextStyle(
               fontSize: 18,
               height: 24 / 18,
               letterSpacing: -0.18,
@@ -148,7 +148,7 @@ class Pembayaran extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text(
+                            Text(
                         'Selesaikan pembayaran dalam ',
                         style: _Gaya.isi,
                       ),
@@ -190,7 +190,7 @@ class Pembayaran extends StatelessWidget {
                   const SizedBox(height: 12),
                   if (tagihan.isEmpty)
                     // tagihan belum dateng dari penyedia pembayaran
-                    const Padding(
+                          Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
                       child: Column(
                         children: [
@@ -206,11 +206,11 @@ class Pembayaran extends StatelessWidget {
                   else
                     _IsiTagihan(metode: metode, tagihan: tagihan),
                   const SizedBox(height: 16),
-                  const Text('Total bayar', style: _Gaya.keterangan),
+                        Text('Total bayar', style: _Gaya.keterangan),
                   const SizedBox(height: 2),
                   Text(
                     rupiah(pesanan['total']),
-                    style: const TextStyle(
+                    style:       TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       color: Warna.teks,
@@ -230,7 +230,7 @@ class Pembayaran extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                        Text(
                     'Cara bayar',
                     style: TextStyle(
                       fontSize: 16,
@@ -248,7 +248,7 @@ class Pembayaran extends StatelessWidget {
                           backgroundColor: Warna.softGreen,
                           child: Text(
                             '${i + 1}',
-                            style: const TextStyle(
+                            style:       TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               color: Warna.hijau,
@@ -297,14 +297,14 @@ class Pembayaran extends StatelessWidget {
                           ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Warna.teks,
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Warna.garisKontrol),
+                      backgroundColor: Warna.kartu,
+                      side:       BorderSide(color: Warna.garisKontrol),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: mengecek
-                        ? const SizedBox(
+                        ?       SizedBox(
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
@@ -377,14 +377,14 @@ class Pembayaran extends StatelessWidget {
 }
 
 abstract final class _Gaya {
-  static const keterangan = TextStyle(
+  static TextStyle get keterangan => TextStyle(
     fontSize: 12,
     height: 16 / 12,
     letterSpacing: 0.1,
     fontWeight: FontWeight.w500,
     color: Warna.teksPendukung,
   );
-  static const isi = TextStyle(
+  static TextStyle get isi => TextStyle(
     fontSize: 14,
     height: 20 / 14,
     fontWeight: FontWeight.w500,
@@ -403,7 +403,7 @@ class _Kartu extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Warna.kartu,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -426,7 +426,7 @@ class _IsiTagihan extends StatelessWidget {
       return QrImageView(data: tagihan['isiQr']!, size: 190);
     }
     if (metode == MetodeBayar.gopay) {
-      return const Padding(
+      return       Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Icon(
           Icons.account_balance_wallet_outlined,
@@ -444,12 +444,12 @@ class _IsiTagihan extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text('Nomor virtual account', style: _Gaya.keterangan),
+                Text('Nomor virtual account', style: _Gaya.keterangan),
           const SizedBox(height: 4),
           FittedBox(
             child: Text(
               tagihan['nomorVa']!,
-              style: const TextStyle(
+              style:       TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -595,7 +595,7 @@ class _TombolGaris extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: Warna.teks,
-          side: const BorderSide(color: Warna.garisKontrol),
+          side:       BorderSide(color: Warna.garisKontrol),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

@@ -12,7 +12,7 @@ class JudulAuth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       teks,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 26,
         height: 40 / 32,
         letterSpacing: -0.6,
@@ -34,7 +34,7 @@ class LabelAuth extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         teks,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: Warna.teks,
@@ -120,8 +120,12 @@ class TombolAuth extends StatelessWidget {
     return FilledButton(
       onPressed: memuat ? null : onPressed,
       style: FilledButton.styleFrom(
-        backgroundColor: Warna.hijau,
-        disabledBackgroundColor: Warna.hijau.withValues(alpha: 0.6),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        disabledBackgroundColor:
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+        disabledForegroundColor:
+            Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.6),
         minimumSize: const Size.fromHeight(48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
@@ -131,12 +135,12 @@ class TombolAuth extends StatelessWidget {
         ),
       ),
       child: memuat
-          ? const SizedBox(
+          ? SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : Text(label),
@@ -163,7 +167,7 @@ class TautanBawah extends StatelessWidget {
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(teks, style: const TextStyle(color: Warna.teksPendukung)),
+        Text(teks, style: TextStyle(color: Warna.teksPendukung)),
         TextButton(
           onPressed: onTap,
           style: TextButton.styleFrom(
@@ -198,12 +202,12 @@ class KotakGalat extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline, size: 20, color: Warna.merah),
+          Icon(Icons.error_outline, size: 20, color: Warna.merah),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               pesan,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Warna.merah,

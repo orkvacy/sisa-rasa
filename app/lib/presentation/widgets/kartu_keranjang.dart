@@ -95,7 +95,7 @@ class _KartuKeranjangState extends State<KartuKeranjang> {
               const SizedBox(height: 2),
               Text(
                 '${rupiah(widget.paket['hargaDiskon'])} / porsi',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: Teks.keterangan,
                   color: Warna.teksPendukung,
                 ),

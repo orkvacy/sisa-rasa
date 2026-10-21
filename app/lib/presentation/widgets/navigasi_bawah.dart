@@ -61,7 +61,7 @@ class NavigasiBawah extends StatelessWidget {
         DecoratedBox(
           decoration: BoxDecoration(
             color: Warna.kartu,
-            border: const Border(top: BorderSide(color: Warna.garis)),
+            border: Border(top: BorderSide(color: Warna.garis)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),

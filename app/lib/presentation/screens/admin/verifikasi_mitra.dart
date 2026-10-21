@@ -59,7 +59,7 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
       // tetap bisa ditarik buat muat ulang
       isi = ListView(
         padding: const EdgeInsets.all(32),
-        children: const [
+        children: [
           Text(
             'Belum ada mitra di sini.',
             textAlign: TextAlign.center,
@@ -81,7 +81,7 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
       appBar: AppBar(
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
+        title: Text(
           'Verifikasi mitra',
           style: TextStyle(
             fontSize: 18,
@@ -92,7 +92,7 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
         actions: [
           IconButton(
             tooltip: 'Keluar',
-            icon: const Icon(Icons.logout, color: Warna.teksPendukung),
+            icon: Icon(Icons.logout, color: Warna.teksPendukung),
             onPressed: () => _keluar(context),
           ),
         ],
@@ -114,7 +114,7 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
                       onSelected: (_) => admin.pilihFilter(status),
                       selectedColor: Warna.softGreen,
                       backgroundColor: Warna.kartu,
-                      side: const BorderSide(color: Warna.garis),
+                      side: BorderSide(color: Warna.garis),
                       showCheckmark: false,
                       // tema bawaan chip terpilih teksnya putih, ga kebaca di hijau muda
                       labelStyle: TextStyle(
@@ -169,7 +169,7 @@ class _KartuMitra extends StatelessWidget {
               Expanded(
                 child: Text(
                   mitra['nama'] as String,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: Warna.teks,
@@ -182,12 +182,12 @@ class _KartuMitra extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             keterangan,
-            style: const TextStyle(fontSize: 13, color: Warna.teksPendukung),
+            style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
           ),
           if (alamat.isNotEmpty)
             Text(
               alamat,
-              style: const TextStyle(fontSize: 13, color: Warna.teksPendukung),
+              style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
             ),
           const SizedBox(height: 4),
           Text(
@@ -195,13 +195,13 @@ class _KartuMitra extends StatelessWidget {
               '${mitra['jumlahPaket']} paket',
               if (daftar != null) 'daftar ${tanggalLengkap(daftar.toLocal())}',
             ].join(' · '),
-            style: const TextStyle(fontSize: 12, color: Warna.teksPendukung),
+            style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
           ),
           if (alasan != null) ...[
             const SizedBox(height: 8),
             Text(
               'Alasan: $alasan',
-              style: const TextStyle(fontSize: 13, color: Warna.merah),
+              style: TextStyle(fontSize: 13, color: Warna.merah),
             ),
           ],
           const SizedBox(height: 12),

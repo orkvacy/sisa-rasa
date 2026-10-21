@@ -225,7 +225,7 @@ class _FormPaketState extends State<FormPaket> {
         ),
         title: Text(
           baru ? 'Paket baru' : 'Ubah paket',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Warna.teks,
@@ -331,7 +331,7 @@ class _FormPaketState extends State<FormPaket> {
           Container(
             width: 132,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Warna.kartu,
               border: Border.all(color: Warna.garisKontrol),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -390,12 +390,12 @@ class _FormPaketState extends State<FormPaket> {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Warna.kartu,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -485,7 +485,7 @@ class _Label extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         teks,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: Warna.teks,
@@ -504,10 +504,7 @@ class _Galat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 6, left: 4),
-      child: Text(
-        teks,
-        style: const TextStyle(fontSize: 12, color: Warna.merah),
-      ),
+      child: Text(teks, style: TextStyle(fontSize: 12, color: Warna.merah)),
     );
   }
 }
@@ -532,7 +529,7 @@ class _KotakFoto extends StatelessWidget {
       return Container(
         height: 150,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Warna.kartu,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Warna.garisKontrol),
         ),
@@ -578,15 +575,15 @@ class _KotakFoto extends StatelessWidget {
       );
     }
     return Material(
-      color: Colors.white,
+      color: Warna.kartu,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Warna.garisKontrol),
+        side: BorderSide(color: Warna.garisKontrol),
       ),
       child: InkWell(
         onTap: onPilih,
         borderRadius: BorderRadius.circular(12),
-        child: const SizedBox(
+        child: SizedBox(
           height: 120,
           width: double.infinity,
           child: Column(
@@ -663,10 +660,10 @@ class _KolomJam extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Warna.kartu,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: const BorderSide(color: Warna.garisKontrol),
+        side: BorderSide(color: Warna.garisKontrol),
       ),
       child: InkWell(
         onTap: onTap,
@@ -681,7 +678,7 @@ class _KolomJam extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Warna.teksPendukung,
                       ),
@@ -697,7 +694,7 @@ class _KolomJam extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.schedule, color: Warna.teks),
+              Icon(Icons.schedule, color: Warna.teks),
             ],
           ),
         ),

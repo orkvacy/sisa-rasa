@@ -90,6 +90,7 @@ class _MasukState extends State<Masuk> {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     return Scaffold(
       backgroundColor: Warna.latar,
       appBar: AppBar(
@@ -111,7 +112,7 @@ class _MasukState extends State<Masuk> {
               widget.dari == null
                   ? 'Pakai email yang kamu daftarkan. Peranmu (pembeli atau mitra) ikut dari akun.'
                   : 'Masuk dulu untuk lanjut. Isi keranjangmu tetap tersimpan.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 height: 22 / 15,
                 color: Warna.teksPendukung,
