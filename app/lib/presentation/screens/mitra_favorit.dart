@@ -28,7 +28,7 @@ class MitraFavorit extends StatelessWidget {
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
-        title: Text(
+        title: const Text(
           'Mitra favorit',
           style: TextStyle(
             fontSize: 18,
@@ -82,7 +82,7 @@ class _BarisFavorit extends StatelessWidget {
       onTap: adaPaket ? () => context.push(Rute.mitra(nama)) : null,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: Warna.garis)),
         ),
         child: Row(
@@ -94,7 +94,7 @@ class _BarisFavorit extends StatelessWidget {
                 height: 64,
                 child: adaPaket
                     ? GambarPaket(paket.first['foto'], fit: BoxFit.cover)
-                    : ColoredBox(
+                    : const ColoredBox(
                         color: Warna.kraft,
                         child: Icon(
                           Icons.storefront_outlined,
@@ -112,7 +112,7 @@ class _BarisFavorit extends StatelessWidget {
                     nama,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Warna.teks,
@@ -123,7 +123,7 @@ class _BarisFavorit extends StatelessWidget {
                     keterangan,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Warna.teksPendukung,
                     ),
@@ -134,13 +134,13 @@ class _BarisFavorit extends StatelessWidget {
                       TextSpan(
                         text:
                             'Tutup ${jam(paket.map((p) => p['tutup'] as int).reduce(max))}',
-                        style: TextStyle(color: Warna.teksPendukung),
+                        style: const TextStyle(color: Warna.teksPendukung),
                         children: [
                           const TextSpan(text: '  '),
                           TextSpan(
                             text:
                                 'mulai ${rupiah(paket.map((p) => p['hargaDiskon'] as int).reduce(min))}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
                             ),
@@ -150,7 +150,7 @@ class _BarisFavorit extends StatelessWidget {
                       style: const TextStyle(fontSize: 13),
                     )
                   else
-                    Text(
+                    const Text(
                       'Belum ada paket sore ini',
                       style: TextStyle(
                         fontSize: 13,
@@ -167,7 +167,7 @@ class _BarisFavorit extends StatelessWidget {
                 'mitra': nama,
                 'jenisMitra': mitra['jenis'],
               }),
-              icon: Icon(Icons.favorite, color: Warna.merah, size: 22),
+              icon: const Icon(Icons.favorite, color: Warna.merah, size: 22),
             ),
           ],
         ),
@@ -187,13 +187,13 @@ class _Kosong extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.favorite_border,
               size: 40,
               color: Warna.teksPendukung,
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'Belum ada mitra favorit',
               style: TextStyle(
                 fontSize: 16,
@@ -202,7 +202,7 @@ class _Kosong extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               'Ketuk ikon hati di halaman mitra untuk menyimpannya di sini.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
@@ -212,7 +212,7 @@ class _Kosong extends StatelessWidget {
               onPressed: () => context.go(Rute.beranda),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Warna.hijau,
-                side: BorderSide(color: Warna.hijau),
+                side: const BorderSide(color: Warna.hijau),
                 // tema bikin tombol outlined selebar layar, di sini seukuran isinya
                 minimumSize: const Size(0, 40),
                 padding: const EdgeInsets.symmetric(horizontal: 16),

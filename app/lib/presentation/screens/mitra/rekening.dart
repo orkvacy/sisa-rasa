@@ -77,7 +77,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
-        title: Text(
+        title: const Text(
           'Rekening pencairan',
           style: TextStyle(
             fontSize: 18,
@@ -95,7 +95,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
               color: Warna.softGreen,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.schedule, size: 20, color: Warna.hijau),
@@ -147,7 +147,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
             ),
           ),
           if (cocok && galat['nama'] == null)
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 8),
               child: Row(
                 children: [
@@ -167,7 +167,7 @@ class _RekeningPencairanState extends State<RekeningPencairan> {
               ),
             ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Nama pemilik harus sama dengan nama usaha di profil. Ganti rekening berlaku untuk pencairan berikutnya.',
             style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
           ),
@@ -209,7 +209,7 @@ class _Label extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         teks,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
           color: Warna.teks,

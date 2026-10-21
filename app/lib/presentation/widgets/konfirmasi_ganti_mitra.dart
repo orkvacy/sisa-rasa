@@ -30,7 +30,7 @@ Future<bool?> cekGantiMitra(
     // di atas navigasi melayang juga, kalau dibuka dari tab beranda
     useRootNavigator: true,
     showDragHandle: true,
-    backgroundColor: Warna.kartu,
+    backgroundColor: Colors.white,
     builder: (sheetContext) => Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Column(
@@ -47,7 +47,7 @@ Future<bool?> cekGantiMitra(
           const SizedBox(height: 8),
           Text(
             'Keranjangmu berisi paket dari $mitraKeranjang. Satu pesanan hanya bisa dari satu mitra karena diambil langsung di tempat.',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: Teks.isi,
               height: 1.45,
               color: Warna.teksPendukung,

@@ -42,15 +42,15 @@ class _CariState extends State<Cari> {
             hintText: 'Cari paket atau mitra',
             prefixIcon: const Icon(Icons.search),
             filled: true,
-            fillColor: Warna.kartu,
+            fillColor: Colors.white,
             contentPadding: EdgeInsets.zero,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Warna.garisKontrol),
+              borderSide: const BorderSide(color: Warna.garisKontrol),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Warna.garisKontrol),
+              borderSide: const BorderSide(color: Warna.garisKontrol),
             ),
           ),
         ),
@@ -60,7 +60,7 @@ class _CariState extends State<Cari> {
         padding: const EdgeInsets.all(16),
         children: [
           if (hasil.isEmpty)
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 48),
               child: Text(
                 'Tidak ada paket yang cocok. Coba nama paket atau nama mitra lain.',

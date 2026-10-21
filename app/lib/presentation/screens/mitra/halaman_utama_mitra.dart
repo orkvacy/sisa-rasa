@@ -53,7 +53,6 @@ class _HalamanUtamaMitraState extends State<HalamanUtamaMitra> {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
     return Scaffold(
       body: shell,
       bottomNavigationBar: NavigasiBawah(
@@ -65,7 +64,10 @@ class _HalamanUtamaMitraState extends State<HalamanUtamaMitra> {
         // tombol bulat hijau di tengah buat pindai kode ambil
         tengah: Container(
           padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(color: Warna.kartu, shape: BoxShape.circle),
+          decoration: const BoxDecoration(
+            color: Warna.kartu,
+            shape: BoxShape.circle,
+          ),
           child: SizedBox(
             width: 56,
             height: 56,

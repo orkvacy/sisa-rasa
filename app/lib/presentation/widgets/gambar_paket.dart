@@ -46,7 +46,10 @@ class GambarPaket extends StatelessWidget {
         height: height,
         color: Warna.kraft,
         alignment: Alignment.center,
-        child: Icon(Icons.restaurant_outlined, color: Warna.teksPendukung),
+        child: const Icon(
+          Icons.restaurant_outlined,
+          color: Warna.teksPendukung,
+        ),
       ),
     );
   }

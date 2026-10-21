@@ -108,7 +108,7 @@ class _CheckoutState extends State<Checkout> {
       },
       child: keranjang.isEmpty
           // sekejap pas keranjang udah dikosongin tapi halamannya belum keganti
-          ?       Scaffold(backgroundColor: Warna.latar)
+          ? const Scaffold(backgroundColor: Warna.latar)
           : _isi(context, keranjang, paketCubit),
     );
   }
@@ -141,7 +141,7 @@ class _CheckoutState extends State<Checkout> {
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
-        title:       Text(
+        title: const Text(
           'Checkout',
           style: TextStyle(
             fontSize: 18,
@@ -167,7 +167,7 @@ class _CheckoutState extends State<Checkout> {
                       color: Warna.softGreen,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child:       Icon(
+                    child: const Icon(
                       Icons.schedule,
                       size: 20,
                       color: Warna.hijau,
@@ -178,7 +178,7 @@ class _CheckoutState extends State<Checkout> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                              Text('Ambil hari ini', style: _Gaya.keterangan),
+                        const Text('Ambil hari ini', style: _Gaya.keterangan),
                         const SizedBox(height: 2),
                         Text(
                           '${jam(pertama['mulai'])} – ${jam(pertama['tutup'])}',
@@ -210,10 +210,10 @@ class _CheckoutState extends State<Checkout> {
                   ),
                 ],
               ),
-                    Divider(height: 24, color: Warna.garis),
+              const Divider(height: 24, color: Warna.garis),
               Row(
                 children: [
-                        Icon(
+                  const Icon(
                     Icons.storefront_outlined,
                     size: 20,
                     color: Warna.teks,
@@ -231,7 +231,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   TextButton(
                     onPressed: () => bukaPeta(context, pertama['alamat']),
-                    child:       Text(
+                    child: const Text(
                       'Peta',
                       style: TextStyle(
                         fontSize: 14,
@@ -251,7 +251,7 @@ class _CheckoutState extends State<Checkout> {
             children: [
               Row(
                 children: [
-                        Expanded(child: Text('Pesananmu', style: _Gaya.judul)),
+                  const Expanded(child: Text('Pesananmu', style: _Gaya.judul)),
                   Text('$porsi porsi', style: _Gaya.keterangan),
                 ],
               ),
@@ -274,7 +274,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 child: Row(
                   children: [
-                          Icon(
+                    const Icon(
                       Icons.eco_outlined,
                       size: 16,
                       color: Warna.hijau,
@@ -296,7 +296,7 @@ class _CheckoutState extends State<Checkout> {
           // metode bayar (F-10)
           _Kartu(
             children: [
-                    Text('Metode pembayaran', style: _Gaya.judul),
+              const Text('Metode pembayaran', style: _Gaya.judul),
               const SizedBox(height: 8),
               BarisMetode(
                 metode: MetodeBayar.qris,
@@ -336,7 +336,7 @@ class _CheckoutState extends State<Checkout> {
           // rincian harga (F-09)
           _Kartu(
             children: [
-                    Text('Rincian pembayaran', style: _Gaya.judul),
+              const Text('Rincian pembayaran', style: _Gaya.judul),
               const SizedBox(height: 10),
               _BarisRincian(
                 label: 'Harga normal ($porsi porsi)',
@@ -364,10 +364,10 @@ class _CheckoutState extends State<Checkout> {
                   warna: Warna.hijau,
                 ),
               ],
-              Divider(height: 21, color: Warna.garis),
+              const Divider(height: 21, color: Warna.garis),
               Row(
                 children: [
-                        Expanded(
+                  const Expanded(
                     child: Text('Total bayar', style: _Gaya.judul),
                   ),
                   Text(rupiah(total), style: _Gaya.harga),
@@ -397,8 +397,8 @@ class _CheckoutState extends State<Checkout> {
           16,
           16 + MediaQuery.of(context).padding.bottom,
         ),
-        decoration:       BoxDecoration(
-          color: Warna.kartu,
+        decoration: const BoxDecoration(
+          color: Colors.white,
           border: Border(top: BorderSide(color: Warna.garis)),
         ),
         child: Row(
@@ -464,26 +464,26 @@ class _CheckoutState extends State<Checkout> {
 
 /// gaya teks yg dipake berulang di checkout (token figma v3)
 abstract final class _Gaya {
-  static TextStyle get keterangan => TextStyle(
+  static const keterangan = TextStyle(
     fontSize: 12,
     height: 16 / 12,
     letterSpacing: 0.1,
     fontWeight: FontWeight.w500,
     color: Warna.teksPendukung,
   );
-  static TextStyle get judul => TextStyle(
+  static const judul = TextStyle(
     fontSize: 16,
     height: 22 / 16,
     fontWeight: FontWeight.w600,
     color: Warna.teks,
   );
-  static TextStyle get tebal => TextStyle(
+  static const tebal = TextStyle(
     fontSize: 14,
     height: 20 / 14,
     fontWeight: FontWeight.w700,
     color: Warna.teks,
   );
-  static TextStyle get harga => TextStyle(
+  static const harga = TextStyle(
     fontSize: 20,
     height: 24 / 20,
     letterSpacing: -0.2,
@@ -503,7 +503,7 @@ class _Kartu extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Warna.kartu,
+        color: Colors.white,
         border: Border.all(color: Warna.garis),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -671,7 +671,7 @@ class _BarisVoucher extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.local_offer_outlined,
                 color: Warna.hijau,
                 size: 20,
@@ -679,7 +679,7 @@ class _BarisVoucher extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: v == null
-                    ? Text(
+                    ? const Text(
                         'Pakai voucher',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
@@ -691,14 +691,14 @@ class _BarisVoucher extends StatelessWidget {
                         children: [
                           Text(
                             '${v['voucher']['kode']} terpakai',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Warna.teks,
                             ),
                           ),
                           Text(
                             'Kamu hemat ${rupiah(v['potongan'])} lagi',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Warna.hijau,
                             ),
@@ -707,8 +707,8 @@ class _BarisVoucher extends StatelessWidget {
                       ),
               ),
               v == null
-                  ? Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 8),
                       child: Icon(
                         Icons.chevron_right,
                         color: Warna.teksPendukung,
@@ -717,7 +717,7 @@ class _BarisVoucher extends StatelessWidget {
                   : IconButton(
                       tooltip: 'Lepas voucher',
                       onPressed: onHapus,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.close,
                         size: 20,
                         color: Warna.teksPendukung,

@@ -75,7 +75,7 @@ class _KilauKerangkaState extends State<KilauKerangka>
             shaderCallback: (kotak) => LinearGradient(
               begin: Alignment(t - 1, 0),
               end: Alignment(t, 0),
-              colors: [Warna.kraft, Warna.kilau, Warna.kraft],
+              colors: const [Warna.kraft, Warna.kilau, Warna.kraft],
             ).createShader(kotak),
             child: isi,
           );
@@ -104,12 +104,12 @@ class GagalMuat extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
       child: Column(
         children: [
-          Icon(Icons.wifi_off, size: 40, color: Warna.teksPendukung),
+          const Icon(Icons.wifi_off, size: 40, color: Warna.teksPendukung),
           const SizedBox(height: 12),
           Text(
             judul,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Warna.teks,
@@ -119,7 +119,7 @@ class GagalMuat extends StatelessWidget {
           Text(
             pesan,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Warna.teksPendukung),
+            style: const TextStyle(fontSize: 13, color: Warna.teksPendukung),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -129,7 +129,7 @@ class GagalMuat extends StatelessWidget {
             label: const Text('Coba lagi'),
             style: OutlinedButton.styleFrom(
               foregroundColor: Warna.hijau,
-              side: BorderSide(color: Warna.hijau),
+              side: const BorderSide(color: Warna.hijau),
               // tema bikin tombol outlined selebar layar, di sini seukuran isinya
               minimumSize: const Size(0, 40),
               padding: const EdgeInsets.symmetric(horizontal: 16),

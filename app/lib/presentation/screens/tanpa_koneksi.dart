@@ -53,9 +53,9 @@ class _TanpaKoneksiState extends State<TanpaKoneksi> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.wifi_off, size: 56, color: Warna.teksPendukung),
+              const Icon(Icons.wifi_off, size: 56, color: Warna.teksPendukung),
               const SizedBox(height: 20),
-              Text(
+              const Text(
                 'Tidak ada koneksi',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -68,14 +68,14 @@ class _TanpaKoneksiState extends State<TanpaKoneksi> {
               Text(
                 pesan,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   height: 22 / 15,
                   color: Warna.teksPendukung,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              const Text(
                 'Kamu tetap masuk, tidak perlu login ulang.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13, color: Warna.teksPendukung),

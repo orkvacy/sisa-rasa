@@ -64,7 +64,7 @@ Future<bool> konfirmasiSerahkan(
     useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: Warna.kartu,
+    backgroundColor: Colors.white,
     builder: (sheetContext) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -76,18 +76,18 @@ Future<bool> konfirmasiSerahkan(
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Warna.softGreen,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.check, color: Warna.hijau, size: 20),
+                  child: const Icon(Icons.check, color: Warna.hijau, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Kode cocok',
                         style: TextStyle(
                           fontSize: 18,
@@ -97,7 +97,7 @@ Future<bool> konfirmasiSerahkan(
                       ),
                       Text(
                         pesanan['kode'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'JetBrainsMono',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -118,7 +118,7 @@ Future<bool> konfirmasiSerahkan(
                   ),
                   child: Text(
                     'Lunas · ${MetodeBayar.isVa(pesanan['metode']) ? 'VA' : MetodeBayar.nama(pesanan['metode'])}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: Warna.hijau,
@@ -220,13 +220,16 @@ class _Baris extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 14, color: Warna.teksPendukung)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Warna.teksPendukung),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             nilai,
             textAlign: TextAlign.right,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Warna.teks,
@@ -295,7 +298,7 @@ class _KetikKodeState extends State<KetikKode> {
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
-        title: Text(
+        title: const Text(
           'Ketik kode ambil',
           style: TextStyle(
             fontSize: 18,
@@ -307,7 +310,7 @@ class _KetikKodeState extends State<KetikKode> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
-          Text(
+          const Text(
             'Ketik 4 karakter setelah SR- yang tampil di HP pembeli.',
             style: TextStyle(fontSize: 14, color: Warna.teksPendukung),
           ),
@@ -338,7 +341,7 @@ class _KetikKodeState extends State<KetikKode> {
                 ),
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       'SR-',
                       style: TextStyle(
                         fontSize: 22,
@@ -366,7 +369,7 @@ class _KetikKodeState extends State<KetikKode> {
                           ),
                           child: Text(
                             i < teks.length ? teks[i] : '',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontFamily: 'JetBrainsMono',
                               fontSize: 26,
                               fontWeight: FontWeight.w700,
@@ -387,12 +390,12 @@ class _KetikKodeState extends State<KetikKode> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.error_outline, size: 18, color: Warna.merah),
+                const Icon(Icons.error_outline, size: 18, color: Warna.merah),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     galat!,
-                    style: TextStyle(fontSize: 13, color: Warna.merah),
+                    style: const TextStyle(fontSize: 13, color: Warna.merah),
                   ),
                 ),
               ],

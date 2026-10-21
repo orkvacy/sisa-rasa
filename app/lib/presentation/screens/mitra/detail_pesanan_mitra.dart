@@ -144,7 +144,7 @@ class DetailPesananMitra extends StatelessWidget {
       useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: Warna.kartu,
+      backgroundColor: Colors.white,
       builder: (sheetContext) => _LembarBatal(pesanan: pesanan),
     );
     if (alasan != null) {
@@ -230,7 +230,7 @@ class _KotakStatus extends StatelessWidget {
           Text(
             teks,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               height: 16 / 12,
               letterSpacing: 0.1,
@@ -276,10 +276,10 @@ class _RincianMitra extends StatelessWidget {
           label: 'Komisi Sisa Rasa ($persenKomisi%)',
           nilai: '−${rupiah(komisi(jual))}',
         ),
-        Divider(height: 21, color: Warna.garis),
+        const Divider(height: 21, color: Warna.garis),
         Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Text(
                 'Diterima mitra',
                 style: TextStyle(
@@ -291,7 +291,7 @@ class _RincianMitra extends StatelessWidget {
             ),
             Text(
               rupiah(penerimaanBersih(pesanan)),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -305,7 +305,7 @@ class _RincianMitra extends StatelessWidget {
             Expanded(
               child: Text(
                 MetodeBayar.nama(pesanan['metode']),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Warna.teksPendukung,
@@ -364,7 +364,7 @@ class _LembarBatalState extends State<_LembarBatal> {
           children: [
             Text(
               'Batalkan pesanan ${p['kode']}?',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -373,7 +373,7 @@ class _LembarBatalState extends State<_LembarBatal> {
             const SizedBox(height: 8),
             Text(
               'Dana ${rupiah(p['total'])} dikembalikan penuh ke ${p['namaPembeli']}. Pembeli akan melihat alasan yang kamu pilih.',
-              style: TextStyle(fontSize: 14, color: Warna.teksPendukung),
+              style: const TextStyle(fontSize: 14, color: Warna.teksPendukung),
             ),
             const SizedBox(height: 12),
             for (final alasan in _alasan)
@@ -403,7 +403,7 @@ class _LembarBatalState extends State<_LembarBatal> {
                           alasan
                               .replaceAll('.', '')
                               .replaceAll(' dari mitra', ''),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                             color: Warna.teks,
