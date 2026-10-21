@@ -12,6 +12,7 @@ import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/voucher_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/percakapan_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/saldo_cubit.dart';
@@ -74,6 +75,7 @@ class _SisaRasaAppState extends State<SisaRasaApp> {
         BlocProvider(create: (context) => SaldoCubit(layanan: sl())),
         BlocProvider(create: (context) => PercakapanCubit(layanan: sl())),
         BlocProvider(create: (context) => FavoritCubit(layanan: sl())),
+        BlocProvider(create: (context) => VoucherCubit(layanan: sl())),
         // izinnya udah pernah dikasih: lokasi langsung diambil diam-diam
         BlocProvider(create: (context) => LokasiCubit(layanan: sl())..mulai()),
         // baru dibikin pas halaman admin dibuka
@@ -155,6 +157,7 @@ class _SinkronState extends State<_Sinkron> {
       ..add(paket.galat.listen(tampilkan))
       ..add(context.read<SaldoCubit>().galat.listen(tampilkan))
       ..add(context.read<FavoritCubit>().galat.listen(tampilkan))
+      ..add(context.read<VoucherCubit>().galat.listen(tampilkan))
       ..add(akun.stream.listen(_akunBerubah));
     _akunBerubah(akun.state);
 

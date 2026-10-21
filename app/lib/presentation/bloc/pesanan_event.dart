@@ -10,6 +10,8 @@ class PesananDibuat extends PesananEvent {
     required this.daftarPaket,
     required this.metode,
     this.kunci,
+    this.voucher,
+    this.potongan = 0,
   });
 
   // pemilik pesanan, biar pas ganti akun daftar pesanannya ikut ganti
@@ -23,6 +25,10 @@ class PesananDibuat extends PesananEvent {
   // idempotency key, satu per layar checkout. kalau request ke server diulang
   // (sinyal putus, kepencet dua kali), server ngasih pesanan yg sama, bukan pesanan baru
   final String? kunci;
+  // kode voucher platform. server ngitung ulang potongannya sendiri,
+  // [potongan] cuma dipake di mode tanpa server
+  final String? voucher;
+  final int potongan;
 }
 
 // minta daftar pesanan terbaru dari server. dikirim pas masuk dan berkala,

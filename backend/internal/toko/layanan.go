@@ -233,6 +233,12 @@ func sidik(isi map[string]int, metode string) string {
 // aplikasi bikin satu kunci per tombol Bayar, jadi kalau request-nya dikirim ulang
 // (sinyal putus, tombol kepencet dua kali) pesanannya ga dobel dan stok ga kepotong dua kali
 func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]int, metode, kunci string) (Pesanan, bool, error) {
+	return l.BuatPesananVoucher(ctx, a, isi, metode, kunci, "")
+}
+
+// BuatPesananVoucher BuatPesanan plus kode voucher platform (boleh kosong)
+func (l *Layanan) BuatPesananVoucher(ctx context.Context, a akun.Akun, isi map[string]int,
+	metode, kunci, kodeVoucher string) (Pesanan, bool, error) {
 	if a.Peran != "pembeli" {
 		return Pesanan{}, false, errBukanPembeli
 	}
@@ -255,9 +261,29 @@ func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]i
 		}
 	}
 
+	kodeVoucher = RapikanKode(kodeVoucher)
 	baru := PesananBaru{
 		IDPembeli: a.ID, NamaPembeli: namaSingkat(a.Nama),
-		Isi: isi, Metode: metode, Kunci: kunci, Sidik: sidik(isi, metode),
+		Isi: isi, Metode: metode, Kunci: kunci, Sidik: sidik(isi, metode) + "|" + kodeVoucher,
+	}
+	// request diulang: pesanan lama dibalikin dulu sebelum voucher dicek lagi,
+	// kalau ga voucher yang barusan kepakai bakal dianggap habis / bukan pesanan pertama
+	if lama, err := l.Store.PesananDariKunci(ctx, a.ID, kunci); err == nil {
+		if lama.sidik != baru.Sidik {
+			return Pesanan{}, false, galat(http.StatusUnprocessableEntity,
+				"Kunci pesanan ini sudah dipakai untuk pesanan lain.")
+		}
+		lama, err = l.pastikanTagihan(ctx, lama)
+		return lama, false, err
+	} else if !errors.Is(err, ErrTidakAda) {
+		return Pesanan{}, false, err
+	}
+	if kodeVoucher != "" {
+		v, err := l.cekVoucher(ctx, a, kodeVoucher)
+		if err != nil {
+			return Pesanan{}, false, err
+		}
+		baru.Voucher = &v
 	}
 	// nomor pesanan acak, kalau kebetulan kembar diulang
 	for range 5 {
@@ -333,6 +359,15 @@ func (l *Layanan) susun(baru PesananBaru, paket []Paket) (Pesanan, error) {
 	p.BiayaLayanan = (p.Subtotal*persenBiayaLayanan + 50) / 100
 	p.Total = p.Subtotal + p.BiayaLayanan
 	p.Hemat = p.HargaNormal - p.Subtotal
+	if v := baru.Voucher; v != nil {
+		// minimal belanja dicek dari harga yang udah dikunci di transaksi ini
+		if err := cekMinBelanja(*v, p.Subtotal); err != nil {
+			return Pesanan{}, err
+		}
+		p.Potongan = potonganVoucher(*v, p.Subtotal)
+		p.Total -= p.Potongan
+		p.idVoucher, p.KodeVoucher = &v.ID, &v.Kode
+	}
 
 	// F-40: ditahan 15 menit, tapi ga boleh lewat jam tutup ambil
 	batas := min(menitBatasBayar, max(1, p.Tutup-menit))

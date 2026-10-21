@@ -92,26 +92,30 @@ type IsiPesanan struct {
 
 // Pesanan lengkap. Kode cuma diisi setelah lunas
 type Pesanan struct {
-	ID             string            `json:"id"`
-	Nomor          string            `json:"nomor"`
-	IDAkun         string            `json:"idAkun"`
-	IDMitra        string            `json:"idMitra"`
-	NamaPembeli    string            `json:"namaPembeli"`
-	Mitra          string            `json:"mitra"`
-	Alamat         string            `json:"alamat"`
-	Foto           string            `json:"foto"`
-	Mulai          int               `json:"mulai"`
-	Tutup          int               `json:"tutup"`
-	Status         string            `json:"status"`
-	Metode         string            `json:"metode"`
-	Kode           *string           `json:"kode"`
-	Isi            []IsiPesanan      `json:"isi"`
-	Porsi          int               `json:"porsi"`
-	Subtotal       int               `json:"subtotal"`
-	HargaNormal    int               `json:"hargaNormal"`
-	BiayaLayanan   int               `json:"biayaLayanan"`
-	Total          int               `json:"total"`
-	Hemat          int               `json:"hemat"`
+	ID           string       `json:"id"`
+	Nomor        string       `json:"nomor"`
+	IDAkun       string       `json:"idAkun"`
+	IDMitra      string       `json:"idMitra"`
+	NamaPembeli  string       `json:"namaPembeli"`
+	Mitra        string       `json:"mitra"`
+	Alamat       string       `json:"alamat"`
+	Foto         string       `json:"foto"`
+	Mulai        int          `json:"mulai"`
+	Tutup        int          `json:"tutup"`
+	Status       string       `json:"status"`
+	Metode       string       `json:"metode"`
+	Kode         *string      `json:"kode"`
+	Isi          []IsiPesanan `json:"isi"`
+	Porsi        int          `json:"porsi"`
+	Subtotal     int          `json:"subtotal"`
+	HargaNormal  int          `json:"hargaNormal"`
+	BiayaLayanan int          `json:"biayaLayanan"`
+	Total        int          `json:"total"`
+	Hemat        int          `json:"hemat"`
+	// Potongan dari voucher platform, udah dikurangin dari Total
+	Potongan       int     `json:"potongan"`
+	KodeVoucher    *string `json:"kodeVoucher"`
+	idVoucher      *string
 	Dipesan        int               `json:"dipesan"`
 	Dibuat         time.Time         `json:"dibuat"`
 	BatasBayar     time.Time         `json:"batasBayar"`
@@ -145,6 +149,8 @@ type PesananBaru struct {
 	Metode      string
 	Kunci       string
 	Sidik       string
+	// Voucher yang udah lolos cekVoucher, nil = tanpa voucher
+	Voucher *Voucher
 }
 
 var (
@@ -200,4 +206,7 @@ type Store interface {
 	StoreSaldo
 	StoreVerifikasi
 	StoreFavorit
+	StoreVoucher
+	// PesananDariKunci pesanan pembeli dengan Idempotency-Key ini, buat request yang diulang
+	PesananDariKunci(ctx context.Context, idPembeli, kunci string) (Pesanan, error)
 }

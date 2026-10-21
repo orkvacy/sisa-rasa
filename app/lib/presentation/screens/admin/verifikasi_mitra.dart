@@ -6,7 +6,9 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/presentation/cubit/admin_cubit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/presentation/router.dart';
 
 /// halaman admin (F-36 - F-38): mitra yang baru daftar diperiksa dulu
 /// sebelum paketnya keliatan pembeli. admin juga bisa nonaktifin mitra
@@ -90,6 +92,11 @@ class _VerifikasiMitraState extends State<VerifikasiMitra> {
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Voucher',
+            icon: const Icon(Icons.local_offer_outlined, color: Warna.hijau),
+            onPressed: () => context.push(Rute.adminVoucher),
+          ),
           IconButton(
             tooltip: 'Keluar',
             icon: const Icon(Icons.logout, color: Warna.teksPendukung),

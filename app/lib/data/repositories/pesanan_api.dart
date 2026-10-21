@@ -18,10 +18,11 @@ class PesananApi implements LayananPesanan {
     required Map<String, int> isi,
     required String metode,
     required String kunci,
+    String? voucher,
   }) async => _satu(
     await klien.post(
       '/v1/pesanan',
-      {'isi': isi, 'metode': metode},
+      {'isi': isi, 'metode': metode, 'voucher': ?voucher},
       {'Idempotency-Key': kunci},
     ),
   );

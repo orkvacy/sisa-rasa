@@ -272,6 +272,7 @@ class _ServerPalsu implements LayananPesanan {
     required Map<String, int> isi,
     required String metode,
     required String kunci,
+    String? voucher,
   }) async {
     if (tolak != null) throw GagalLayanan(tolak!);
     this.kunci = kunci;
