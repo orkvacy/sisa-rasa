@@ -87,4 +87,11 @@ func TestStorePG(t *testing.T) {
 	if baru, err := l.MasukGoogle(ctx, "tok-budi"); err != nil || baru.Akun.ID == g.Akun.ID {
 		t.Fatalf("abis dihapus harus jadi akun baru: %+v %v", baru.Akun, err)
 	}
+
+	// F-61 lupa sandi lewat SQL beneran. email beda biar ga bentrok sama di atas
+	lr := &Layanan{Store: StorePG{Pool: pool}, BiayaBcrypt: 4}
+	if _, err := pool.Exec(ctx, `DELETE FROM akun WHERE email = 'rani@contoh.id'`); err != nil {
+		t.Fatal(err)
+	}
+	ujiLupaSandi(t, lr)
 }

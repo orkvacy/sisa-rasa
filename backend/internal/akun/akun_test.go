@@ -19,6 +19,7 @@ type storeMemori struct {
 	mu    sync.Mutex
 	akun  map[string]akunTersimpan // email -> akun
 	sesi  map[string]sesiMemori    // token hash -> sesi
+	reset map[string]ResetSandi    // id akun -> permintaan atur ulang
 	nomor int
 }
 
@@ -29,7 +30,8 @@ type sesiMemori struct {
 }
 
 func baruStoreMemori() *storeMemori {
-	return &storeMemori{akun: map[string]akunTersimpan{}, sesi: map[string]sesiMemori{}}
+	return &storeMemori{akun: map[string]akunTersimpan{}, sesi: map[string]sesiMemori{},
+		reset: map[string]ResetSandi{}}
 }
 
 func (s *storeMemori) BuatAkun(_ context.Context, nama, email, hash, peran string) (Akun, error) {
@@ -145,6 +147,66 @@ func (s *storeMemori) CabutSesi(_ context.Context, hash string, _ time.Time) err
 		ses.dicabut = true
 		s.sesi[hash] = ses
 	}
+	return nil
+}
+
+func (s *storeMemori) SimpanReset(_ context.Context, r ResetSandi) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.reset[r.IDAkun] = r
+	return nil
+}
+
+func (s *storeMemori) ResetAkun(_ context.Context, id string) (ResetSandi, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	r, ada := s.reset[id]
+	if !ada {
+		return r, ErrTidakAda
+	}
+	return r, nil
+}
+
+func (s *storeMemori) ResetDariTiket(_ context.Context, tiket string) (ResetSandi, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, r := range s.reset {
+		if r.TiketHash != "" && r.TiketHash == tiket {
+			return r, nil
+		}
+	}
+	return ResetSandi{}, ErrTidakAda
+}
+
+func (s *storeMemori) CatatSalah(_ context.Context, id string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	r, ada := s.reset[id]
+	if !ada {
+		return 0, ErrTidakAda
+	}
+	r.Salah++
+	s.reset[id] = r
+	return r.Salah, nil
+}
+
+func (s *storeMemori) GantiSandi(_ context.Context, id, hash string, _ time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for email, a := range s.akun {
+		if a.ID == id {
+			a.HashSandi = hash
+			a.PunyaSandi = true
+			s.akun[email] = a
+		}
+	}
+	for h, ss := range s.sesi {
+		if ss.idAkun == id {
+			ss.dicabut = true
+			s.sesi[h] = ss
+		}
+	}
+	delete(s.reset, id)
 	return nil
 }
 
