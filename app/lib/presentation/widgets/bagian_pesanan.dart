@@ -4,6 +4,7 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 // bagian-bagian detail pesanan yg dipake bareng layar pembeli sama layar mitra
 
@@ -92,9 +93,16 @@ class BlokPutih extends StatelessWidget {
 
 /// tiga lingkaran: Dibayar, Disiapkan, Siap diambil
 class TahapanPesanan extends StatelessWidget {
-  const TahapanPesanan({required this.status, super.key});
+  const TahapanPesanan({
+    required this.status,
+    this.animasiDibayar = false,
+    this.onCentang,
+    super.key,
+  });
 
   final String status;
+  final bool animasiDibayar;
+  final VoidCallback? onCentang;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +136,8 @@ class TahapanPesanan extends StatelessWidget {
                   flex: 2,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 28),
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: durasiGerak(context),
                       height: 2,
                       color: i + 1 <= sekarang ? Warna.hijau : Warna.garis,
                     ),
@@ -159,6 +168,8 @@ class TahapanPesanan extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     _Lingkaran(
+                      animasiCentang: i == 0 && animasiDibayar,
+                      onCentang: i == 0 && animasiDibayar ? onCentang : null,
                       ikon: ikon[i],
                       lewat: i < sekarang,
                       aktif: i == sekarang,
@@ -180,6 +191,8 @@ class _Lingkaran extends StatelessWidget {
     required this.lewat,
     required this.aktif,
     required this.mendesak,
+    this.animasiCentang = false,
+    this.onCentang,
   });
 
   final IconData ikon;
@@ -187,13 +200,16 @@ class _Lingkaran extends StatelessWidget {
   final bool aktif;
   // tahap bayar yg belum dibayar, warnanya oren
   final bool mendesak;
+  final bool animasiCentang;
+  final VoidCallback? onCentang;
 
   @override
   Widget build(BuildContext context) {
     final terisi = lewat || aktif;
     final warna = mendesak ? Warna.mendesak : Warna.hijau;
 
-    return Container(
+    return AnimatedContainer(
+      duration: durasiGerak(context),
       width: 48,
       height: 48,
       alignment: Alignment.center,
@@ -204,7 +220,8 @@ class _Lingkaran extends StatelessWidget {
             ? (mendesak ? Warna.mendesakLembut : Warna.softGreen)
             : Warna.kartu,
       ),
-      child: Container(
+      child: AnimatedContainer(
+        duration: durasiGerak(context),
         width: 32,
         height: 32,
         decoration: BoxDecoration(
@@ -212,10 +229,20 @@ class _Lingkaran extends StatelessWidget {
           color: terisi ? warna : Warna.kartu,
           border: terisi ? null : Border.all(color: Warna.garisKontrol),
         ),
-        child: Icon(
-          ikon,
-          size: 18,
-          color: terisi ? Colors.white : Warna.teksPendukung,
+        child: MunculSekali(
+          animasi: animasiCentang,
+          centang: true,
+          onMulai: onCentang,
+          child: Center(
+            child: GantiHalus(
+              kunci: ikon,
+              child: Icon(
+                ikon,
+                size: 18,
+                color: terisi ? Colors.white : Warna.teksPendukung,
+              ),
+            ),
+          ),
         ),
       ),
     );

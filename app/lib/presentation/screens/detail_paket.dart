@@ -13,6 +13,7 @@ import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/timeline_ambil.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
+import 'package:sisa_rasa/presentation/widgets/kabar_jumlah.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
@@ -34,10 +35,19 @@ class _DetailPaketState extends State<DetailPaket> {
     super.dispose();
   }
 
-  void aturJumlah(int nilai) {
+  void aturJumlah(int nilai, {bool dariTombol = false}) {
     final int sisa = widget.paket['sisaPorsi'];
+    final berubah = jumlah != nilai.clamp(1, sisa);
     setState(() => jumlah = nilai.clamp(1, sisa));
     jumlahController.text = '$jumlah';
+    if (dariTombol && berubah) {
+      kabarJumlah(
+        context,
+        nama: widget.paket['nama'],
+        jumlah: jumlah,
+        diKeranjang: false,
+      );
+    }
   }
 
   Future<void> tambahKeKeranjang() async {
@@ -50,14 +60,17 @@ class _DetailPaketState extends State<DetailPaket> {
     keranjangCubit.tambah(widget.paket, jumlah, gantiMitra: gantiMitra);
     if (!mounted) return;
     // snackbar dinaikin 88 biar munculnya di atas bar keranjang, ga nutupin
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${widget.paket['nama']} masuk keranjang'),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 88),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${widget.paket['nama']} masuk keranjang'),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(12, 0, 12, 88),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     // context.pop: balik ke halaman sebelumnya (beranda / cari)
     context.pop();
   }
@@ -398,7 +411,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           tooltip: 'Kurangi porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah > 1
-                              ? () => aturJumlah(jumlah - 1)
+                              ? () => aturJumlah(jumlah - 1, dariTombol: true)
                               : null,
                           icon: const Icon(Icons.remove, size: 18),
                         ),
@@ -430,7 +443,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           tooltip: 'Tambah porsi',
                           visualDensity: VisualDensity.compact,
                           onPressed: jumlah < sisa
-                              ? () => aturJumlah(jumlah + 1)
+                              ? () => aturJumlah(jumlah + 1, dariTombol: true)
                               : null,
                           icon: const Icon(Icons.add, size: 18),
                         ),

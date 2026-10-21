@@ -8,6 +8,8 @@ import 'package:sisa_rasa/data/sumber/dummy_akun.dart';
 import 'package:sisa_rasa/injection.dart';
 import 'package:sisa_rasa/main.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_utama.dart';
+import 'package:sisa_rasa/presentation/screens/detail_pesanan.dart';
+import 'package:sisa_rasa/presentation/screens/pembayaran.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
 
 /// hitung mundur batas bayar jalan tiap detik, jadi selama layarnya kebuka
@@ -82,6 +84,57 @@ void main() {
   });
 
   tesKelolaPaket();
+  testWidgets('snackbar jumlah mengikuti ketukan terbaru dan tidak mengantre', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(SisaRasaApp(akunAwal: dummyAkun.first));
+    await tester.pump();
+    await bukaIbis(tester);
+    await tester.tap(find.byTooltip('Tambah American Breakfast Set'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('American Breakfast Set: 1 porsi di keranjang'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byTooltip('Tambah porsi').first);
+    await tester.pump();
+    await tester.tap(find.byTooltip('Kurangi porsi').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(
+      find.text('American Breakfast Set: 1 porsi di keranjang'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('American Breakfast Set: 2 porsi di keranjang'),
+      findsNothing,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsNothing);
+
+    await tester.tap(find.text('American Breakfast Set'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Tambah porsi'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('American Breakfast Set: 2 porsi dipilih'),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '3');
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.tap(find.byTooltip('Kurangi porsi'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('American Breakfast Set: 2 porsi dipilih'),
+      findsOneWidget,
+    );
+  });
   testWidgets('beranda: flash sale, mitra sekitar, navigasi bawah', (
     tester,
   ) async {
@@ -188,9 +241,18 @@ void main() {
 
     // cek status -> lunas -> detail pesanan, tahap Disiapkan
     await tester.tap(find.text('Saya sudah bayar · cek status'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // Menekan tombol saja belum merupakan konfirmasi pembayaran.
+    expect(find.byType(Pembayaran), findsOneWidget);
+    expect(find.byType(DetailPesanan), findsNothing);
     await lewati(tester);
     await lewati(tester);
     expect(find.text('Pembayaran berhasil'), findsOneWidget);
+    expect(
+      tester.widget<DetailPesanan>(find.byType(DetailPesanan)).baruDibayar,
+      isTrue,
+    );
     expect(find.text('Pesananmu sedang disiapkan'), findsOneWidget);
     expect(find.textContaining('SR-'), findsWidgets);
     await tester.scrollUntilVisible(

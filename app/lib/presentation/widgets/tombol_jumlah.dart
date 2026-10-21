@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// tombol + / - kecil buat ngatur porsi (kayak stepper GoFood).
 /// lingkarannya 28, area sentuhnya 36 biar tetap gampang dipencet.
@@ -40,7 +41,7 @@ class TombolJumlah extends StatelessWidget {
             radius: _sentuh / 2,
             child: Center(
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
+                duration: durasiGerak(context, 150),
                 width: _lingkaran,
                 height: _lingkaran,
                 decoration: BoxDecoration(
@@ -94,13 +95,23 @@ class PengaturJumlah extends StatelessWidget {
         ),
         SizedBox(
           width: 24,
-          child: Text(
-            '$jumlah',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Warna.teks,
+          height: 36,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: GantiHalus(
+                kunci: jumlah,
+                geser: const Offset(0, 0.2),
+                child: Text(
+                  '$jumlah',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
