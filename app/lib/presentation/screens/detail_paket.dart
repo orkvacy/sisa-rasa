@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sisa_rasa/presentation/cubit/lokasi_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
@@ -11,6 +12,7 @@ import 'package:sisa_rasa/presentation/widgets/kartu_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/timeline_ambil.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
 
 /// halaman detail paket, kebuka dari beranda / cari
 class DetailPaket extends StatefulWidget {
@@ -117,8 +119,8 @@ class _DetailPaketState extends State<DetailPaket> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    '${paket['mitra']} · ${paket['jenisMitra']} · ${paket['jarak']}',
-                                    style: TextStyle(
+                                    '${paket['mitra']} · ${paket['jenisMitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
+                                    style: const TextStyle(
                                       color: Warna.teksPendukung,
                                     ),
                                   ),
@@ -355,23 +357,7 @@ class _DetailPaketState extends State<DetailPaket> {
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 8,
                     right: 16,
-                    child: CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Warna.latar,
-                      child: IconButton(
-                        tooltip: 'Simpan mitra',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Mitra favorit belum tersedia di versi ini',
-                              ),
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.favorite_border, color: Warna.teks),
-                      ),
-                    ),
+                    child: TombolFavorit(paket: paket),
                   ),
                 ],
               ),

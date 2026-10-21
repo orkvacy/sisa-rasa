@@ -1,6 +1,7 @@
 package toko
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -13,11 +14,26 @@ import (
 func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) http.Handler) {
 	h := func(f httpx.Handler) http.Handler { return wajib(f) }
 
+	// webhook Midtrans: tanpa sesi, keasliannya dicek dari tanda tangan
+	mux.Handle("POST /v1/pembayaran/midtrans", httpx.Handler(l.handleNotifikasi))
+
 	// daftar paket boleh dilihat tamu (F-65)
 	mux.Handle("GET /v1/paket", opsional(httpx.Handler(l.handlePaket)))
 	mux.Handle("GET /v1/mitra/status", h(l.handleStatusGerai))
 	mux.Handle("GET /v1/admin/mitra", h(l.handleDaftarMitra))
 	mux.Handle("POST /v1/admin/mitra/{id}/periksa", h(l.handlePeriksaMitra))
+
+	// mitra favorit pembeli. PUT / DELETE idempoten, aman diulang
+	mux.Handle("GET /v1/favorit", h(l.handleFavorit))
+	mux.Handle("PUT /v1/favorit/{id}", h(l.handleAturFavorit))
+	mux.Handle("DELETE /v1/favorit/{id}", h(l.handleAturFavorit))
+
+	// voucher platform: pembeli cek / liat daftar, admin kelola
+	mux.Handle("GET /v1/voucher", h(l.handleVoucherTersedia))
+	mux.Handle("POST /v1/voucher/cek", h(l.handleCekVoucher))
+	mux.Handle("GET /v1/admin/voucher", h(l.handleDaftarVoucher))
+	mux.Handle("POST /v1/admin/voucher", h(l.handleBuatVoucher))
+	mux.Handle("PATCH /v1/admin/voucher/{id}", h(l.handleAturVoucher))
 
 	mux.Handle("GET /v1/mitra/paket", h(l.handlePaketSaya))
 	mux.Handle("POST /v1/mitra/paket", h(l.handleBuatPaket))
@@ -26,6 +42,7 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) h
 	mux.Handle("PATCH /v1/mitra/paket/{id}/sisa", h(l.handleSisa))
 	mux.Handle("PATCH /v1/mitra/paket/{id}/aktif", h(l.handleAktif))
 	mux.Handle("PUT /v1/mitra/gerai/tutup", h(l.handleGerai))
+	mux.Handle("PUT /v1/mitra/gerai/lokasi", h(l.handleLokasi))
 	mux.Handle("POST /v1/mitra/ambil", h(l.handleAmbil))
 	mux.Handle("GET /v1/mitra/saldo", h(l.handleSaldo))
 	mux.Handle("PUT /v1/mitra/rekening", h(l.handleRekening))
@@ -168,14 +185,15 @@ func (l *Layanan) handleDaftar(w http.ResponseWriter, r *http.Request) error {
 
 func (l *Layanan) handleBuat(w http.ResponseWriter, r *http.Request) error {
 	var isi struct {
-		Isi    map[string]int `json:"isi"`
-		Metode string         `json:"metode"`
+		Isi     map[string]int `json:"isi"`
+		Metode  string         `json:"metode"`
+		Voucher string         `json:"voucher"`
 	}
 	if err := httpx.BacaJSON(w, r, &isi); err != nil {
 		return err
 	}
-	p, dibuat, err := l.BuatPesanan(r.Context(), akun.DariKonteks(r.Context()),
-		isi.Isi, isi.Metode, r.Header.Get("Idempotency-Key"))
+	p, dibuat, err := l.BuatPesananVoucher(r.Context(), akun.DariKonteks(r.Context()),
+		isi.Isi, isi.Metode, r.Header.Get("Idempotency-Key"), isi.Voucher)
 	if err != nil {
 		return err
 	}
@@ -352,5 +370,127 @@ func (l *Layanan) handlePeriksaMitra(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, st)
+	return nil
+}
+
+// ---------- mitra favorit ----------
+
+func (l *Layanan) handleFavorit(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.DaftarFavorit(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]MitraFavorit{"mitra": daftar})
+	return nil
+}
+
+func (l *Layanan) handleAturFavorit(w http.ResponseWriter, r *http.Request) error {
+	suka := r.Method == http.MethodPut
+	if err := l.AturFavorit(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), suka); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// ---------- pembayaran ----------
+
+// handleNotifikasi isi webhook Midtrans banyak field lain, jadi ga pakai
+// httpx.BacaJSON yang nolak field tak dikenal
+func (l *Layanan) handleNotifikasi(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		OrderID     string `json:"order_id"`
+		StatusCode  string `json:"status_code"`
+		GrossAmount string `json:"gross_amount"`
+		Signature   string `json:"signature_key"`
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 64<<10)
+	if err := json.NewDecoder(r.Body).Decode(&isi); err != nil {
+		return httpx.NewGalat(http.StatusBadRequest, "Isian tidak bisa dibaca.")
+	}
+	err := l.TerimaNotifikasi(r.Context(), NotifikasiBayar{
+		IDTagihan: isi.OrderID, KodeStatus: isi.StatusCode,
+		Total: isi.GrossAmount, TandaTangan: isi.Signature,
+	})
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	return nil
+}
+
+func (l *Layanan) handleLokasi(w http.ResponseWriter, r *http.Request) error {
+	var t Titik
+	if err := httpx.BacaJSON(w, r, &t); err != nil {
+		return err
+	}
+	if err := l.AturLokasi(r.Context(), akun.DariKonteks(r.Context()), t); err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, t)
+	return nil
+}
+
+// ---------- voucher ----------
+
+func (l *Layanan) handleVoucherTersedia(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.VoucherTersedia(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]Voucher{"voucher": daftar})
+	return nil
+}
+
+func (l *Layanan) handleCekVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Kode     string `json:"kode"`
+		Subtotal int    `json:"subtotal"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	hasil, err := l.CekVoucher(r.Context(), akun.DariKonteks(r.Context()), isi.Kode, isi.Subtotal)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, hasil)
+	return nil
+}
+
+func (l *Layanan) handleDaftarVoucher(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.DaftarVoucher(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]Voucher{"voucher": daftar})
+	return nil
+}
+
+func (l *Layanan) handleBuatVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi IsianVoucher
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	v, err := l.BuatVoucher(r.Context(), akun.DariKonteks(r.Context()), isi)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusCreated, map[string]Voucher{"voucher": v})
+	return nil
+}
+
+func (l *Layanan) handleAturVoucher(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		Aktif bool `json:"aktif"`
+	}
+	if err := httpx.BacaJSON(w, r, &isi); err != nil {
+		return err
+	}
+	v, err := l.AturVoucherAktif(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), isi.Aktif)
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]Voucher{"voucher": v})
 	return nil
 }

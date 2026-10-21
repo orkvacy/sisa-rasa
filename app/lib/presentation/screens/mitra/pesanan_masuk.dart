@@ -8,6 +8,7 @@ import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/presentation/widgets/pil_status.dart';
 import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 import 'package:sisa_rasa/presentation/widgets/tombol_percakapan.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
@@ -37,14 +38,19 @@ class _PesananMasukState extends State<PesananMasuk> {
     if (mitra == null) return const SizedBox.shrink();
     final semua = pesananMitra(context, mitra);
 
+    // segmen Selesai ikut nampilin yang Tidak diambil (F-56): penerimaannya
+    // tetap masuk saldo, jadi mitra harus bisa liat
     List<Map<String, dynamic>> dengan(String status) => [
       for (final p in semua)
-        if (p['status'] == status) p,
+        if (p['status'] == status ||
+            (status == StatusPesanan.selesai &&
+                p['status'] == StatusPesanan.tidakDiambil))
+          p,
     ];
     final daftar = dengan(segmen);
     final menungguBayar = dengan(StatusPesanan.menungguBayar).length;
 
-    // rekap hari ini (F-47): pesanan selesai + penerimaan bersihnya
+    // rekap hari ini (F-47): pesanan selesai / tidak diambil + penerimaan bersihnya
     final selesai = dengan(StatusPesanan.selesai);
     final bersih = selesai.fold<int>(0, (a, p) => a + penerimaanBersih(p));
 
@@ -363,7 +369,11 @@ class _KartuPesanan extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (status != StatusPesanan.selesai)
+                  // lewat jam ambil (F-56): cukup keterangan, ga ada aksi lagi
+                  if (status == StatusPesanan.tidakDiambil)
+                    PilStatus(status: status),
+                  if (status == StatusPesanan.disiapkan ||
+                      status == StatusPesanan.siapDiambil)
                     SizedBox(
                       height: 48,
                       child: FilledButton.tonal(

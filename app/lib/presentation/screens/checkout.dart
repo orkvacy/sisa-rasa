@@ -14,6 +14,7 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/pilih_metode.dart';
+import 'package:sisa_rasa/presentation/widgets/pilih_voucher.dart';
 import 'package:sisa_rasa/domain/aturan/pembayaran.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
 
@@ -28,6 +29,8 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   String metode = MetodeBayar.qris;
+  // voucher yang dipakai: {voucher, potongan} dari server, null = tanpa voucher
+  Map<String, dynamic>? voucher;
   // tombol bayar dikunci selama pesanan dibikin, biar ga kepencet dua kali
   bool memproses = false;
 
@@ -68,8 +71,15 @@ class _CheckoutState extends State<Checkout> {
         daftarPaket: context.read<PaketCubit>().state,
         metode: metode,
         kunci: kunci,
+        voucher: voucher?['voucher']['kode'],
+        potongan: voucher?['potongan'] ?? 0,
       ),
     );
+  }
+
+  Future<void> bukaVoucher(int subtotal) async {
+    final hasil = await pilihVoucher(context, subtotal: subtotal);
+    if (hasil != null && mounted) setState(() => voucher = hasil);
   }
 
   /// baris VA: kalau belum VA langsung pilih BCA, kalau udah VA buka daftar bank
@@ -121,8 +131,9 @@ class _CheckoutState extends State<Checkout> {
       porsi += keranjang[id]!;
     }
     final biaya = biayaLayanan(subtotal);
-    final total = subtotal + biaya;
-    final hemat = hargaNormal - subtotal;
+    final int potongan = voucher?['potongan'] ?? 0;
+    final total = subtotal + biaya - potongan;
+    final hemat = hargaNormal - subtotal + potongan;
 
     return Scaffold(
       backgroundColor: Warna.latar,
@@ -314,6 +325,14 @@ class _CheckoutState extends State<Checkout> {
           ),
           const SizedBox(height: 12),
 
+          // voucher platform: ketik kode / pilih dari daftar
+          _BarisVoucher(
+            voucher: voucher,
+            onTap: () => bukaVoucher(subtotal),
+            onHapus: () => setState(() => voucher = null),
+          ),
+          const SizedBox(height: 12),
+
           // rincian harga (F-09)
           _Kartu(
             children: [
@@ -326,7 +345,7 @@ class _CheckoutState extends State<Checkout> {
               const SizedBox(height: 10),
               _BarisRincian(
                 label: 'Kamu hemat',
-                nilai: '−${rupiah(hemat)}',
+                nilai: '−${rupiah(hargaNormal - subtotal)}',
                 warna: Warna.hijau,
               ),
               // baris biaya layanan ilang sendiri kalau persennya 0
@@ -337,7 +356,15 @@ class _CheckoutState extends State<Checkout> {
                   nilai: rupiah(biaya),
                 ),
               ],
-                    Divider(height: 21, color: Warna.garis),
+              if (potongan > 0) ...[
+                const SizedBox(height: 10),
+                _BarisRincian(
+                  label: 'Voucher ${voucher!['voucher']['kode']}',
+                  nilai: '−${rupiah(potongan)}',
+                  warna: Warna.hijau,
+                ),
+              ],
+              const Divider(height: 21, color: Warna.garis),
               Row(
                 children: [
                         Expanded(
@@ -610,6 +637,95 @@ class _Jaminan extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(child: Text(teks, style: _Gaya.keterangan)),
         ],
+      ),
+    );
+  }
+}
+
+/// baris voucher di checkout: "Pakai voucher" atau voucher yang lagi dipakai
+class _BarisVoucher extends StatelessWidget {
+  const _BarisVoucher({
+    required this.voucher,
+    required this.onTap,
+    required this.onHapus,
+  });
+
+  final Map<String, dynamic>? voucher;
+  final VoidCallback onTap;
+  final VoidCallback onHapus;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = voucher;
+    return Material(
+      color: Warna.kartu,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: v == null ? Warna.garis : Warna.hijau),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: const Key('baris-voucher'),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.local_offer_outlined,
+                color: Warna.hijau,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: v == null
+                    ? const Text(
+                        'Pakai voucher',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Warna.teks,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${v['voucher']['kode']} terpakai',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Warna.teks,
+                            ),
+                          ),
+                          Text(
+                            'Kamu hemat ${rupiah(v['potongan'])} lagi',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Warna.hijau,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+              v == null
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.chevron_right,
+                        color: Warna.teksPendukung,
+                      ),
+                    )
+                  : IconButton(
+                      tooltip: 'Lepas voucher',
+                      onPressed: onHapus,
+                      icon: const Icon(
+                        Icons.close,
+                        size: 20,
+                        color: Warna.teksPendukung,
+                      ),
+                    ),
+            ],
+          ),
+        ),
       ),
     );
   }

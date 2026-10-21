@@ -50,6 +50,8 @@ type Layanan struct {
 	QRISStatis string
 	// FotoSah ngecek URL foto unggahan (foto.Penyimpanan.Sah). nil = cuma foto bawaan
 	FotoSah func(url string) bool
+	// Gerbang penyedia pembayaran asli (Midtrans). nil = mode uji
+	Gerbang Gerbang
 }
 
 func (l *Layanan) sekarang() time.Time {
@@ -231,6 +233,12 @@ func sidik(isi map[string]int, metode string) string {
 // aplikasi bikin satu kunci per tombol Bayar, jadi kalau request-nya dikirim ulang
 // (sinyal putus, tombol kepencet dua kali) pesanannya ga dobel dan stok ga kepotong dua kali
 func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]int, metode, kunci string) (Pesanan, bool, error) {
+	return l.BuatPesananVoucher(ctx, a, isi, metode, kunci, "")
+}
+
+// BuatPesananVoucher BuatPesanan plus kode voucher platform (boleh kosong)
+func (l *Layanan) BuatPesananVoucher(ctx context.Context, a akun.Akun, isi map[string]int,
+	metode, kunci, kodeVoucher string) (Pesanan, bool, error) {
 	if a.Peran != "pembeli" {
 		return Pesanan{}, false, errBukanPembeli
 	}
@@ -253,9 +261,29 @@ func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]i
 		}
 	}
 
+	kodeVoucher = RapikanKode(kodeVoucher)
 	baru := PesananBaru{
 		IDPembeli: a.ID, NamaPembeli: namaSingkat(a.Nama),
-		Isi: isi, Metode: metode, Kunci: kunci, Sidik: sidik(isi, metode),
+		Isi: isi, Metode: metode, Kunci: kunci, Sidik: sidik(isi, metode) + "|" + kodeVoucher,
+	}
+	// request diulang: pesanan lama dibalikin dulu sebelum voucher dicek lagi,
+	// kalau ga voucher yang barusan kepakai bakal dianggap habis / bukan pesanan pertama
+	if lama, err := l.Store.PesananDariKunci(ctx, a.ID, kunci); err == nil {
+		if lama.sidik != baru.Sidik {
+			return Pesanan{}, false, galat(http.StatusUnprocessableEntity,
+				"Kunci pesanan ini sudah dipakai untuk pesanan lain.")
+		}
+		lama, err = l.pastikanTagihan(ctx, lama)
+		return lama, false, err
+	} else if !errors.Is(err, ErrTidakAda) {
+		return Pesanan{}, false, err
+	}
+	if kodeVoucher != "" {
+		v, err := l.cekVoucher(ctx, a, kodeVoucher)
+		if err != nil {
+			return Pesanan{}, false, err
+		}
+		baru.Voucher = &v
 	}
 	// nomor pesanan acak, kalau kebetulan kembar diulang
 	for range 5 {
@@ -269,6 +297,13 @@ func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]i
 			return Pesanan{}, false, galat(http.StatusUnprocessableEntity,
 				"Kunci pesanan ini sudah dipakai untuk pesanan lain.")
 		}
+		if err != nil {
+			return p, dibuat, err
+		}
+		// tagihan dari penyedia diminta di luar transaksi, biar stok ga kekunci
+		// selama nunggu jawaban. kalau gagal, request yang diulang (kunci sama)
+		// bakal nyoba bikin tagihannya lagi
+		p, err = l.pastikanTagihan(ctx, p)
 		return p, dibuat, err
 	}
 	return Pesanan{}, false, errors.New("nomor pesanan bentrok terus")
@@ -324,6 +359,15 @@ func (l *Layanan) susun(baru PesananBaru, paket []Paket) (Pesanan, error) {
 	p.BiayaLayanan = (p.Subtotal*persenBiayaLayanan + 50) / 100
 	p.Total = p.Subtotal + p.BiayaLayanan
 	p.Hemat = p.HargaNormal - p.Subtotal
+	if v := baru.Voucher; v != nil {
+		// minimal belanja dicek dari harga yang udah dikunci di transaksi ini
+		if err := cekMinBelanja(*v, p.Subtotal); err != nil {
+			return Pesanan{}, err
+		}
+		p.Potongan = potonganVoucher(*v, p.Subtotal)
+		p.Total -= p.Potongan
+		p.idVoucher, p.KodeVoucher = &v.ID, &v.Kode
+	}
 
 	// F-40: ditahan 15 menit, tapi ga boleh lewat jam tutup ambil
 	batas := min(menitBatasBayar, max(1, p.Tutup-menit))
@@ -411,26 +455,18 @@ func (l *Layanan) batal(p *Pesanan, alasan string, otomatis bool) {
 }
 
 // CekBayar "Saya sudah bayar · cek status". status lunas cuma ditentukan server (NF-10).
-// selama belum pakai Midtrans, server pura-pura penyedia pembayaran bilang lunas
+// pakai Midtrans: statusnya ditanya ke Midtrans. mode uji: langsung dianggap lunas
 func (l *Layanan) CekBayar(ctx context.Context, a akun.Akun, id string) (Pesanan, error) {
+	if l.Gerbang != nil {
+		return l.cekBayarGerbang(ctx, a, id)
+	}
 	for range 5 {
 		p, err := l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
 			if p.Status != MenungguBayar {
 				// udah lunas / batal: jawab apa adanya, request ulang aman
 				return Perubahan{}, nil
 			}
-			kode, err := acak("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 4)
-			if err != nil {
-				return Perubahan{}, err
-			}
-			now := l.sekarang()
-			menit := l.menitSekarang()
-			kode = "SR-" + kode
-			p.Status = Disiapkan
-			p.Kode = &kode
-			p.DibayarPada = &now
-			p.Dibayar = &menit
-			return Perubahan{}, nil
+			return l.lunasi(p)
 		})
 		if errors.Is(err, ErrBentrok) {
 			continue // kode ambil kebetulan kembar sama pesanan aktif lain
@@ -463,14 +499,24 @@ func (l *Layanan) GantiMetode(ctx context.Context, a akun.Akun, id, metode strin
 	if !slices.Contains(metodeBayar, metode) {
 		return Pesanan{}, galat(http.StatusUnprocessableEntity, "Pilih metode pembayaran.")
 	}
-	return l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
+	var lama string
+	p, err := l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
 		if p.Status != MenungguBayar {
 			return Perubahan{}, galat(http.StatusConflict, "Metode hanya bisa diganti sebelum dibayar.")
 		}
+		lama = p.Tagihan["idTagihan"]
 		p.Metode = metode
 		p.Tagihan = l.tagihan(p.ID, p.Total, metode)
 		return Perubahan{}, nil
 	})
+	if err != nil || l.Gerbang == nil {
+		return p, err
+	}
+	// tagihan lama dibatalin biar ga kebayar dua kali, lalu minta yang baru
+	if lama != "" {
+		_ = l.Gerbang.Batalkan(ctx, lama)
+	}
+	return l.pastikanTagihan(ctx, p)
 }
 
 // UbahStatus tahapan dari mitra: disiapkan -> siap diambil (F-43) -> selesai (F-20)
@@ -533,6 +579,8 @@ func (l *Layanan) AmbilDenganKode(ctx context.Context, a akun.Akun, kode string)
 		switch p.Status {
 		case Selesai:
 			return Pesanan{}, galat(http.StatusConflict, "Kode ini sudah dipakai. Pesanannya sudah diambil.")
+		case TidakDiambil:
+			return Pesanan{}, galat(http.StatusConflict, "Jam ambil pesanan ini sudah lewat.")
 		case Disiapkan, SiapDiambil:
 			return l.UbahStatus(ctx, a, p.ID, Selesai)
 		}
@@ -540,9 +588,11 @@ func (l *Layanan) AmbilDenganKode(ctx context.Context, a akun.Akun, kode string)
 	return Pesanan{}, galat(http.StatusNotFound, "Kode tidak ditemukan di pesanan gerai ini.")
 }
 
-// Bersihkan batalin pesanan yang batas bayarnya lewat dan balikin porsinya (F-40).
+// Bersihkan batalin pesanan yang batas bayarnya lewat dan balikin porsinya (F-40),
+// lalu nandain pesanan lunas yang ga diambil sampai jam tutup (F-56).
 // dipanggil berkala dari main.go dan sebelum daftar pesanan dibaca
 func (l *Layanan) Bersihkan(ctx context.Context) {
+	l.tandaiTidakDiambil(ctx)
 	id, err := l.Store.MenungguLewat(ctx, l.sekarang())
 	if err != nil {
 		return
@@ -558,11 +608,45 @@ func (l *Layanan) Bersihkan(ctx context.Context) {
 	}
 }
 
+// lewatAmbil jam tutup ambil pesanan [p] udah lewat. tanggalnya ikut hari
+// pesanan dibuat (WITA), jamnya dari Tutup. "sekarang" ikut JamDemo kalau diisi,
+// jadi di server demo yang jamnya dikunci 16.20 pesanan sore ga langsung hangus
+func (l *Layanan) lewatAmbil(p Pesanan) bool {
+	tengahMalam := func(t time.Time) time.Time {
+		t = t.In(wita)
+		return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, wita)
+	}
+	batas := tengahMalam(p.Dibuat).Add(time.Duration(p.Tutup) * time.Minute)
+	kini := tengahMalam(l.sekarang()).Add(time.Duration(l.menitSekarang()) * time.Minute)
+	return !kini.Before(batas)
+}
+
+// tandaiTidakDiambil F-56: pesanan lunas yang lewat jam tutup ambil jadi Tidak diambil.
+// dana ga dikembalikan dan penerimaan bersihnya tetap masuk saldo mitra (F-48)
+func (l *Layanan) tandaiTidakDiambil(ctx context.Context) {
+	id, err := l.Store.BelumDiambil(ctx)
+	if err != nil {
+		return
+	}
+	for _, satu := range id {
+		_, _ = l.Store.UbahPesanan(ctx, satu, func(p *Pesanan) (Perubahan, error) {
+			if (p.Status != Disiapkan && p.Status != SiapDiambil) || !l.lewatAmbil(*p) {
+				return Perubahan{}, nil
+			}
+			p.Status = TidakDiambil
+			return Perubahan{}, nil
+		})
+	}
+}
+
 // ---------- alat bantu ----------
 
-// tagihan isi QR / nomor VA buat satu pesanan. QRIS pakai QR asli kalau
-// QRISStatis diisi, sisanya tiruan sampai Midtrans dipasang
+// tagihan isi QR / nomor VA buat satu pesanan. pakai Midtrans: kosong dulu,
+// diisi pastikanTagihan. mode uji: QRIS asli kalau QRISStatis diisi, sisanya tiruan
 func (l *Layanan) tagihan(id string, total int, metode string) map[string]string {
+	if l.Gerbang != nil {
+		return map[string]string{}
+	}
 	t := tagihanUji(id, total)
 	if metode == "qris" && l.QRISStatis != "" {
 		if qr, err := QRISDinamis(l.QRISStatis, total); err == nil {

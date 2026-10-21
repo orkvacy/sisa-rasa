@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/tema_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
@@ -269,17 +270,20 @@ class Akun extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                _BarisMenu(
+                const _BarisMenu(
                   ikon: Icons.dark_mode_outlined,
                   judul: 'Tampilan',
                   nilai: TemaCubit.label(modeTema),
                   onTap: () => _pilihTema(context),
                 ),
-                const _BarisMenu(
-                  ikon: Icons.favorite_border,
-                  judul: 'Mitra favorit',
-                  nilai: '3',
-                ),
+                // favorit cuma buat pembeli
+                if (akun['peran'] == 'pembeli')
+                  _BarisMenu(
+                    ikon: Icons.favorite_border,
+                    judul: 'Mitra favorit',
+                    nilai: '${context.watch<FavoritCubit>().state.length}',
+                    onTap: () => context.push(Rute.favorit),
+                  ),
               ],
             ),
           ),

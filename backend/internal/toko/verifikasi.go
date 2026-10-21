@@ -22,6 +22,8 @@ const (
 type StatusGerai struct {
 	Status string  `json:"status"`
 	Alasan *string `json:"alasan"`
+	// Titik gerai, nil = belum dipasang (dasbor ngingetin mitra buat masang)
+	Titik *Titik `json:"titik"`
 }
 
 // MitraAdmin satu baris di daftar mitra halaman admin
@@ -92,4 +94,16 @@ func (l *Layanan) PeriksaMitra(ctx context.Context, a akun.Akun, idMitra, status
 		return StatusGerai{}, err
 	}
 	return StatusGerai{Status: status, Alasan: catatan}, nil
+}
+
+// AturLokasi mitra masang titik gerainya dari GPS HP (halaman profil usaha)
+func (l *Layanan) AturLokasi(ctx context.Context, a akun.Akun, t Titik) error {
+	if a.Peran != "mitra" {
+		return errBukanMitra
+	}
+	// 0,0 = GPS belum dapet sinyal, bukan lokasi beneran
+	if t.Lat < -90 || t.Lat > 90 || t.Lng < -180 || t.Lng > 180 || (t.Lat == 0 && t.Lng == 0) {
+		return galat(http.StatusUnprocessableEntity, "Lokasi tidak valid. Coba ambil lokasi lagi.")
+	}
+	return l.Store.AturLokasi(ctx, a.ID, t)
 }

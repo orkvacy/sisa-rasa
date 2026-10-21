@@ -41,6 +41,15 @@ type Config struct {
 	// GoogleClientID web client ID OAuth (boleh lebih dari satu, pisah koma).
 	// kosong = masuk dengan Google dimatiin. ini bukan rahasia
 	GoogleClientID []string
+	// MidtransServerKey kunci rahasia Midtrans (isi di Coolify aja). kosong =
+	// pembayaran mode uji. MidtransProduksi = pakai server produksi, bukan sandbox
+	MidtransServerKey string
+	MidtransProduksi  bool
+	// ResendKunci kunci API Resend buat email kode atur ulang sandi (rahasia).
+	// kosong = fitur lupa sandi mati, kecuali di dev (kodenya cuma ditulis ke log)
+	ResendKunci string
+	// EmailPengirim alamat pengirim, domainnya harus udah diverifikasi di Resend
+	EmailPengirim string
 }
 
 func Baca() (Config, error) {
@@ -76,6 +85,15 @@ func Baca() (Config, error) {
 			c.GoogleClientID = append(c.GoogleClientID, id)
 		}
 	}
+	c.MidtransServerKey = strings.TrimSpace(os.Getenv("MIDTRANS_SERVER_KEY"))
+	c.MidtransProduksi = os.Getenv("MIDTRANS_PRODUKSI") == "1"
+	// akun Midtrans lama: kunci sandbox diawali SB-. akun baru ga pakai awalan,
+	// jadi cuma yang jelas sandbox (SB-) yang ditolak di mode produksi
+	if c.MidtransProduksi && strings.HasPrefix(c.MidtransServerKey, "SB-") {
+		return c, errors.New("MIDTRANS_SERVER_KEY ini kunci sandbox (diawali SB-), tapi MIDTRANS_PRODUKSI=1")
+	}
+	c.ResendKunci = strings.TrimSpace(os.Getenv("RESEND_API_KEY"))
+	c.EmailPengirim = ambil("EMAIL_PENGIRIM", "Sisa Rasa <noreply@sisarasa.web.id>")
 	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
 	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")
 	c.R2Rahasia = os.Getenv("R2_SECRET_ACCESS_KEY")

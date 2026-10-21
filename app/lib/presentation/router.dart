@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/screens/admin/verifikasi_mitra.dart';
+import 'package:sisa_rasa/presentation/screens/admin/voucher_admin.dart';
 import 'package:sisa_rasa/presentation/screens/akun.dart';
 import 'package:sisa_rasa/presentation/screens/auth/daftar.dart';
 import 'package:sisa_rasa/presentation/screens/auth/ketentuan.dart';
@@ -20,6 +21,7 @@ import 'package:sisa_rasa/presentation/screens/detail_pesanan.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_mitra.dart';
 import 'package:sisa_rasa/presentation/screens/halaman_utama.dart';
 import 'package:sisa_rasa/presentation/screens/keranjang.dart';
+import 'package:sisa_rasa/presentation/screens/mitra_favorit.dart';
 import 'package:sisa_rasa/presentation/screens/kode_ambil.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/dasbor.dart';
 import 'package:sisa_rasa/presentation/screens/mitra/detail_pesanan_mitra.dart';
@@ -66,6 +68,7 @@ abstract final class Rute {
   static const cari = '/beranda/cari';
   static const keranjang = '/beranda/keranjang';
   static const checkout = '/beranda/checkout';
+  static const favorit = '/beranda/favorit';
   static String paket(String id) => '/beranda/paket/$id';
   // nama mitra dipake sebagai id sementara (data dummy belum punya id mitra),
   // di-encode biar spasi sama simbol aman di alamat
@@ -102,6 +105,7 @@ abstract final class Rute {
 
   /// admin cuma punya satu halaman: verifikasi mitra (F-36 - F-38)
   static const admin = '/admin';
+  static const adminVoucher = '/admin/voucher';
 
   /// sesi tersimpan tapi server ga bisa dihubungi pas aplikasi dibuka
   static const tanpaKoneksi = '/tanpa-koneksi';
@@ -161,8 +165,9 @@ GoRouter buatRouter({required AkunCubit akun}) {
             lokasi.startsWith(Rute.pesanan) ||
             lokasi.startsWith(Rute.akun) ||
             lokasi == Rute.checkout ||
+            lokasi == Rute.favorit ||
             lokasi.startsWith('/mitra') ||
-            lokasi == Rute.admin;
+            lokasi.startsWith(Rute.admin);
         if (perluAkun) return Rute.masukLalu(state.uri.toString());
         return null;
       }
@@ -174,8 +179,8 @@ GoRouter buatRouter({required AkunCubit akun}) {
       // mitra ga bisa buka halaman pembeli, pembeli ga bisa buka halaman mitra
       // admin cuma boleh di halaman admin, peran lain ga boleh ke sana
       final admin = akun.state['peran'] == 'admin';
-      if (admin) return lokasi == Rute.admin ? null : Rute.admin;
-      if (lokasi == Rute.admin) return Rute.beranda;
+      if (admin) return lokasi.startsWith(Rute.admin) ? null : Rute.admin;
+      if (lokasi.startsWith(Rute.admin)) return Rute.beranda;
       final mitra = akun.state['peran'] == 'mitra';
       final diHalamanMitra = lokasi.startsWith('/mitra');
       if (mitra && !diHalamanMitra) return Rute.mitraDasbor;
@@ -214,6 +219,12 @@ GoRouter buatRouter({required AkunCubit akun}) {
       GoRoute(
         path: Rute.admin,
         builder: (context, state) => const VerifikasiMitra(),
+        routes: [
+          GoRoute(
+            path: 'voucher',
+            builder: (context, state) => const VoucherAdmin(),
+          ),
+        ],
       ),
       // StatefulShellRoute: tab bawah, isi tiap tab ga ke-reset pas pindah tab
       StatefulShellRoute(
@@ -257,6 +268,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
                     (context, state) => const Keranjang(),
                   ),
                   layarPenuh('checkout', (context, state) => const Checkout()),
+                  layarPenuh(
+                    'favorit',
+                    (context, state) => const MitraFavorit(),
+                  ),
                 ],
               ),
             ],

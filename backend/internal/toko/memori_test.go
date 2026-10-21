@@ -2,6 +2,8 @@ package toko
 
 import (
 	"context"
+	"fmt"
+	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -20,12 +22,15 @@ type storeMemori struct {
 	rek     map[string]Rekening
 	status  map[string]StatusGerai
 	cair    map[string][]Pencairan
+	favorit map[string][]string // id pembeli -> id mitra, terbaru di depan
+	voucher []Voucher
 	urut    int
 }
 
 func memoriBaru() *storeMemori {
 	return &storeMemori{nama: map[string]string{}, gerai: map[string]Gerai{}, tutup: map[string]bool{},
-		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}, status: map[string]StatusGerai{}}
+		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}, status: map[string]StatusGerai{},
+		favorit: map[string][]string{}}
 }
 
 // tambahMitra mitra contoh di tes, langsung terverifikasi kayak mitra semaian
@@ -52,6 +57,9 @@ func (s *storeMemori) lengkapi(p Paket) Paket {
 	}
 	p.GeraiTutup = s.tutup[p.IDMitra]
 	p.StatusGerai = s.statusDari(p.IDMitra).Status
+	if t := s.gerai[p.IDMitra].Titik; t != nil {
+		p.Lat, p.Lng = &t.Lat, &t.Lng
+	}
 	return p
 }
 
@@ -165,6 +173,18 @@ func (s *storeMemori) BuatPesanan(_ context.Context, baru PesananBaru,
 			return Pesanan{}, false, ErrBentrok
 		}
 	}
+	if p.idVoucher != nil {
+		dipakai := false
+		for i, v := range s.voucher {
+			if v.ID == *p.idVoucher && v.Aktif && (v.Kuota == nil || v.Terpakai < *v.Kuota) {
+				s.voucher[i].Terpakai++
+				dipakai = true
+			}
+		}
+		if !dipakai {
+			return Pesanan{}, false, errVoucherHabis
+		}
+	}
 	for i := range s.paket {
 		s.paket[i].SisaPorsi -= baru.Isi[s.paket[i].ID]
 	}
@@ -229,6 +249,13 @@ func (s *storeMemori) UbahPesanan(_ context.Context, id string,
 				}
 			}
 		}
+		if per.KembalikanStok && salinan.idVoucher != nil {
+			for k := range s.voucher {
+				if s.voucher[k].ID == *salinan.idVoucher && s.voucher[k].Terpakai > 0 {
+					s.voucher[k].Terpakai--
+				}
+			}
+		}
 		if per.KembalikanStok {
 			for _, isi := range salinan.Isi {
 				for k := range s.paket {
@@ -242,6 +269,18 @@ func (s *storeMemori) UbahPesanan(_ context.Context, id string,
 		return salinan, nil
 	}
 	return Pesanan{}, ErrTidakAda
+}
+
+func (s *storeMemori) BelumDiambil(context.Context) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var id []string
+	for _, p := range s.pesanan {
+		if p.Status == Disiapkan || p.Status == SiapDiambil {
+			id = append(id, p.ID)
+		}
+	}
+	return id, nil
 }
 
 func (s *storeMemori) MenungguLewat(_ context.Context, sekarang time.Time) ([]string, error) {
@@ -388,7 +427,9 @@ func (s *storeMemori) StatusGerai(_ context.Context, id string) (StatusGerai, er
 	if _, ada := s.nama[id]; !ada {
 		return StatusGerai{}, ErrTidakAda
 	}
-	return s.statusDari(id), nil
+	st := s.statusDari(id)
+	st.Titik = s.gerai[id].Titik
+	return st, nil
 }
 
 func (s *storeMemori) DaftarMitra(_ context.Context, status string) ([]MitraAdmin, error) {
@@ -413,6 +454,112 @@ func (s *storeMemori) PeriksaMitra(_ context.Context, id, status string, alasan 
 	}
 	s.status[id] = StatusGerai{Status: status, Alasan: alasan}
 	return nil
+}
+
+func (s *storeMemori) Favorit(_ context.Context, idPembeli string) ([]MitraFavorit, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	hasil := []MitraFavorit{}
+	for _, id := range s.favorit[idPembeli] {
+		jenis := s.gerai[id].Jenis
+		if jenis == "" {
+			jenis = "Mitra"
+		}
+		hasil = append(hasil, MitraFavorit{ID: id, Nama: s.nama[id], Jenis: jenis})
+	}
+	return hasil, nil
+}
+
+func (s *storeMemori) AturFavorit(_ context.Context, idPembeli, idMitra string, suka bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	daftar := slices.DeleteFunc(s.favorit[idPembeli], func(id string) bool { return id == idMitra })
+	if suka {
+		if _, ada := s.nama[idMitra]; !ada {
+			return ErrTidakAda
+		}
+		daftar = append([]string{idMitra}, daftar...)
+	}
+	s.favorit[idPembeli] = daftar
+	return nil
+}
+
+func (s *storeMemori) AturLokasi(_ context.Context, idMitra string, t Titik) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	g := s.gerai[idMitra]
+	g.Titik = &t
+	s.gerai[idMitra] = g
+	return nil
+}
+
+func (s *storeMemori) PesananDariKunci(_ context.Context, idPembeli, kunci string) (Pesanan, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, p := range s.pesanan {
+		if p.IDAkun == idPembeli && p.kunci == kunci {
+			return p, nil
+		}
+	}
+	return Pesanan{}, ErrTidakAda
+}
+
+func (s *storeMemori) BuatVoucher(_ context.Context, v Voucher) (Voucher, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, lama := range s.voucher {
+		if lama.Kode == v.Kode {
+			return Voucher{}, ErrBentrok
+		}
+	}
+	s.urut++
+	v.ID = fmt.Sprintf("00000000-0000-4000-8000-%012d", s.urut)
+	s.voucher = append(s.voucher, v)
+	return v, nil
+}
+
+func (s *storeMemori) SemuaVoucher(context.Context) ([]Voucher, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	hasil := make([]Voucher, 0, len(s.voucher))
+	for i := len(s.voucher) - 1; i >= 0; i-- {
+		hasil = append(hasil, s.voucher[i])
+	}
+	return hasil, nil
+}
+
+func (s *storeMemori) AturVoucherAktif(_ context.Context, id string, aktif bool) (Voucher, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.voucher {
+		if s.voucher[i].ID == id {
+			s.voucher[i].Aktif = aktif
+			return s.voucher[i], nil
+		}
+	}
+	return Voucher{}, ErrTidakAda
+}
+
+func (s *storeMemori) VoucherDariKode(_ context.Context, kode string) (Voucher, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, v := range s.voucher {
+		if v.Kode == kode {
+			return v, nil
+		}
+	}
+	return Voucher{}, ErrTidakAda
+}
+
+func (s *storeMemori) PernahPesan(_ context.Context, idPembeli string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, p := range s.pesanan {
+		if p.IDAkun == idPembeli && p.Status != Dibatalkan {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 var _ Store = (*storeMemori)(nil)

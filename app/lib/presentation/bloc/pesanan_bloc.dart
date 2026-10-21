@@ -171,6 +171,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
           isi: event.keranjang,
           metode: event.metode,
           kunci: event.kunci ?? _kunciAcak(),
+          voucher: event.voucher,
         ),
         stokBerubah: true,
       );
@@ -236,7 +237,10 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
       'hargaNormal': hargaNormal,
       'subtotal': subtotal,
       'biayaLayanan': biaya,
-      'total': subtotal + biaya,
+      // potongan voucher ditanggung platform: subtotal (bagian mitra) tetap
+      'potongan': event.potongan,
+      'kodeVoucher': event.voucher,
+      'total': subtotal + biaya - event.potongan,
       'hemat': hargaNormal - subtotal,
       // batasBayar buat hitung mundur, batasMenit buat ditulis "sampai 16.35"
       'batasBayar': DateTime.now().add(Duration(minutes: menit)),
@@ -254,7 +258,7 @@ class PesananBloc extends Bloc<PesananEvent, List<Map<String, dynamic>>> {
     final tagihan = await pembayaran.buatTagihan(
       idPesanan: id,
       metode: event.metode,
-      total: subtotal + biaya,
+      total: subtotal + biaya - event.potongan,
     );
     emit(_ubah(id, (lama) => {...lama, 'tagihan': tagihan}));
   }

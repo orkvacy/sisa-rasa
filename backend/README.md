@@ -9,26 +9,37 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/healthz` | Cek server + koneksi database |
 | `POST` | `/v1/akun/daftar` | `{nama, email, sandi, peran}` → `{akun, token}` (F-29) |
 | `POST` | `/v1/akun/masuk` | `{email, sandi}` → `{akun, token}` (F-30) |
+| `POST` | `/v1/akun/lupa-sandi` | `{email}` kirim kode 6 angka ke email (berlaku 10 menit). Selalu 204, terdaftar atau tidak |
+| `POST` | `/v1/akun/lupa-sandi/cek` | `{email, kode}` → `{tiket}`. Salah 5 kali = kode hangus |
+| `POST` | `/v1/akun/lupa-sandi/atur` | `{tiket, sandi}` ganti sandi, semua sesi lama dicabut |
 | `POST` | `/v1/akun/google` | `{idToken}` masuk / daftar pembeli pakai Google. Token diperiksa ke kunci publik Google. Email yang sudah terdaftar pakai sandi ditolak 409 (tidak disambung otomatis) |
 | `GET` | `/v1/akun/saya` | Header `Authorization: Bearer <token>` → `{akun}` |
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
 | `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
 | `POST` | `/v1/akun/hapus` | `{sandi}` (akun Google: `{idToken}`) hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
 | `GET` | `/v1/paket` | Paket dari mitra terverifikasi, boleh tanpa masuk (F-65). Mitra yang masuk ikut melihat paketnya sendiri walau belum diverifikasi |
+| `GET` | `/v1/favorit` | Khusus pembeli: `{mitra: [{id, nama, jenis}]}` mitra favorit, terbaru di depan |
+| `PUT` `DELETE` | `/v1/favorit/{idMitra}` | Simpan / lepas mitra favorit. Idempoten, aman diulang |
 | `GET` | `/v1/mitra/status` | `{status, alasan}` status verifikasi gerai: `menunggu` / `terverifikasi` / `ditolak` / `nonaktif` (F-37) |
 | `GET` `POST` | `/v1/mitra/paket` | Paket milik mitra / tambah paket (F-15) |
 | `PUT` `DELETE` | `/v1/mitra/paket/{id}` | Ubah / hapus paket (F-18) |
 | `PATCH` | `/v1/mitra/paket/{id}/sisa` | `{sisa}` (F-44) |
 | `PATCH` | `/v1/mitra/paket/{id}/aktif` | `{aktif}` (F-45) |
+| `PUT` | `/v1/mitra/gerai/lokasi` | `{lat, lng}` titik gerai dari GPS HP mitra. Paket ikut membawa `lat`/`lng`, jarak dihitung di HP pembeli (lokasi pembeli tidak dikirim ke server) |
 | `PUT` | `/v1/mitra/gerai/tutup` | `{tutup}` tutup gerai sementara (F-51) |
 | `GET` | `/v1/mitra/saldo` | `{rekening, tersedia, riwayat}` saldo dari pesanan selesai dikurangi komisi 10% dan pencairan (F-48, F-50) |
 | `PUT` | `/v1/mitra/rekening` | `{bank, nomor, nama}` nama harus sama dengan nama usaha (F-49) |
 | `POST` | `/v1/mitra/foto` | Multipart field `foto` (JPG/PNG/WebP, maks 8 MB). Dikecilkan ke lebar 1200 px, EXIF dibuang, disimpan ke R2. Jawab `{foto: url}` |
 | `POST` | `/v1/mitra/ambil` | `{kode}` scan / ketik kode ambil, pesanan selesai (F-46) |
 | `GET` | `/v1/pesanan` | Pesanan pembeli, atau pesanan masuk mitra (yang sudah dibayar) |
-| `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode}` + header **`Idempotency-Key`** |
+| `POST` | `/v1/pesanan` | `{isi: {idPaket: jumlah}, metode, voucher?}` + header **`Idempotency-Key`**. Voucher mengurangi `total` (field `potongan`), `subtotal` dan penerimaan mitra tetap |
+| `GET` | `/v1/voucher` | Pembeli: voucher publik yang sedang berlaku dan boleh dipakai akun ini |
+| `POST` | `/v1/voucher/cek` | `{kode, subtotal}` → `{voucher, potongan}` cek voucher di checkout sebelum bayar |
+| `GET` `POST` | `/v1/admin/voucher` | Admin: daftar / buat voucher `{kode, judul, persen, maksPotongan, minBelanja, mulai, berakhir, kuota?, khususBaru, publik}` |
+| `PATCH` | `/v1/admin/voucher/{id}` | Admin: `{aktif}` nyalakan / matikan voucher |
 | `GET` | `/v1/pesanan/{id}` | Satu pesanan |
-| `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Sementara selalu lunas, mode uji |
+| `POST` | `/v1/pesanan/{id}/cek-bayar` | Cek lunas (NF-10). Dengan Midtrans: status ditanya ke Midtrans, 409 kalau belum dibayar. Tanpa Midtrans (mode uji): langsung lunas |
+| `POST` | `/v1/pembayaran/midtrans` | Webhook Midtrans (tanpa sesi). Tanda tangan SHA512 dicek, status ditanya ulang ke Midtrans, lalu pesanan lunas / batal. Idempoten |
 | `POST` | `/v1/pesanan/{id}/batal` | `{alasan}` pembeli batal sebelum bayar, porsi kembali (F-55) |
 | `GET` | `/v1/admin/mitra?status=` | Khusus admin: daftar mitra, filter status opsional (F-36) |
 | `POST` | `/v1/admin/mitra/{id}/periksa` | Khusus admin: `{status, alasan}` setujui / tolak / nonaktifkan mitra. Alasan wajib untuk ditolak & nonaktif (F-37, F-38) |
@@ -115,6 +126,10 @@ Keamanan yang sudah dipasang:
 | `R2_PUBLIK` | | Alamat publik bucket, misal `https://cdn.sisarasa.web.id` |
 | `FOLDER_FOTO` | `data/foto` (`/data/foto` di Docker) | Tempat foto kalau R2 belum diatur. Di Coolify pasang Persistent Storage ke `/data` |
 | `ADMIN_EMAIL` `ADMIN_SANDI` | kosong | Akun admin dibuat saat server nyala kalau belum ada (sandi min. 12 karakter, rahasia, isi di Coolify saja). Admin tidak bisa daftar lewat aplikasi |
+| `MIDTRANS_SERVER_KEY` | kosong | Server Key Midtrans (rahasia, isi di Coolify saja). Kosong = pembayaran mode uji |
+| `MIDTRANS_PRODUKSI` | kosong | Isi `1` kalau pakai kunci produksi (api.midtrans.com). Kosong = sandbox. Kunci berawalan `SB-` (akun Midtrans lama) ditolak kalau ini `1` |
+| `RESEND_API_KEY` | kosong | Kunci API Resend untuk email kode lupa sandi (rahasia, isi di Coolify saja). Kosong = fitur lupa sandi mati (di dev kodenya hanya ditulis ke log) |
+| `EMAIL_PENGIRIM` | `Sisa Rasa <noreply@sisarasa.web.id>` | Alamat pengirim, domainnya harus sudah diverifikasi di Resend |
 | `GOOGLE_CLIENT_ID` | kosong | Web client ID OAuth dari Google Cloud (bukan rahasia). Kosong = masuk dengan Google mati |
 | `SEMAI_AKUN_CONTOH` | kosong | Isi `1` di server demo supaya akun contoh dibuat. Ditolak kalau `LINGKUNGAN=production` |
 

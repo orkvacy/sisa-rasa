@@ -22,6 +22,8 @@ import (
 	"github.com/orkvacy/sisa-rasa/backend/internal/db"
 	"github.com/orkvacy/sisa-rasa/backend/internal/foto"
 	"github.com/orkvacy/sisa-rasa/backend/internal/httpx"
+	"github.com/orkvacy/sisa-rasa/backend/internal/midtrans"
+	"github.com/orkvacy/sisa-rasa/backend/internal/surel"
 	"github.com/orkvacy/sisa-rasa/backend/internal/toko"
 )
 
@@ -50,6 +52,13 @@ func jalan() error {
 	}
 
 	layananAkun := &akun.Layanan{Store: akun.StorePG{Pool: pool}}
+	// F-61 email kode atur ulang sandi
+	switch {
+	case cfg.ResendKunci != "":
+		layananAkun.Pengirim = &surel.Resend{Kunci: cfg.ResendKunci, Dari: cfg.EmailPengirim}
+	case cfg.Dev():
+		layananAkun.Pengirim = surel.Log{}
+	}
 	if len(cfg.GoogleClientID) > 0 {
 		layananAkun.Google = &akun.PemeriksaGoogle{ClientID: cfg.GoogleClientID}
 	}
@@ -67,6 +76,10 @@ func jalan() error {
 	layananToko := &toko.Layanan{Store: toko.StorePG{Pool: pool}, JamDemo: cfg.JamDemo,
 		PencairanUji: cfg.Lingkungan != "production", QRISStatis: cfg.QRISStatis,
 		FotoSah: penyimpananFoto.Sah}
+	if cfg.MidtransServerKey != "" {
+		layananToko.Gerbang = &midtrans.Klien{ServerKey: cfg.MidtransServerKey, Produksi: cfg.MidtransProduksi}
+		slog.Info("pembayaran lewat Midtrans", "produksi", cfg.MidtransProduksi)
+	}
 	if cfg.QRISStatis != "" {
 		if err := toko.CekQRIS(cfg.QRISStatis); err != nil {
 			return fmt.Errorf("QRIS_STATIS: %w", err)

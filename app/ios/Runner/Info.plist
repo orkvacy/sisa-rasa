@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Sisa Rasa memakai lokasimu untuk menampilkan jarak ke mitra terdekat. Lokasimu tidak dikirim ke server.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Sisa Rasa memakai kamera untuk memindai kode ambil pesanan pembeli.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

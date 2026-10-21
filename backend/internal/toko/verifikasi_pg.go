@@ -10,10 +10,14 @@ import (
 func (s StorePG) StatusGerai(ctx context.Context, idMitra string) (StatusGerai, error) {
 	// mitra yang belum punya baris gerai (baru daftar, belum bikin paket) = menunggu
 	var st StatusGerai
+	var lat, lng *float64
 	err := s.Pool.QueryRow(ctx, `
-		SELECT COALESCE(g.status, 'menunggu'), g.alasan
+		SELECT COALESCE(g.status, 'menunggu'), g.alasan, g.lat, g.lng
 		FROM akun a LEFT JOIN gerai g ON g.id_akun = a.id
-		WHERE a.id = $1 AND a.peran = 'mitra'`, idMitra).Scan(&st.Status, &st.Alasan)
+		WHERE a.id = $1 AND a.peran = 'mitra'`, idMitra).Scan(&st.Status, &st.Alasan, &lat, &lng)
+	if lat != nil && lng != nil {
+		st.Titik = &Titik{Lat: *lat, Lng: *lng}
+	}
 	return st, petakan(err)
 }
 

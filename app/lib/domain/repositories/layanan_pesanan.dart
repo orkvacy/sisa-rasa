@@ -13,6 +13,7 @@ abstract class LayananPesanan {
     required Map<String, int> isi,
     required String metode,
     required String kunci,
+    String? voucher,
   });
 
   Future<Map<String, dynamic>> cekBayar(String id);

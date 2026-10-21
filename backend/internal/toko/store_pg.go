@@ -37,7 +37,7 @@ func petakan(err error) error {
 
 const kolomPaket = `
 	p.id, p.id_mitra, a.nama, COALESCE(g.jenis, 'Mitra'), COALESCE(g.alamat, ''),
-	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), COALESCE(g.status, 'menunggu'),
+	COALESCE(g.jarak, ''), COALESCE(g.tutup, false), COALESCE(g.status, 'menunggu'), g.lat, g.lng,
 	p.nama, p.deskripsi, p.kategori,
 	p.foto, p.halal, p.meja_berbagi, p.harga_asli, p.harga_diskon, p.total_porsi,
 	p.sisa_porsi, p.mulai, p.tutup, p.nonaktif, p.dihapus`
@@ -50,7 +50,7 @@ const dariPaket = `
 func pindaiPaket(baris pgx.Row) (Paket, error) {
 	var p Paket
 	err := baris.Scan(&p.ID, &p.IDMitra, &p.Mitra, &p.JenisMitra, &p.Alamat,
-		&p.Jarak, &p.GeraiTutup, &p.StatusGerai, &p.Nama, &p.Deskripsi, &p.Kategori,
+		&p.Jarak, &p.GeraiTutup, &p.StatusGerai, &p.Lat, &p.Lng, &p.Nama, &p.Deskripsi, &p.Kategori,
 		&p.Foto, &p.Halal, &p.MejaBerbagi, &p.HargaAsli, &p.HargaDiskon, &p.TotalPorsi,
 		&p.SisaPorsi, &p.Mulai, &p.Tutup, &p.Nonaktif, &p.dihapus)
 	return p, err
@@ -88,10 +88,23 @@ func (s StorePG) satuPaket(ctx context.Context, idMitra, id string) (Paket, erro
 }
 
 func (s StorePG) SimpanGerai(ctx context.Context, idMitra string, g Gerai) error {
+	var lat, lng *float64
+	if g.Titik != nil {
+		lat, lng = &g.Titik.Lat, &g.Titik.Lng
+	}
 	_, err := s.Pool.Exec(ctx, `
-		INSERT INTO gerai (id_akun, jenis, alamat, jarak, status) VALUES ($1, $2, $3, $4, 'terverifikasi')
-		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4, status = 'terverifikasi'`,
-		idMitra, g.Jenis, g.Alamat, g.Jarak)
+		INSERT INTO gerai (id_akun, jenis, alamat, jarak, status, lat, lng)
+		VALUES ($1, $2, $3, $4, 'terverifikasi', $5, $6)
+		ON CONFLICT (id_akun) DO UPDATE SET jenis = $2, alamat = $3, jarak = $4,
+			status = 'terverifikasi', lat = COALESCE($5, gerai.lat), lng = COALESCE($6, gerai.lng)`,
+		idMitra, g.Jenis, g.Alamat, g.Jarak, lat, lng)
+	return petakan(err)
+}
+
+func (s StorePG) AturLokasi(ctx context.Context, idMitra string, t Titik) error {
+	_, err := s.Pool.Exec(ctx, `
+		INSERT INTO gerai (id_akun, lat, lng) VALUES ($1, $2, $3)
+		ON CONFLICT (id_akun) DO UPDATE SET lat = $2, lng = $3`, idMitra, t.Lat, t.Lng)
 	return petakan(err)
 }
 
@@ -176,7 +189,8 @@ const kolomPesanan = `
 	id, nomor, id_pembeli, id_mitra, nama_pembeli, nama_mitra, alamat, foto, mulai, tutup,
 	status, metode, kode, subtotal, harga_normal, biaya_layanan, total, dipesan_menit,
 	dibuat, batas_bayar, batas_menit, dibayar_pada, dibayar_menit, diambil_pada,
-	dibatalkan_pada, alasan, otomatis, oleh_mitra, tagihan, kunci_idempotensi, sidik_isi`
+	dibatalkan_pada, alasan, otomatis, oleh_mitra, tagihan, kunci_idempotensi, sidik_isi,
+	potongan, kode_voucher, id_voucher::text`
 
 func pindaiPesanan(baris pgx.Row) (Pesanan, error) {
 	var p Pesanan
@@ -184,7 +198,8 @@ func pindaiPesanan(baris pgx.Row) (Pesanan, error) {
 		&p.Alamat, &p.Foto, &p.Mulai, &p.Tutup, &p.Status, &p.Metode, &p.Kode,
 		&p.Subtotal, &p.HargaNormal, &p.BiayaLayanan, &p.Total, &p.Dipesan,
 		&p.Dibuat, &p.BatasBayar, &p.BatasMenit, &p.DibayarPada, &p.Dibayar, &p.DiambilPada,
-		&p.DibatalkanPada, &p.Alasan, &p.Otomatis, &p.OlehMitra, &p.Tagihan, &p.kunci, &p.sidik)
+		&p.DibatalkanPada, &p.Alasan, &p.Otomatis, &p.OlehMitra, &p.Tagihan, &p.kunci, &p.sidik,
+		&p.Potongan, &p.KodeVoucher, &p.idVoucher)
 	p.Hemat = p.HargaNormal - p.Subtotal
 	return p, err
 }
@@ -307,12 +322,14 @@ func (s StorePG) BuatPesanan(ctx context.Context, baru PesananBaru,
 	_, err = tx.Exec(ctx, `
 		INSERT INTO pesanan (id, nomor, id_pembeli, id_mitra, nama_pembeli, nama_mitra, alamat,
 			foto, mulai, tutup, status, metode, subtotal, harga_normal, biaya_layanan, total,
-			dipesan_menit, dibuat, batas_bayar, batas_menit, tagihan, kunci_idempotensi, sidik_isi)
+			dipesan_menit, dibuat, batas_bayar, batas_menit, tagihan, kunci_idempotensi, sidik_isi,
+			potongan, kode_voucher, id_voucher)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19, $20, $21, $22, $23)`,
+			$17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
 		p.ID, p.Nomor, p.IDAkun, p.IDMitra, p.NamaPembeli, p.Mitra, p.Alamat,
 		p.Foto, p.Mulai, p.Tutup, p.Status, p.Metode, p.Subtotal, p.HargaNormal, p.BiayaLayanan, p.Total,
-		p.Dipesan, p.Dibuat, p.BatasBayar, p.BatasMenit, p.Tagihan, p.kunci, p.sidik)
+		p.Dipesan, p.Dibuat, p.BatasBayar, p.BatasMenit, p.Tagihan, p.kunci, p.sidik,
+		p.Potongan, p.KodeVoucher, p.idVoucher)
 	if err != nil {
 		// nomor kembar, atau request kembar dengan kunci sama selesai duluan:
 		// Layanan ngulang, dan percobaan berikutnya ketemu pesanan lama di langkah 1
@@ -330,10 +347,34 @@ func (s StorePG) BuatPesanan(ctx context.Context, baru PesananBaru,
 			return Pesanan{}, false, petakan(err)
 		}
 	}
+	// 5. kuota voucher dipotong di transaksi yang sama: kalau keduluan pembeli lain
+	//    dan kuotanya abis, pesanan ini ikut batal (stok ga jadi berkurang)
+	if p.idVoucher != nil {
+		tag, err := tx.Exec(ctx, `
+			UPDATE voucher SET terpakai = terpakai + 1
+			WHERE id = $1 AND aktif AND (kuota IS NULL OR terpakai < kuota)`, *p.idVoucher)
+		if err != nil {
+			return Pesanan{}, false, petakan(err)
+		}
+		if tag.RowsAffected() == 0 {
+			return Pesanan{}, false, errVoucherHabis
+		}
+	}
 	if err := tx.Commit(ctx); err != nil {
 		return Pesanan{}, false, petakan(err)
 	}
 	return p, true, nil
+}
+
+func (s StorePG) PesananDariKunci(ctx context.Context, idPembeli, kunci string) (Pesanan, error) {
+	var id string
+	err := s.Pool.QueryRow(ctx, `
+		SELECT id FROM pesanan WHERE id_pembeli = $1 AND kunci_idempotensi = $2`,
+		idPembeli, kunci).Scan(&id)
+	if err != nil {
+		return Pesanan{}, petakan(err)
+	}
+	return s.Pesanan(ctx, id)
 }
 
 func (s StorePG) UbahPesanan(ctx context.Context, id string,
@@ -369,6 +410,13 @@ func (s StorePG) UbahPesanan(ctx context.Context, id string,
 	if err != nil {
 		return Pesanan{}, petakan(err)
 	}
+	if perubahan.KembalikanStok && p.idVoucher != nil {
+		// belum dibayar terus batal: kuota vouchernya balik
+		if _, err := tx.Exec(ctx, `
+			UPDATE voucher SET terpakai = GREATEST(terpakai - 1, 0) WHERE id = $1`, *p.idVoucher); err != nil {
+			return Pesanan{}, petakan(err)
+		}
+	}
 	if perubahan.KembalikanStok {
 		for _, isi := range p.Isi {
 			if _, err := tx.Exec(ctx, `
@@ -382,6 +430,16 @@ func (s StorePG) UbahPesanan(ctx context.Context, id string,
 		return Pesanan{}, petakan(err)
 	}
 	return p, nil
+}
+
+func (s StorePG) BelumDiambil(ctx context.Context) ([]string, error) {
+	baris, err := s.Pool.Query(ctx, `
+		SELECT id FROM pesanan WHERE status IN ('disiapkan', 'siap_diambil')
+		ORDER BY dibuat LIMIT 500`)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(baris, pgx.RowTo[string])
 }
 
 func (s StorePG) MenungguLewat(ctx context.Context, sekarang time.Time) ([]string, error) {

@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- manggil server Go (API_URL) -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- jarak ke gerai mitra (F-66). cuma dipakai di HP, ga dikirim ke server -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- simpan QR pembayaran ke galeri (plugin gal), cuma perlu di Android 10 ke bawah -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

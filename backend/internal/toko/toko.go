@@ -27,6 +27,10 @@ type Paket struct {
 	Alamat     string `json:"alamat"`
 	Jarak      string `json:"jarak"`
 	GeraiTutup bool   `json:"geraiTutup"`
+	// titik gerai. jarak ke pembeli dihitung di HP, lokasi pembeli ga dikirim ke server.
+	// null kalau mitranya belum masang titik
+	Lat *float64 `json:"lat"`
+	Lng *float64 `json:"lng"`
 	// StatusGerai verifikasi mitra (F-37). pembeli cuma liat yang terverifikasi
 	StatusGerai string `json:"statusGerai"`
 	Nama        string `json:"nama"`
@@ -65,6 +69,14 @@ type Gerai struct {
 	Jenis  string
 	Alamat string
 	Jarak  string
+	// Titik koordinat gerai, nil = belum dipasang
+	Titik *Titik
+}
+
+// Titik koordinat lintang / bujur (WGS84, sama kayak GPS di HP)
+type Titik struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
 }
 
 // IsiPesanan satu paket di dalam pesanan, disalin pas dipesan
@@ -80,26 +92,30 @@ type IsiPesanan struct {
 
 // Pesanan lengkap. Kode cuma diisi setelah lunas
 type Pesanan struct {
-	ID             string            `json:"id"`
-	Nomor          string            `json:"nomor"`
-	IDAkun         string            `json:"idAkun"`
-	IDMitra        string            `json:"idMitra"`
-	NamaPembeli    string            `json:"namaPembeli"`
-	Mitra          string            `json:"mitra"`
-	Alamat         string            `json:"alamat"`
-	Foto           string            `json:"foto"`
-	Mulai          int               `json:"mulai"`
-	Tutup          int               `json:"tutup"`
-	Status         string            `json:"status"`
-	Metode         string            `json:"metode"`
-	Kode           *string           `json:"kode"`
-	Isi            []IsiPesanan      `json:"isi"`
-	Porsi          int               `json:"porsi"`
-	Subtotal       int               `json:"subtotal"`
-	HargaNormal    int               `json:"hargaNormal"`
-	BiayaLayanan   int               `json:"biayaLayanan"`
-	Total          int               `json:"total"`
-	Hemat          int               `json:"hemat"`
+	ID           string       `json:"id"`
+	Nomor        string       `json:"nomor"`
+	IDAkun       string       `json:"idAkun"`
+	IDMitra      string       `json:"idMitra"`
+	NamaPembeli  string       `json:"namaPembeli"`
+	Mitra        string       `json:"mitra"`
+	Alamat       string       `json:"alamat"`
+	Foto         string       `json:"foto"`
+	Mulai        int          `json:"mulai"`
+	Tutup        int          `json:"tutup"`
+	Status       string       `json:"status"`
+	Metode       string       `json:"metode"`
+	Kode         *string      `json:"kode"`
+	Isi          []IsiPesanan `json:"isi"`
+	Porsi        int          `json:"porsi"`
+	Subtotal     int          `json:"subtotal"`
+	HargaNormal  int          `json:"hargaNormal"`
+	BiayaLayanan int          `json:"biayaLayanan"`
+	Total        int          `json:"total"`
+	Hemat        int          `json:"hemat"`
+	// Potongan dari voucher platform, udah dikurangin dari Total
+	Potongan       int     `json:"potongan"`
+	KodeVoucher    *string `json:"kodeVoucher"`
+	idVoucher      *string
 	Dipesan        int               `json:"dipesan"`
 	Dibuat         time.Time         `json:"dibuat"`
 	BatasBayar     time.Time         `json:"batasBayar"`
@@ -133,6 +149,8 @@ type PesananBaru struct {
 	Metode      string
 	Kunci       string
 	Sidik       string
+	// Voucher yang udah lolos cekVoucher, nil = tanpa voucher
+	Voucher *Voucher
 }
 
 var (
@@ -156,6 +174,8 @@ type Store interface {
 	SemuaPaket(ctx context.Context, idMitra string) ([]Paket, error)
 	PaketMitra(ctx context.Context, idMitra string) ([]Paket, error)
 	SimpanGerai(ctx context.Context, idMitra string, g Gerai) error
+	// AturLokasi titik gerai dari GPS HP mitra
+	AturLokasi(ctx context.Context, idMitra string, t Titik) error
 	AturGerai(ctx context.Context, idMitra string, tutup bool) error
 	BuatPaket(ctx context.Context, idMitra string, isi IsianPaket) (Paket, error)
 	// UbahPaket: kalau total porsi diganti, sisa ikut geser sebanyak selisihnya
@@ -178,8 +198,15 @@ type Store interface {
 		ubah func(p *Pesanan) (Perubahan, error)) (Pesanan, error)
 	// MenungguLewat id pesanan yang masih nunggu bayar tapi batasnya udah lewat
 	MenungguLewat(ctx context.Context, sekarang time.Time) ([]string, error)
+	// BelumDiambil id pesanan lunas yang belum diambil (disiapkan / siap diambil).
+	// lewat jam tutup ambil atau belum, dicek di Layanan
+	BelumDiambil(ctx context.Context) ([]string, error)
 
 	StoreChat
 	StoreSaldo
 	StoreVerifikasi
+	StoreFavorit
+	StoreVoucher
+	// PesananDariKunci pesanan pembeli dengan Idempotency-Key ini, buat request yang diulang
+	PesananDariKunci(ctx context.Context, idPembeli, kunci string) (Pesanan, error)
 }

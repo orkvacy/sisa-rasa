@@ -149,21 +149,30 @@ class AkunApi implements LayananAkun {
     _isi(res);
   }
 
-  // atur ulang kata sandi lewat email (F-61) belum ada di server
-  static const _belumAda = GagalAkun(
-    'Atur ulang kata sandi belum tersedia. Hubungi admin Sisa Rasa.',
-  );
+  // F-61 atur ulang kata sandi: kode 6 angka dikirim server ke email
+  Future<Map<String, dynamic>> _kirimJson(String jalur, Object isi) async {
+    final res = await _kirim(
+      () => _klien.post(_uri(jalur), headers: _kepala(), body: jsonEncode(isi)),
+    );
+    return _isi(res);
+  }
 
   @override
-  Future<void> mintaKodeReset(String email) async => throw _belumAda;
+  Future<void> mintaKodeReset(String email) =>
+      _kirimJson('/v1/akun/lupa-sandi', {'email': email});
 
   @override
-  Future<String> cekKodeReset(String email, String kode) async =>
-      throw _belumAda;
+  Future<String> cekKodeReset(String email, String kode) async {
+    final hasil = await _kirimJson('/v1/akun/lupa-sandi/cek', {
+      'email': email,
+      'kode': kode,
+    });
+    return hasil['tiket'] as String;
+  }
 
   @override
-  Future<void> aturSandiBaru(String tiket, String sandi) async =>
-      throw _belumAda;
+  Future<void> aturSandiBaru(String tiket, String sandi) =>
+      _kirimJson('/v1/akun/lupa-sandi/atur', {'tiket': tiket, 'sandi': sandi});
 
   @override
   bool get modeUji => false;

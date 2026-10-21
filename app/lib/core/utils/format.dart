@@ -67,6 +67,10 @@ const _bulan = [
 String _jamMenit(DateTime waktu) =>
     '${waktu.hour.toString().padLeft(2, '0')}.${waktu.minute.toString().padLeft(2, '0')}';
 
+/// contoh "30 Sep 2026", buat masa berlaku voucher
+String tanggalPendek(DateTime waktu) =>
+    '${waktu.day} ${_bulan[waktu.month - 1]} ${waktu.year}';
+
 /// contoh "30 Sep, 17.12", dipake di kartu pesanan
 String tanggalSingkat(DateTime waktu) =>
     '${waktu.day} ${_bulan[waktu.month - 1]}, ${_jamMenit(waktu)}';

@@ -130,6 +130,10 @@ func (s StorePG) HapusAkun(ctx context.Context, idAkun string, sekarang time.Tim
 		UPDATE pesanan SET nama_pembeli = 'Akun dihapus' WHERE id_pembeli = $1`, idAkun); err != nil {
 		return err
 	}
+	// mitra favorit juga data pribadi, ga perlu disimpan
+	if _, err := tx.Exec(ctx, `DELETE FROM favorit WHERE id_pembeli = $1`, idAkun); err != nil {
+		return err
+	}
 	return tx.Commit(ctx)
 }
 

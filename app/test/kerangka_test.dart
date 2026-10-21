@@ -10,6 +10,8 @@ import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/screens/beranda.dart';
 import 'package:sisa_rasa/presentation/widgets/kerangka.dart';
 
+import 'bantu_lokasi.dart';
+
 /// server pura-pura: tiap muat nunggu [jawab] diselesaiin dari tes
 class _PaketLambat extends PaketLokal {
   Completer<List<Map<String, dynamic>>> jawab = Completer();
@@ -35,6 +37,7 @@ void main() {
             providers: [
               BlocProvider.value(value: cubit),
               BlocProvider(create: (_) => KeranjangCubit()),
+              lokasiUji(),
             ],
             child: Beranda(onBukaMitra: (_) {}),
           ),
