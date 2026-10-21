@@ -82,6 +82,18 @@ func (s *storeMemori) UbahNama(_ context.Context, id, nama string) error {
 	return nil
 }
 
+func (s *storeMemori) AturFoto(_ context.Context, id, url string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for email, a := range s.akun {
+		if a.ID == id {
+			a.Foto = url
+			s.akun[email] = a
+		}
+	}
+	return nil
+}
+
 // pesananAktif id akun yang pura-puranya masih punya pesanan berjalan
 var pesananAktif = map[string]bool{}
 
@@ -95,7 +107,7 @@ func (s *storeMemori) HapusAkun(_ context.Context, id string, sekarang time.Time
 		if a.ID == id {
 			delete(s.akun, email)
 			a.Nama, a.Email, a.HashSandi = "Akun dihapus", "dihapus-"+id+"@sisarasa.invalid", "!"
-			a.GoogleSub = ""
+			a.GoogleSub, a.Foto = "", ""
 			s.akun[a.Email] = a
 		}
 	}

@@ -89,6 +89,8 @@ void main() {
     expect(find.textContaining('Restoran · 0,8 km'), findsOneWidget);
     await tester.tap(find.byKey(const Key('tombol-lokasi')));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('lokasi-gps')));
+    await tester.pumpAndSettle();
     expect(find.text('Izin lokasi belum diberikan.'), findsOneWidget);
   });
 

@@ -2,6 +2,7 @@ package foto
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"image"
 	"image/color"
@@ -101,5 +102,33 @@ func TestSah(t *testing.T) {
 		if disk.Sah(url) != sah[0] || r2.Sah(url) != sah[1] {
 			t.Errorf("%s: disk %v r2 %v", url, disk.Sah(url), r2.Sah(url))
 		}
+	}
+}
+
+func TestUnggahProfil(t *testing.T) {
+	disk := Disk{Folder: t.TempDir()}
+	var dipasang string
+	atur := func(_ context.Context, a akun.Akun, url string) (akun.Akun, error) {
+		dipasang = url
+		a.Foto = url
+		return a, nil
+	}
+	var badan bytes.Buffer
+	m := multipart.NewWriter(&badan)
+	f, _ := m.CreateFormFile("foto", "saya.png")
+	_, _ = f.Write(pngContoh(40, 40))
+	_ = m.Close()
+	r := httptest.NewRequest("POST", "/v1/akun/foto", &badan)
+	r.Header.Set("Content-Type", m.FormDataContentType())
+	// pembeli juga boleh: foto profil bukan foto paket
+	r = r.WithContext(akun.KeKonteks(r.Context(), akun.Akun{ID: "p1", Nama: "Rani", Peran: "pembeli"}))
+	w := httptest.NewRecorder()
+	UnggahProfil(disk, atur).ServeHTTP(w, r)
+	var hasil struct {
+		Akun akun.Akun `json:"akun"`
+	}
+	_ = json.Unmarshal(w.Body.Bytes(), &hasil)
+	if w.Code != 200 || !disk.Sah(dipasang) || hasil.Akun.Foto != dipasang {
+		t.Fatalf("unggah profil: %d %q %+v", w.Code, dipasang, hasil.Akun)
 	}
 }

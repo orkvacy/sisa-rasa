@@ -134,6 +134,42 @@ class AkunTiruan implements LayananAkun {
       throw const GagalAkun('Masuk dengan Google butuh server.');
 
   @override
+  Future<Map<String, String>> gantiSandi(
+    String token,
+    String lama,
+    String baru,
+  ) async {
+    final akun = await _akunDariToken(token);
+    if (akun['sandi'] != lama) throw const GagalAkun('Kata sandi lama salah.');
+    if (baru.length < panjangSandiMinimal) {
+      throw const GagalAkun('Kata sandi baru minimal 8 karakter.');
+    }
+    if (baru == lama) {
+      throw const GagalAkun('Kata sandi baru harus beda dari yang lama.');
+    }
+    final email = akun['email']!;
+    akun['sandi'] = baru;
+    // HP lain yg masih masuk dikeluarin, HP ini dapet sesi baru
+    _versiSesi[email] = (_versiSesi[email] ?? 0) + 1;
+    return _bukaSesi(akun);
+  }
+
+  /// tiruan ga punya server foto: berkasnya langsung dipakai dari HP
+  @override
+  Future<Map<String, String>> aturFoto(String token, String jalurBerkas) async {
+    final akun = await _akunDariToken(token);
+    akun['foto'] = 'file://$jalurBerkas';
+    return _tanpaSandi(akun);
+  }
+
+  @override
+  Future<Map<String, String>> hapusFoto(String token) async {
+    final akun = await _akunDariToken(token);
+    akun.remove('foto');
+    return _tanpaSandi(akun);
+  }
+
+  @override
   Future<void> hapusAkun(
     String token,
     String sandi, {

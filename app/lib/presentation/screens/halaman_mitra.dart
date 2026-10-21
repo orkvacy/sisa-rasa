@@ -184,14 +184,14 @@ class HalamanMitra extends StatelessWidget {
                             final cubit = context.read<KeranjangCubit>();
                             if (baru == 0) {
                               cubit.hapus(paket['id']);
+                              kabarJumlah(
+                                context,
+                                nama: paket['nama'],
+                                jumlah: 0,
+                              );
                             } else {
                               cubit.ubahJumlah(paket['id'], baru);
                             }
-                            kabarJumlah(
-                              context,
-                              nama: paket['nama'],
-                              jumlah: baru,
-                            );
                           },
                         ),
                       ),

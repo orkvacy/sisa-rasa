@@ -134,6 +134,8 @@ func jalan() error {
 	// foto paket: unggah 30 kali per menit per IP
 	batasFoto := httpx.NewPembatas(30, time.Minute, cfg.DiBelakangProxy)
 	mux.Handle("POST /v1/mitra/foto", batasFoto.Bungkus(layananAkun.Wajib(foto.Unggah(penyimpananFoto))))
+	mux.Handle("POST /v1/akun/foto", batasFoto.Bungkus(layananAkun.Wajib(
+		foto.UnggahProfil(penyimpananFoto, layananAkun.AturFoto))))
 	if disk, ok := penyimpananFoto.(foto.Disk); ok {
 		mux.Handle("GET /v1/foto/{nama}", disk.Sajikan())
 	}

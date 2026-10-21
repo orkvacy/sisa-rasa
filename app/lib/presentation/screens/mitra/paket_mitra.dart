@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sisa_rasa/presentation/widgets/tombol_jumlah.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/paket_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
@@ -285,24 +284,27 @@ class _KartuPaket extends StatelessWidget {
                         ],
                       ),
                     ),
-                    TextButton(
+                    // tombol kecil, ditanya dulu: sekali kepencet paketnya
+                    // langsung ilang dari beranda pembeli
+                    OutlinedButton(
+                      key: Key('set-habis-${paket['id']}'),
                       onPressed: sisa > 0
-                          ? () => cubit.ubahSisa(paket['id'], 0)
+                          ? () => _konfirmasiHabis(context, cubit, paket)
                           : onTap,
-                      style: TextButton.styleFrom(foregroundColor: Warna.hijau),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Warna.hijau,
+                        side: const BorderSide(color: Warna.garisKontrol),
+                        minimumSize: const Size(0, 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        textStyle: const TextStyle(
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       child: Text(sisa > 0 ? 'Set habis' : 'Ubah'),
-                    ),
-                    PengaturJumlah(
-                      jumlah: sisa,
-                      labelKurang: 'Kurangi sisa ${paket['nama']}',
-                      labelTambah: 'Tambah sisa ${paket['nama']}',
-                      onKurang: sisa > 0
-                          ? () => cubit.ubahSisa(paket['id'], sisa - 1)
-                          : null,
-                      // ga boleh lebih dari jumlah porsi yg diterbitkan
-                      onTambah: sisa < total
-                          ? () => cubit.ubahSisa(paket['id'], sisa + 1)
-                          : null,
                     ),
                   ],
                 ),
@@ -313,4 +315,34 @@ class _KartuPaket extends StatelessWidget {
       ),
     );
   }
+}
+
+/// F-44: tanya dulu sebelum sisa porsi dijadiin 0
+Future<void> _konfirmasiHabis(
+  BuildContext context,
+  PaketCubit cubit,
+  Map<String, dynamic> paket,
+) async {
+  final yakin = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: const Text('Tandai paket habis?'),
+      content: Text(
+        '${paket['nama']} tidak akan tampil lagi untuk pembeli hari ini. '
+        'Sisa porsi bisa diisi lagi lewat Ubah.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(c, false),
+          child: const Text('Tidak'),
+        ),
+        FilledButton(
+          key: const Key('yakin-habis'),
+          onPressed: () => Navigator.pop(c, true),
+          child: const Text('Ya, habis'),
+        ),
+      ],
+    ),
+  );
+  if (yakin == true) cubit.ubahSisa(paket['id'], 0);
 }

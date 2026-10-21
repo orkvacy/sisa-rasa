@@ -29,7 +29,36 @@ class _PesananMasukState extends State<PesananMasuk> {
     StatusPesanan.siapDiambil,
     StatusPesanan.selesai,
   ];
-  String segmen = StatusPesanan.disiapkan;
+  // tiap segmen satu halaman, bisa digeser kiri / kanan
+  final _halaman = PageController();
+  int _indeks = 0;
+  // halaman tujuan pas pindah lewat ketukan, halaman yg kelewat ga ikut milih
+  int? _tujuan;
+
+  String get segmen => _segmen[_indeks];
+
+  @override
+  void dispose() {
+    _halaman.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pilih(String status) async {
+    final i = _segmen.indexOf(status);
+    if (i == _indeks) return;
+    setState(() => _indeks = i);
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _halaman.jumpToPage(i);
+      return;
+    }
+    _tujuan = i;
+    await _halaman.animateToPage(
+      i,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+    _tujuan = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +76,6 @@ class _PesananMasukState extends State<PesananMasuk> {
                 p['status'] == StatusPesanan.tidakDiambil))
           p,
     ];
-    final daftar = dengan(segmen);
     final menungguBayar = dengan(StatusPesanan.menungguBayar).length;
 
     // rekap hari ini (F-47): pesanan selesai / tidak diambil + penerimaan bersihnya
@@ -55,178 +83,228 @@ class _PesananMasukState extends State<PesananMasuk> {
     final bersih = selesai.fold<int>(0, (a, p) => a + penerimaanBersih(p));
 
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, ruangBawahMitra),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Pesanan masuk',
-            style: TextStyle(
-              fontSize: 22,
-              height: 34 / 28,
-              letterSpacing: -0.4,
-              fontWeight: FontWeight.w800,
-              color: Warna.teks,
-            ),
-          ),
-          const SizedBox(height: 20),
-          // rel krem tiga pilihan, yg aktif pil gelap + jumlahnya
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Warna.kraft,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final status in _segmen)
-                  Expanded(
-                    child: Semantics(
-                      button: true,
-                      selected: segmen == status,
-                      child: Material(
-                        color: segmen == status
-                            ? Warna.hijau
-                            : Colors.transparent,
-                        shape: const StadiumBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => setState(() => segmen = status),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 9,
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    StatusPesanan.label(status),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: segmen == status
-                                          ? Colors.white
-                                          : Warna.teksPendukung,
+                const Text(
+                  'Pesanan masuk',
+                  style: TextStyle(
+                    fontSize: 22,
+                    height: 34 / 28,
+                    letterSpacing: -0.4,
+                    fontWeight: FontWeight.w800,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // rel krem tiga pilihan, yg aktif pil gelap + jumlahnya
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Warna.kraft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    children: [
+                      for (final status in _segmen)
+                        Expanded(
+                          child: Semantics(
+                            button: true,
+                            selected: segmen == status,
+                            child: Material(
+                              color: segmen == status
+                                  ? Warna.hijau
+                                  : Colors.transparent,
+                              shape: const StadiumBorder(),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () => _pilih(status),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 9,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          StatusPesanan.label(status),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: segmen == status
+                                                ? Colors.white
+                                                : Warna.teksPendukung,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 1,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: segmen == status
+                                                ? Colors.white
+                                                : Warna.latar,
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${dengan(status).length}',
+                                            key: Key('jumlah-mitra-$status'),
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              color: Warna.teks,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 1,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: segmen == status
-                                          ? Colors.white
-                                          : Warna.latar,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      '${dengan(status).length}',
-                                      key: Key('jumlah-mitra-$status'),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Warna.teks,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          if (menungguBayar > 0) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(
-                  Icons.schedule,
-                  size: 16,
-                  color: Warna.teksPendukung,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '$menungguBayar pesanan lagi menunggu dibayar pembeli',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Warna.teksPendukung,
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 12),
-          if (daftar.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Text(
-                switch (segmen) {
-                  StatusPesanan.disiapkan =>
-                    'Belum ada pesanan yang perlu disiapkan.',
-                  StatusPesanan.siapDiambil =>
-                    'Belum ada pesanan yang menunggu diambil.',
-                  _ => 'Belum ada pesanan selesai hari ini.',
-                },
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Warna.teksPendukung),
-              ),
-            ),
-          for (final (i, p) in daftar.indexed) ...[
-            MunculBertahap(
-              key: ValueKey('$segmen-${p['id']}'),
-              urutan: i,
-              child: TekanMengecil(
-                child: _KartuPesanan(
-                  pesanan: p,
-                  onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          // rekap hari ini (F-47)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Warna.kraft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.bar_chart, color: Warna.teks),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                if (menungguBayar > 0) ...[
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
-                      const Text(
-                        'Rekap hari ini',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Warna.teks,
-                        ),
+                      const Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: Warna.teksPendukung,
                       ),
-                      Text(
-                        '${selesai.length} pesanan selesai · ${rupiah(bersih)} bersih',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Warna.teksPendukung,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '$menungguBayar pesanan lagi menunggu dibayar pembeli',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Warna.teksPendukung,
+                          ),
                         ),
                       ),
                     ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Expanded(
+            child: PageView.builder(
+              controller: _halaman,
+              itemCount: _segmen.length,
+              onPageChanged: (i) {
+                if (_tujuan != null && i != _tujuan) return;
+                setState(() => _indeks = i);
+              },
+              itemBuilder: (context, i) => _halamanSegmen(
+                _segmen[i],
+                dengan(_segmen[i]),
+                rekap: _Rekap(jumlah: selesai.length, bersih: bersih),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// isi satu segmen: kartu pesanan (atau keadaan kosong), lalu rekap hari ini
+  Widget _halamanSegmen(
+    String segmen,
+    List<Map<String, dynamic>> daftar, {
+    required Widget rekap,
+  }) {
+    return ListView(
+      key: PageStorageKey('pesanan-mitra-$segmen'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, ruangBawahMitra),
+      children: [
+        if (daftar.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Text(
+              switch (segmen) {
+                StatusPesanan.disiapkan =>
+                  'Belum ada pesanan yang perlu disiapkan.',
+                StatusPesanan.siapDiambil =>
+                  'Belum ada pesanan yang menunggu diambil.',
+                _ => 'Belum ada pesanan selesai hari ini.',
+              },
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Warna.teksPendukung),
+            ),
+          ),
+        for (final (i, p) in daftar.indexed) ...[
+          MunculBertahap(
+            key: ValueKey('$segmen-${p['id']}'),
+            urutan: i,
+            child: TekanMengecil(
+              child: _KartuPesanan(
+                pesanan: p,
+                onTap: () => context.push(Rute.mitraDetailPesanan(p['id'])),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        rekap,
+      ],
+    );
+  }
+}
+
+/// rekap hari ini (F-47): pesanan selesai / tidak diambil + penerimaan bersihnya
+class _Rekap extends StatelessWidget {
+  const _Rekap({required this.jumlah, required this.bersih});
+
+  final int jumlah;
+  final int bersih;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Warna.kraft,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.bar_chart, color: Warna.teks),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Rekap hari ini',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Warna.teks,
+                  ),
+                ),
+                Text(
+                  '$jumlah pesanan selesai · ${rupiah(bersih)} bersih',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Warna.teksPendukung,
                   ),
                 ),
               ],

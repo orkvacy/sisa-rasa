@@ -16,6 +16,9 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `GET` | `/v1/akun/saya` | Header `Authorization: Bearer <token>` → `{akun}` |
 | `POST` | `/v1/akun/keluar` | Mencabut token (F-33) |
 | `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
+| `POST` | `/v1/akun/sandi` | `{lama, baru}` ganti sandi → `{akun, token}`. Sesi lain dicabut, HP ini dapat token baru. Akun Google ditolak 409 (F-64) |
+| `POST` | `/v1/akun/foto` | Multipart field `foto`, semua peran. Diproses sama seperti foto paket lalu dipasang jadi foto profil → `{akun}` (F-63) |
+| `DELETE` | `/v1/akun/foto` | Hapus foto profil, kembali ke inisial nama → `{akun}` |
 | `POST` | `/v1/akun/hapus` | `{sandi}` (akun Google: `{idToken}`) hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
 | `GET` | `/v1/paket` | Paket dari mitra terverifikasi, boleh tanpa masuk (F-65). Mitra yang masuk ikut melihat paketnya sendiri walau belum diverifikasi |
 | `GET` | `/v1/favorit` | Khusus pembeli: `{mitra: [{id, nama, jenis}]}` mitra favorit, terbaru di depan |

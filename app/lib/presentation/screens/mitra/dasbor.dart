@@ -11,6 +11,7 @@ import 'package:sisa_rasa/presentation/cubit/saldo_cubit.dart';
 import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
+import 'package:sisa_rasa/presentation/widgets/avatar_akun.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
@@ -140,16 +141,9 @@ class Dasbor extends StatelessWidget {
                   key: const Key('akun-mitra'),
                   onTap: () => context.push(Rute.mitraAkun),
                   customBorder: const CircleBorder(),
-                  child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Warna.softGreen,
-                    child: Text(
-                      inisial(nama),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: Warna.hijau,
-                      ),
-                    ),
+                  child: AvatarAkun(
+                    nama: nama,
+                    foto: context.watch<AkunCubit>().state['foto'],
                   ),
                 ),
               ),

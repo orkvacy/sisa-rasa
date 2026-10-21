@@ -38,8 +38,11 @@ class _FormPaketState extends State<FormPaket> {
   final hargaDiskon = TextEditingController();
   String? kategori;
   int porsi = 1;
+  // jam ambil opsional: kosong = buka dari awal hari / tutup 23.59
   int? mulai;
   int? tutup;
+  static const _awalHari = 0;
+  static const _akhirHari = 24 * 60 - 1;
   bool mejaBerbagi = false;
   Map<String, String?> galat = {};
   // foto paket: aset contoh, URL unggahan, atau file:// (tanpa server)
@@ -134,11 +137,11 @@ class _FormPaketState extends State<FormPaket> {
       // F-16
       g['hargaDiskon'] = 'Harus lebih murah dari harga asli.';
     }
-    if (mulai == null || tutup == null) {
-      g['jam'] = 'Pilih jam buka dan tutup ambil.';
-    } else if (tutup! <= mulai!) {
+    final buka = mulai ?? _awalHari;
+    final akhir = tutup ?? _akhirHari;
+    if (akhir <= buka) {
       g['jam'] = 'Jam tutup harus setelah jam buka.';
-    } else if (tutup! <= jamSekarang) {
+    } else if (akhir <= jamSekarang) {
       g['jam'] = 'Jam tutup sudah lewat, paket tidak akan tampil.';
     }
     setState(() => galat = g);
@@ -154,8 +157,8 @@ class _FormPaketState extends State<FormPaket> {
       'hargaAsli': int.parse(hargaAsli.text),
       'hargaDiskon': int.parse(hargaDiskon.text),
       'totalPorsi': porsi,
-      'mulai': mulai,
-      'tutup': tutup,
+      'mulai': mulai ?? _awalHari,
+      'tutup': tutup ?? _akhirHari,
       'mejaBerbagi': mejaBerbagi,
       'foto': ?foto,
     };
@@ -363,27 +366,48 @@ class _FormPaketState extends State<FormPaket> {
           ),
           const SizedBox(height: 20),
 
-          const _Label('Jam ambil hari ini'),
+          const _Label('Jam ambil hari ini (opsional)'),
           Row(
             children: [
               Expanded(
                 child: _KolomJam(
+                  key: const Key('jam-buka'),
                   label: 'Buka',
+                  kosong: 'Sekarang',
                   menit: mulai,
                   onTap: () => pilihJam(buka: true),
+                  onHapus: () => setState(() {
+                    mulai = null;
+                    galat.remove('jam');
+                  }),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _KolomJam(
+                  key: const Key('jam-tutup'),
                   label: 'Tutup',
+                  kosong: jam(_akhirHari),
                   menit: tutup,
                   onTap: () => pilihJam(buka: false),
+                  onHapus: () => setState(() {
+                    tutup = null;
+                    galat.remove('jam');
+                  }),
                 ),
               ),
             ],
           ),
-          if (galat['jam'] != null) _Galat(galat['jam']!),
+          if (galat['jam'] != null)
+            _Galat(galat['jam']!)
+          else
+            const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text(
+                'Kosongkan kalau paket bisa diambil kapan saja sampai 23.59.',
+                style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
+              ),
+            ),
           const SizedBox(height: 20),
 
           // F-22: tandai buat donasi kalau ga terjual
@@ -652,13 +676,20 @@ class _KolomHarga extends StatelessWidget {
 class _KolomJam extends StatelessWidget {
   const _KolomJam({
     required this.label,
+    required this.kosong,
     required this.menit,
     required this.onTap,
+    required this.onHapus,
+    super.key,
   });
 
   final String label;
+  // teks abu-abu kalau jamnya ga diisi
+  final String kosong;
   final int? menit;
   final VoidCallback onTap;
+  // kosongin lagi jam yg udah dipilih
+  final VoidCallback onHapus;
 
   @override
   Widget build(BuildContext context) {
@@ -687,7 +718,7 @@ class _KolomJam extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      menit == null ? 'Pilih jam' : jam(menit!),
+                      menit == null ? kosong : jam(menit!),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -697,7 +728,15 @@ class _KolomJam extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.schedule, color: Warna.teks),
+              if (menit == null)
+                const Icon(Icons.schedule, color: Warna.teks)
+              else
+                IconButton(
+                  tooltip: 'Kosongkan jam ${label.toLowerCase()}',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onHapus,
+                  icon: const Icon(Icons.close, size: 18),
+                ),
             ],
           ),
         ),

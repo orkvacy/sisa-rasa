@@ -65,6 +65,8 @@ void main() {
     // F-63 ganti nama
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('ubah-nama')));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Rani Putri');
     await tester.tap(find.text('Simpan'));
     await tester.pumpAndSettle();

@@ -12,10 +12,17 @@ import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/navigasi_bawah.dart';
+import 'package:sisa_rasa/presentation/widgets/avatar_akun.dart';
+import 'package:sisa_rasa/domain/aturan/akun.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// tab akun: profil, kartu dampak, sama menu setelan
 class Akun extends StatelessWidget {
-  const Akun({super.key});
+  const Akun({this.layarPenuh = false, super.key});
+
+  /// dibuka dari dasbor mitra di atas navigasi bawah, bukan sebagai tab:
+  /// belum ada Scaffold di atasnya, jadi bikin sendiri
+  final bool layarPenuh;
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +42,13 @@ class Akun extends StatelessWidget {
       hemat += pesanan['hemat'] as int;
     }
 
-    return SafeArea(
+    final isi = SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           16,
           16,
           16,
-          NavigasiBawah.ruangBawah,
+          layarPenuh ? 24 : NavigasiBawah.ruangBawah,
         ),
         children: [
           Row(
@@ -77,18 +84,12 @@ class Akun extends StatelessWidget {
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               onTap: () => _ubahProfil(context),
-              // CircleAvatar: lingkaran isi inisial nama, gantiin foto profil
-              leading: CircleAvatar(
+              // foto profil, kalau belum ada inisial nama
+              leading: AvatarAkun(
+                nama: akun['nama']!,
+                foto: akun['foto'],
                 radius: 28,
-                backgroundColor: Warna.softGreen,
-                child: Text(
-                  inisial(akun['nama']!),
-                  style: const TextStyle(
-                    fontSize: Teks.nama,
-                    fontWeight: FontWeight.w800,
-                    color: Warna.hijau,
-                  ),
-                ),
+                ukuranHuruf: Teks.nama,
               ),
               title: Text(
                 akun['nama']!,
@@ -236,7 +237,12 @@ class Akun extends StatelessWidget {
                   judul: 'Email',
                   nilai: 'Terverifikasi',
                 ),
-                const _BarisMenu(ikon: Icons.lock_outline, judul: 'Kata sandi'),
+                _BarisMenu(
+                  ikon: Icons.lock_outline,
+                  judul: 'Kata sandi',
+                  nilai: context.read<AkunCubit>().tanpaSandi ? 'Google' : null,
+                  onTap: () => _gantiSandi(context),
+                ),
                 // F-62: akun mitra ditutup lewat tim (masih ada saldo + rekening)
                 if (akun['peran'] == 'pembeli')
                   _BarisMenu(
@@ -317,20 +323,191 @@ class Akun extends StatelessWidget {
         ],
       ),
     );
+    return layarPenuh ? Scaffold(backgroundColor: Warna.latar, body: isi) : isi;
   }
 }
 
-/// F-63: pembeli ganti nama. nama mitra = nama gerai yang nempel di paket,
-/// pesanan, dan rekening, jadi gantinya lewat tim Sisa Rasa
+/// F-63: lembar profil. foto profil bisa diganti semua peran, nama cuma
+/// pembeli: nama mitra = nama gerai yang nempel di paket, pesanan, dan
+/// rekening, jadi gantinya lewat tim Sisa Rasa
 void _ubahProfil(BuildContext context) {
-  final akun = context.read<AkunCubit>().state;
-  if (akun['peran'] != 'pembeli') {
+  showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    showDragHandle: true,
+    backgroundColor: Colors.white,
+    builder: (_) => BlocProvider.value(
+      value: context.read<AkunCubit>(),
+      child: _LembarProfil(akar: context),
+    ),
+  );
+}
+
+class _LembarProfil extends StatefulWidget {
+  const _LembarProfil({required this.akar});
+
+  /// context halaman akun, buat buka dialog ubah nama abis lembar ini ditutup
+  final BuildContext akar;
+
+  @override
+  State<_LembarProfil> createState() => _LembarProfilState();
+}
+
+class _LembarProfilState extends State<_LembarProfil> {
+  bool mengunggah = false;
+
+  void _kabar(String pesan) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(pesan)));
+  }
+
+  Future<void> _pilihFoto(ImageSource sumber) async {
+    // HP ngecilin duluan biar unggahnya cepet, server ngecilin lagi + buang EXIF
+    final XFile? dipilih;
+    try {
+      dipilih = await ImagePicker().pickImage(
+        source: sumber,
+        maxWidth: 800,
+        imageQuality: 85,
+      );
+    } catch (_) {
+      _kabar('Foto tidak bisa dibuka. Cek izin kamera / galeri.');
+      return;
+    }
+    if (dipilih == null || !mounted) return;
+    setState(() => mengunggah = true);
+    try {
+      await context.read<AkunCubit>().aturFoto(dipilih.path);
+      if (mounted) _kabar('Foto profil diperbarui');
+    } on GagalAkun catch (e) {
+      if (mounted) _kabar(e.pesan);
+    } finally {
+      if (mounted) setState(() => mengunggah = false);
+    }
+  }
+
+  Future<void> _hapusFoto() async {
+    setState(() => mengunggah = true);
+    try {
+      await context.read<AkunCubit>().hapusFoto();
+    } on GagalAkun catch (e) {
+      if (mounted) _kabar(e.pesan);
+    } finally {
+      if (mounted) setState(() => mengunggah = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final akun = context.watch<AkunCubit>().state;
+    if (akun['id'] == null) return const SizedBox.shrink();
+    final adaFoto = (akun['foto'] ?? '').isNotEmpty;
+    final pembeli = akun['peran'] == 'pembeli';
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AvatarAkun(
+                  key: const Key('avatar-profil'),
+                  nama: akun['nama']!,
+                  foto: akun['foto'],
+                  radius: 44,
+                  ukuranHuruf: 28,
+                ),
+                if (mengunggah)
+                  const SizedBox(
+                    width: 88,
+                    height: 88,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              akun['nama']!,
+              style: const TextStyle(
+                fontSize: Teks.nama,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              key: const Key('foto-galeri'),
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(
+                adaFoto ? 'Ganti foto dari galeri' : 'Pilih foto dari galeri',
+              ),
+              enabled: !mengunggah,
+              onTap: () => _pilihFoto(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Ambil foto'),
+              enabled: !mengunggah,
+              onTap: () => _pilihFoto(ImageSource.camera),
+            ),
+            if (adaFoto)
+              ListTile(
+                key: const Key('hapus-foto'),
+                leading: const Icon(Icons.delete_outline, color: Warna.merah),
+                title: const Text(
+                  'Hapus foto',
+                  style: TextStyle(color: Warna.merah),
+                ),
+                enabled: !mengunggah,
+                onTap: _hapusFoto,
+              ),
+            const Divider(height: 16, color: Warna.garis),
+            if (pembeli)
+              ListTile(
+                key: const Key('ubah-nama'),
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Ubah nama'),
+                onTap: () {
+                  final cubit = context.read<AkunCubit>();
+                  Navigator.pop(context);
+                  showDialog<void>(
+                    context: widget.akar,
+                    builder: (_) => BlocProvider.value(
+                      value: cubit,
+                      child: _DialogUbahNama(namaSekarang: akun['nama']!),
+                    ),
+                  );
+                },
+              )
+            else
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  'Nama usaha diubah lewat tim Sisa Rasa, karena terhubung ke paket dan rekening.',
+                  style: TextStyle(
+                    fontSize: Teks.keterangan,
+                    color: Warna.teksPendukung,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// F-64: ganti sandi pakai sandi lama. akun Google ga punya sandi
+void _gantiSandi(BuildContext context) {
+  if (context.read<AkunCubit>().tanpaSandi) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         const SnackBar(
           content: Text(
-            'Nama usaha diubah lewat tim Sisa Rasa, karena terhubung ke paket dan rekening.',
+            'Akunmu masuk dengan Google, jadi tidak memakai kata sandi.',
           ),
         ),
       );
@@ -340,9 +517,130 @@ void _ubahProfil(BuildContext context) {
     context: context,
     builder: (_) => BlocProvider.value(
       value: context.read<AkunCubit>(),
-      child: _DialogUbahNama(namaSekarang: akun['nama']!),
+      child: const _DialogGantiSandi(),
     ),
   );
+}
+
+class _DialogGantiSandi extends StatefulWidget {
+  const _DialogGantiSandi();
+
+  @override
+  State<_DialogGantiSandi> createState() => _DialogGantiSandiState();
+}
+
+class _DialogGantiSandiState extends State<_DialogGantiSandi> {
+  final lama = TextEditingController();
+  final baru = TextEditingController();
+  final ulang = TextEditingController();
+  String? galatLama;
+  String? galatBaru;
+  String? galatUlang;
+  bool menyimpan = false;
+  bool tampil = false;
+
+  @override
+  void dispose() {
+    lama.dispose();
+    baru.dispose();
+    ulang.dispose();
+    super.dispose();
+  }
+
+  Future<void> simpan() async {
+    setState(() {
+      galatLama = lama.text.isEmpty ? 'Isi kata sandi lama.' : null;
+      galatBaru = baru.text.length < panjangSandiMinimal
+          ? 'Minimal $panjangSandiMinimal karakter.'
+          : null;
+      galatUlang = ulang.text != baru.text
+          ? 'Belum sama dengan sandi baru.'
+          : null;
+    });
+    if (galatLama != null || galatBaru != null || galatUlang != null) return;
+    setState(() => menyimpan = true);
+    try {
+      await context.read<AkunCubit>().gantiSandi(lama.text, baru.text);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Kata sandi diganti. Perangkat lain yang masuk ke akun ini sudah dikeluarkan.',
+          ),
+        ),
+      );
+    } on GagalAkun catch (e) {
+      if (!mounted) return;
+      setState(() {
+        // sandi lama salah ditaruh di kolomnya, sisanya di kolom sandi baru
+        if (e.pesan.contains('lama salah')) {
+          galatLama = e.pesan;
+        } else {
+          galatBaru = e.pesan;
+        }
+      });
+    } finally {
+      if (mounted) setState(() => menyimpan = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    InputDecoration hias(String label, String? galat) =>
+        InputDecoration(labelText: label, errorText: galat, errorMaxLines: 2);
+    return AlertDialog(
+      title: const Text('Ganti kata sandi'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              key: const Key('sandi-lama'),
+              controller: lama,
+              obscureText: !tampil,
+              autofocus: true,
+              decoration: hias('Kata sandi lama', galatLama),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('sandi-baru'),
+              controller: baru,
+              obscureText: !tampil,
+              decoration: hias('Kata sandi baru', galatBaru),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('sandi-ulang'),
+              controller: ulang,
+              obscureText: !tampil,
+              decoration: hias('Ulangi kata sandi baru', galatUlang),
+              onSubmitted: (_) => simpan(),
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('Tampilkan kata sandi'),
+              value: tampil,
+              onChanged: (v) => setState(() => tampil = v ?? false),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: menyimpan ? null : () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          key: const Key('simpan-sandi'),
+          onPressed: menyimpan ? null : simpan,
+          child: Text(menyimpan ? 'Menyimpan…' : 'Simpan'),
+        ),
+      ],
+    );
+  }
 }
 
 /// F-62: minta sandi lagi, lalu data akun dihapus dan semua sesi dicabut

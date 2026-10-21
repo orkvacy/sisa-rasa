@@ -339,7 +339,10 @@ GoRouter buatRouter({required AkunCubit akun}) {
                 path: Rute.mitraDasbor,
                 builder: (context, state) => const Dasbor(),
                 routes: [
-                  layarPenuh('akun', (context, state) => const Akun()),
+                  layarPenuh(
+                    'akun',
+                    (context, state) => const Akun(layarPenuh: true),
+                  ),
                   layarPenuh(
                     'profil-usaha',
                     (context, state) => const ProfilUsaha(),

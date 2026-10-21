@@ -37,7 +37,35 @@ class Pesanan extends StatefulWidget {
 
 class _PesananState extends State<Pesanan> {
   static const _segmen = ['berlangsung', 'selesai', 'dibatalkan'];
-  String segmen = 'berlangsung';
+  // tiap segmen satu halaman, bisa digeser kiri / kanan (kayak tab Gojek)
+  final _halaman = PageController();
+  int _indeks = 0;
+  // halaman tujuan pas pindah lewat ketukan: halaman yg kelewat di tengah
+  // jalan (Berlangsung -> Dibatalkan lewat Selesai) ga ikut milih segmen
+  int? _tujuan;
+
+  @override
+  void dispose() {
+    _halaman.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pilih(String nama) async {
+    final i = _segmen.indexOf(nama);
+    if (i == _indeks) return;
+    setState(() => _indeks = i);
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _halaman.jumpToPage(i);
+      return;
+    }
+    _tujuan = i;
+    await _halaman.animateToPage(
+      i,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+    _tujuan = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +77,66 @@ class _PesananState extends State<Pesanan> {
       context.watch<PesananBloc>().state,
       idAkun,
     );
-    final berlangsung = [
+    List<Map<String, dynamic>> dengan(String segmen) => [
       for (final p in daftarPesanan)
-        if (StatusPesanan.berlangsung(p['status'])) p,
+        if (switch (segmen) {
+          'berlangsung' => StatusPesanan.berlangsung(p['status']),
+          'selesai' =>
+            p['status'] == StatusPesanan.selesai ||
+                p['status'] == StatusPesanan.tidakDiambil,
+          _ => p['status'] == StatusPesanan.dibatalkan,
+        })
+          p,
     ];
-    final daftar = switch (segmen) {
-      'berlangsung' => berlangsung,
-      'selesai' => [
-        for (final p in daftarPesanan)
-          if (p['status'] == StatusPesanan.selesai ||
-              p['status'] == StatusPesanan.tidakDiambil)
-            p,
-      ],
-      _ => [
-        for (final p in daftarPesanan)
-          if (p['status'] == StatusPesanan.dibatalkan) p,
-      ],
-    };
 
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Pesanan',
+                  style: TextStyle(
+                    fontSize: 22,
+                    height: 34 / 28,
+                    letterSpacing: -0.4,
+                    fontWeight: FontWeight.w800,
+                    color: Warna.teks,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _SaringStatus(
+                  pilihan: _segmen,
+                  aktif: _segmen[_indeks],
+                  jumlahBerlangsung: dengan('berlangsung').length,
+                  onPilih: _pilih,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: PageView.builder(
+              controller: _halaman,
+              itemCount: _segmen.length,
+              onPageChanged: (i) {
+                if (_tujuan != null && i != _tujuan) return;
+                setState(() => _indeks = i);
+              },
+              itemBuilder: (context, i) =>
+                  _halamanSegmen(_segmen[i], dengan(_segmen[i])),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// isi satu segmen: kartu pesanan, atau keadaan kosong
+  Widget _halamanSegmen(String segmen, List<Map<String, dynamic>> daftar) {
     // selesai sama dibatalkan dikelompokin per tanggal (Hari ini, Kemarin, ...)
     final isi = <Widget>[];
     String? kelompokTerakhir;
@@ -90,37 +160,10 @@ class _PesananState extends State<Pesanan> {
         )
         ..add(const SizedBox(height: 12));
     }
-
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          NavigasiBawah.ruangBawah,
-        ),
-        children: [
-          const Text(
-            'Pesanan',
-            style: TextStyle(
-              fontSize: 22,
-              height: 34 / 28,
-              letterSpacing: -0.4,
-              fontWeight: FontWeight.w800,
-              color: Warna.teks,
-            ),
-          ),
-          const SizedBox(height: 24),
-          _SaringStatus(
-            pilihan: _segmen,
-            aktif: segmen,
-            jumlahBerlangsung: berlangsung.length,
-            onPilih: (nama) => setState(() => segmen = nama),
-          ),
-          const SizedBox(height: 12),
-          if (daftar.isEmpty) _kosong() else ...isi,
-        ],
-      ),
+    return ListView(
+      key: PageStorageKey('pesanan-$segmen'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, NavigasiBawah.ruangBawah),
+      children: daftar.isEmpty ? [_kosong(segmen)] : isi,
     );
   }
 
@@ -131,7 +174,7 @@ class _PesananState extends State<Pesanan> {
       pesanan['dibayarPada'] ??
       pesanan['dibuat'];
 
-  Widget _kosong() {
+  Widget _kosong(String segmen) {
     return Padding(
       padding: const EdgeInsets.only(top: 48),
       child: Column(
