@@ -544,6 +544,8 @@ func (l *Layanan) AmbilDenganKode(ctx context.Context, a akun.Akun, kode string)
 		switch p.Status {
 		case Selesai:
 			return Pesanan{}, galat(http.StatusConflict, "Kode ini sudah dipakai. Pesanannya sudah diambil.")
+		case TidakDiambil:
+			return Pesanan{}, galat(http.StatusConflict, "Jam ambil pesanan ini sudah lewat.")
 		case Disiapkan, SiapDiambil:
 			return l.UbahStatus(ctx, a, p.ID, Selesai)
 		}
@@ -551,9 +553,11 @@ func (l *Layanan) AmbilDenganKode(ctx context.Context, a akun.Akun, kode string)
 	return Pesanan{}, galat(http.StatusNotFound, "Kode tidak ditemukan di pesanan gerai ini.")
 }
 
-// Bersihkan batalin pesanan yang batas bayarnya lewat dan balikin porsinya (F-40).
+// Bersihkan batalin pesanan yang batas bayarnya lewat dan balikin porsinya (F-40),
+// lalu nandain pesanan lunas yang ga diambil sampai jam tutup (F-56).
 // dipanggil berkala dari main.go dan sebelum daftar pesanan dibaca
 func (l *Layanan) Bersihkan(ctx context.Context) {
+	l.tandaiTidakDiambil(ctx)
 	id, err := l.Store.MenungguLewat(ctx, l.sekarang())
 	if err != nil {
 		return
@@ -565,6 +569,37 @@ func (l *Layanan) Bersihkan(ctx context.Context) {
 			}
 			l.batal(p, "Batas waktu pembayaran habis.", true)
 			return Perubahan{KembalikanStok: true}, nil
+		})
+	}
+}
+
+// lewatAmbil jam tutup ambil pesanan [p] udah lewat. tanggalnya ikut hari
+// pesanan dibuat (WITA), jamnya dari Tutup. "sekarang" ikut JamDemo kalau diisi,
+// jadi di server demo yang jamnya dikunci 16.20 pesanan sore ga langsung hangus
+func (l *Layanan) lewatAmbil(p Pesanan) bool {
+	tengahMalam := func(t time.Time) time.Time {
+		t = t.In(wita)
+		return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, wita)
+	}
+	batas := tengahMalam(p.Dibuat).Add(time.Duration(p.Tutup) * time.Minute)
+	kini := tengahMalam(l.sekarang()).Add(time.Duration(l.menitSekarang()) * time.Minute)
+	return !kini.Before(batas)
+}
+
+// tandaiTidakDiambil F-56: pesanan lunas yang lewat jam tutup ambil jadi Tidak diambil.
+// dana ga dikembalikan dan penerimaan bersihnya tetap masuk saldo mitra (F-48)
+func (l *Layanan) tandaiTidakDiambil(ctx context.Context) {
+	id, err := l.Store.BelumDiambil(ctx)
+	if err != nil {
+		return
+	}
+	for _, satu := range id {
+		_, _ = l.Store.UbahPesanan(ctx, satu, func(p *Pesanan) (Perubahan, error) {
+			if (p.Status != Disiapkan && p.Status != SiapDiambil) || !l.lewatAmbil(*p) {
+				return Perubahan{}, nil
+			}
+			p.Status = TidakDiambil
+			return Perubahan{}, nil
 		})
 	}
 }

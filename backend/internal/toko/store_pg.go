@@ -397,6 +397,16 @@ func (s StorePG) UbahPesanan(ctx context.Context, id string,
 	return p, nil
 }
 
+func (s StorePG) BelumDiambil(ctx context.Context) ([]string, error) {
+	baris, err := s.Pool.Query(ctx, `
+		SELECT id FROM pesanan WHERE status IN ('disiapkan', 'siap_diambil')
+		ORDER BY dibuat LIMIT 500`)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(baris, pgx.RowTo[string])
+}
+
 func (s StorePG) MenungguLewat(ctx context.Context, sekarang time.Time) ([]string, error) {
 	baris, err := s.Pool.Query(ctx, `
 		SELECT id FROM pesanan WHERE status = 'menunggu_bayar' AND batas_bayar <= $1 LIMIT 200`,
