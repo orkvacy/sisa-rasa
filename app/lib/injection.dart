@@ -5,6 +5,8 @@ import 'package:sisa_rasa/data/repositories/admin_api.dart';
 import 'package:sisa_rasa/data/repositories/admin_tiruan.dart';
 import 'package:sisa_rasa/data/repositories/akun_api.dart';
 import 'package:sisa_rasa/data/repositories/akun_tiruan.dart';
+import 'package:sisa_rasa/data/repositories/favorit_api.dart';
+import 'package:sisa_rasa/data/repositories/favorit_lokal.dart';
 import 'package:sisa_rasa/data/repositories/google_asli.dart';
 import 'package:sisa_rasa/data/repositories/paket_api.dart';
 import 'package:sisa_rasa/data/repositories/paket_lokal.dart';
@@ -17,6 +19,7 @@ import 'package:sisa_rasa/data/repositories/saldo_lokal.dart';
 import 'package:sisa_rasa/data/sumber/klien_api.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_admin.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
+import 'package:sisa_rasa/domain/repositories/layanan_favorit.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_paket.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_pembayaran.dart';
 import 'package:sisa_rasa/domain/repositories/layanan_percakapan.dart';
@@ -46,7 +49,8 @@ void daftarkanDependensi({String alamat = alamatApi}) {
       ..registerLazySingleton<LayananPercakapan>(PercakapanTiruan.new)
       ..registerLazySingleton<LayananSaldo>(SaldoLokal.new)
       ..registerLazySingleton<LayananAdmin>(AdminTiruan.new)
-      ..registerLazySingleton<MasukGoogle>(GoogleMati.new);
+      ..registerLazySingleton<MasukGoogle>(GoogleMati.new)
+      ..registerLazySingleton<LayananFavorit>(FavoritLokal.new);
     return;
   }
   final klien = KlienApi(alamat: alamat, sesi: sesi);
@@ -57,6 +61,7 @@ void daftarkanDependensi({String alamat = alamatApi}) {
     ..registerLazySingleton<LayananPercakapan>(() => PercakapanApi(klien))
     ..registerLazySingleton<LayananSaldo>(() => SaldoApi(klien))
     ..registerLazySingleton<LayananAdmin>(() => AdminApi(klien))
+    ..registerLazySingleton<LayananFavorit>(() => FavoritApi(klien))
     ..registerLazySingleton<MasukGoogle>(
       () => googleClientId.isEmpty
           ? const GoogleMati()

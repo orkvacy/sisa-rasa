@@ -19,6 +19,11 @@ func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) h
 	mux.Handle("GET /v1/admin/mitra", h(l.handleDaftarMitra))
 	mux.Handle("POST /v1/admin/mitra/{id}/periksa", h(l.handlePeriksaMitra))
 
+	// mitra favorit pembeli. PUT / DELETE idempoten, aman diulang
+	mux.Handle("GET /v1/favorit", h(l.handleFavorit))
+	mux.Handle("PUT /v1/favorit/{id}", h(l.handleAturFavorit))
+	mux.Handle("DELETE /v1/favorit/{id}", h(l.handleAturFavorit))
+
 	mux.Handle("GET /v1/mitra/paket", h(l.handlePaketSaya))
 	mux.Handle("POST /v1/mitra/paket", h(l.handleBuatPaket))
 	mux.Handle("PUT /v1/mitra/paket/{id}", h(l.handleUbahPaket))
@@ -352,5 +357,25 @@ func (l *Layanan) handlePeriksaMitra(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 	httpx.TulisJSON(w, http.StatusOK, st)
+	return nil
+}
+
+// ---------- mitra favorit ----------
+
+func (l *Layanan) handleFavorit(w http.ResponseWriter, r *http.Request) error {
+	daftar, err := l.DaftarFavorit(r.Context(), akun.DariKonteks(r.Context()))
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string][]MitraFavorit{"mitra": daftar})
+	return nil
+}
+
+func (l *Layanan) handleAturFavorit(w http.ResponseWriter, r *http.Request) error {
+	suka := r.Method == http.MethodPut
+	if err := l.AturFavorit(r.Context(), akun.DariKonteks(r.Context()), r.PathValue("id"), suka); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }

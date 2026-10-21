@@ -13,6 +13,7 @@ import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/presentation/widgets/bar_keranjang.dart';
 import 'package:sisa_rasa/presentation/widgets/konfirmasi_ganti_mitra.dart';
 import 'package:sisa_rasa/presentation/widgets/gambar_paket.dart';
+import 'package:sisa_rasa/presentation/widgets/tombol_favorit.dart';
 import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// halaman satu mitra (figma v3: pembeli/halaman mitra, F-54).
@@ -84,7 +85,7 @@ class HalamanMitra extends StatelessWidget {
           ListView(
             padding: EdgeInsets.only(bottom: porsiKeranjang > 0 ? 96 : 24),
             children: [
-              _Sampul(foto: pertama['foto'], onKembali: () => context.pop()),
+              _Sampul(paket: pertama, onKembali: () => context.pop()),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: Column(
@@ -210,9 +211,10 @@ class HalamanMitra extends StatelessWidget {
 
 /// foto sampul 188 tinggi, tombol kembali sama favorit numpuk di atasnya
 class _Sampul extends StatelessWidget {
-  const _Sampul({required this.foto, required this.onKembali});
+  const _Sampul({required this.paket, required this.onKembali});
 
-  final String foto;
+  /// paket pertama mitra ini: fotonya jadi sampul, mitranya buat tombol hati
+  final Map<String, dynamic> paket;
   final VoidCallback onKembali;
 
   @override
@@ -224,7 +226,7 @@ class _Sampul extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          GambarPaket(foto, fit: BoxFit.cover),
+          GambarPaket(paket['foto'], fit: BoxFit.cover),
           Positioned(
             top: atas + 12,
             left: 16,
@@ -237,17 +239,7 @@ class _Sampul extends StatelessWidget {
           Positioned(
             top: atas + 12,
             right: 16,
-            child: _TombolBulat(
-              tooltip: 'Simpan mitra',
-              ikon: Icons.favorite_border,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Mitra favorit belum tersedia di versi ini'),
-                  ),
-                );
-              },
-            ),
+            child: TombolFavorit(paket: paket),
           ),
         ],
       ),

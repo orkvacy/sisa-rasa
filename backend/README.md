@@ -15,6 +15,8 @@ REST API untuk aplikasi mobile, ditulis dengan Go (`net/http`) dan PostgreSQL.
 | `PATCH` | `/v1/akun/saya` | `{nama}` ganti nama, khusus pembeli (F-63) |
 | `POST` | `/v1/akun/hapus` | `{sandi}` (akun Google: `{idToken}`) hapus akun pembeli: data pribadi dikosongkan, semua sesi dicabut, nama di pesanan lama dianonimkan. Ditolak kalau masih ada pesanan berjalan (F-62) |
 | `GET` | `/v1/paket` | Paket dari mitra terverifikasi, boleh tanpa masuk (F-65). Mitra yang masuk ikut melihat paketnya sendiri walau belum diverifikasi |
+| `GET` | `/v1/favorit` | Khusus pembeli: `{mitra: [{id, nama, jenis}]}` mitra favorit, terbaru di depan |
+| `PUT` `DELETE` | `/v1/favorit/{idMitra}` | Simpan / lepas mitra favorit. Idempoten, aman diulang |
 | `GET` | `/v1/mitra/status` | `{status, alasan}` status verifikasi gerai: `menunggu` / `terverifikasi` / `ditolak` / `nonaktif` (F-37) |
 | `GET` `POST` | `/v1/mitra/paket` | Paket milik mitra / tambah paket (F-15) |
 | `PUT` `DELETE` | `/v1/mitra/paket/{id}` | Ubah / hapus paket (F-18) |

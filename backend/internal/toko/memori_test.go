@@ -2,6 +2,7 @@ package toko
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -20,12 +21,14 @@ type storeMemori struct {
 	rek     map[string]Rekening
 	status  map[string]StatusGerai
 	cair    map[string][]Pencairan
+	favorit map[string][]string // id pembeli -> id mitra, terbaru di depan
 	urut    int
 }
 
 func memoriBaru() *storeMemori {
 	return &storeMemori{nama: map[string]string{}, gerai: map[string]Gerai{}, tutup: map[string]bool{},
-		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}, status: map[string]StatusGerai{}}
+		rek: map[string]Rekening{}, cair: map[string][]Pencairan{}, status: map[string]StatusGerai{},
+		favorit: map[string][]string{}}
 }
 
 // tambahMitra mitra contoh di tes, langsung terverifikasi kayak mitra semaian
@@ -412,6 +415,34 @@ func (s *storeMemori) PeriksaMitra(_ context.Context, id, status string, alasan 
 		return ErrTidakAda
 	}
 	s.status[id] = StatusGerai{Status: status, Alasan: alasan}
+	return nil
+}
+
+func (s *storeMemori) Favorit(_ context.Context, idPembeli string) ([]MitraFavorit, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	hasil := []MitraFavorit{}
+	for _, id := range s.favorit[idPembeli] {
+		jenis := s.gerai[id].Jenis
+		if jenis == "" {
+			jenis = "Mitra"
+		}
+		hasil = append(hasil, MitraFavorit{ID: id, Nama: s.nama[id], Jenis: jenis})
+	}
+	return hasil, nil
+}
+
+func (s *storeMemori) AturFavorit(_ context.Context, idPembeli, idMitra string, suka bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	daftar := slices.DeleteFunc(s.favorit[idPembeli], func(id string) bool { return id == idMitra })
+	if suka {
+		if _, ada := s.nama[idMitra]; !ada {
+			return ErrTidakAda
+		}
+		daftar = append([]string{idMitra}, daftar...)
+	}
+	s.favorit[idPembeli] = daftar
 	return nil
 }
 
