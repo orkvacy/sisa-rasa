@@ -250,6 +250,18 @@ func (s *storeMemori) UbahPesanan(_ context.Context, id string,
 	return Pesanan{}, ErrTidakAda
 }
 
+func (s *storeMemori) BelumDiambil(context.Context) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var id []string
+	for _, p := range s.pesanan {
+		if p.Status == Disiapkan || p.Status == SiapDiambil {
+			id = append(id, p.ID)
+		}
+	}
+	return id, nil
+}
+
 func (s *storeMemori) MenungguLewat(_ context.Context, sekarang time.Time) ([]string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
