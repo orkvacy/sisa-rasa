@@ -9,6 +9,7 @@ import 'package:sisa_rasa/core/theme/warna.dart';
 import 'package:sisa_rasa/presentation/utils/aksi_mitra.dart';
 import 'package:sisa_rasa/core/utils/format.dart';
 import 'package:sisa_rasa/domain/aturan/percakapan.dart';
+import 'package:sisa_rasa/presentation/widgets/animasi.dart';
 
 /// percakapan pembeli - mitra untuk satu pesanan (SRS layar 6a, F-67 s.d. F-70).
 /// dipake dua peran, peran yg lagi masuk nentuin bubble mana yg "punya saya"
@@ -23,6 +24,9 @@ class Percakapan extends StatefulWidget {
 
 class _PercakapanState extends State<Percakapan> {
   final kolom = TextEditingController();
+  final _dikenal = <String>{};
+  final _pesanBaru = <String>{};
+  bool _riwayatSiap = false;
   late final String peran = context.read<AkunCubit>().state['peran'] == 'mitra'
       ? 'mitra'
       : 'pembeli';
@@ -31,8 +35,17 @@ class _PercakapanState extends State<Percakapan> {
   void initState() {
     super.initState();
     final cubit = context.read<PercakapanCubit>();
+    _dikenal.addAll(
+      cubit.pesan(widget.idPesanan).map((p) => p['id'] as String),
+    );
     cubit.muat(widget.idPesanan).then((_) {
-      if (mounted) cubit.tandaiDibaca(widget.idPesanan, peran);
+      if (!mounted) return;
+      // muat() mengirim riwayat satu per satu: semuanya menjadi baseline.
+      _dikenal.addAll(
+        cubit.pesan(widget.idPesanan).map((p) => p['id'] as String),
+      );
+      _riwayatSiap = true;
+      cubit.tandaiDibaca(widget.idPesanan, peran);
     });
   }
 
@@ -63,6 +76,14 @@ class _PercakapanState extends State<Percakapan> {
       );
     }
     final daftar = context.watch<PercakapanCubit>().pesan(widget.idPesanan);
+    for (final pesan in daftar) {
+      final id = pesan['id'] as String;
+      if (_dikenal.add(id) && _riwayatSiap) _pesanBaru.add(id);
+    }
+    final indeksPesan = <String, int>{
+      for (var i = 0; i < daftar.length; i++)
+        daftar[i]['id'] as String: daftar.length - 1 - i,
+    };
     final keadaan = keadaanPercakapan(pesanan);
     final lawan = peran == 'mitra'
         ? pesanan['namaPembeli']
@@ -150,6 +171,8 @@ class _PercakapanState extends State<Percakapan> {
                       reverse: true,
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                       itemCount: daftar.length,
+                      findChildIndexCallback: (key) =>
+                          indeksPesan[(key as ValueKey<String>).value],
                       itemBuilder: (context, i) {
                         final p = daftar[daftar.length - 1 - i];
                         final sebelumnya = i + 1 < daftar.length
@@ -159,17 +182,21 @@ class _PercakapanState extends State<Percakapan> {
                         final hariBaru =
                             sebelumnya == null ||
                             kelompokTanggal(sebelumnya['waktu']) != judulHari;
-                        return Column(
-                          children: [
-                            if (hariBaru) _JudulHari(judulHari),
-                            _Gelembung(
-                              pesan: p,
-                              punyaSaya: p['peran'] == peran,
-                              onKirimUlang: () => context
-                                  .read<PercakapanCubit>()
-                                  .kirimUlang(widget.idPesanan, p['id']),
-                            ),
-                          ],
+                        return MunculSekali(
+                          key: ValueKey<String>(p['id'] as String),
+                          animasi: _pesanBaru.remove(p['id']),
+                          child: Column(
+                            children: [
+                              if (hariBaru) _JudulHari(judulHari),
+                              _Gelembung(
+                                pesan: p,
+                                punyaSaya: p['peran'] == peran,
+                                onKirimUlang: () => context
+                                    .read<PercakapanCubit>()
+                                    .kirimUlang(widget.idPesanan, p['id']),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),

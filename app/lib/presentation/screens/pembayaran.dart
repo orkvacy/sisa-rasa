@@ -99,7 +99,10 @@ class Pembayaran extends StatelessWidget {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Pembayaran berhasil')));
-          context.go(Rute.detailPesanan(idPesanan));
+          context.go(
+            Rute.detailPesanan(idPesanan),
+            extra: 'pembayaran-berhasil',
+          );
         } else if (baru['status'] == StatusPesanan.dibatalkan) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Pesanan dibatalkan. ${baru['alasan']}')),
