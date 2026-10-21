@@ -79,7 +79,7 @@ class _BerandaState extends State<Beranda> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Urutkan & Saring',
                   style: TextStyle(
                     fontSize: 18,
@@ -88,7 +88,7 @@ class _BerandaState extends State<Beranda> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Urutkan berdasarkan',
                   style: TextStyle(
                     fontSize: 14,
@@ -112,7 +112,7 @@ class _BerandaState extends State<Beranda> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Saring paket',
                   style: TextStyle(
                     fontSize: 14,
@@ -170,6 +170,7 @@ class _BerandaState extends State<Beranda> {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
     // context.watch: kalau stok paket berubah, beranda ikut digambar ulang (F-28)
     final paketCubit = context.watch<PaketCubit>();
     final daftarPaket = paketCubit.state;
@@ -243,7 +244,7 @@ class _BerandaState extends State<Beranda> {
                   const TombolKeranjang(),
                   IconButton(
                     tooltip: 'Mitra favorit',
-                    icon: const Icon(Icons.favorite_border, color: Warna.teks),
+                    icon: Icon(Icons.favorite_border, color: Warna.teks),
                     onPressed: () => context.push(Rute.favorit),
                   ),
                 ],
@@ -266,7 +267,7 @@ class _BerandaState extends State<Beranda> {
                       // diketuk langsung pindah ke halaman cari (F-04)
                       child: InkWell(
                         onTap: () => context.push(Rute.cari),
-                        child: const SizedBox(
+                        child: SizedBox(
                           height: 42,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -336,7 +337,7 @@ class _BerandaState extends State<Beranda> {
                     child: Text(
                       jamSekarang < 18 * 60 ? 'Sore ini' : 'Malam ini',
                       maxLines: 1,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         height: 40 / 36,
                         letterSpacing: -1.26,
@@ -347,7 +348,7 @@ class _BerandaState extends State<Beranda> {
                   ),
                   Text(
                     '$totalPorsi porsi · ${semuaMitra.length} dapur',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       height: 20 / 14,
                       fontWeight: FontWeight.w500,
@@ -398,7 +399,7 @@ class _BerandaState extends State<Beranda> {
 
                   // Flash sale: kartu geser mendatar, disembunyiin kalau ga ada (F-53)
                   if (flashSale.isNotEmpty) ...[
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
                       child: Row(
                         children: [
@@ -455,7 +456,7 @@ class _BerandaState extends State<Beranda> {
 
                   // Mitra sekitar, urut dari jam tutup terdekat (F-01)
                   if (sekitar.isNotEmpty) ...[
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -516,11 +517,7 @@ class _BerandaState extends State<Beranda> {
       padding: const EdgeInsets.fromLTRB(32, 48, 32, 0),
       child: Column(
         children: [
-          const Icon(
-            Icons.restaurant_outlined,
-            size: 56,
-            color: Warna.teksPendukung,
-          ),
+          Icon(Icons.restaurant_outlined, size: 56, color: Warna.teksPendukung),
           const SizedBox(height: 12),
           Text(
             kategoriDipilih == 'Semua'
@@ -530,7 +527,7 @@ class _BerandaState extends State<Beranda> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Paket biasanya muncul menjelang sore, setelah mitra menghitung sisa jualannya.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Warna.teksPendukung),
@@ -619,11 +616,11 @@ class _KartuFlashSale extends StatelessWidget {
     return SizedBox(
       width: 168,
       child: Material(
-        color: Colors.white,
+        color: Warna.kartu,
         // latar putih: cukup garis tipis + bayangan halus, bukan bayangan tebal
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Warna.garis),
+          side: BorderSide(color: Warna.garis),
         ),
         elevation: 1,
         shadowColor: Colors.black.withValues(alpha: 0.12),
@@ -666,7 +663,7 @@ class _KartuFlashSale extends StatelessWidget {
                     children: [
                       Text(
                         '${mitra.jenis} · ${mitra.jarak}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           height: 18 / 13,
                           fontWeight: FontWeight.w500,
@@ -678,7 +675,7 @@ class _KartuFlashSale extends StatelessWidget {
                         mitra.nama,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           height: 22 / 17,
                           letterSpacing: -0.17,
@@ -692,7 +689,7 @@ class _KartuFlashSale extends StatelessWidget {
                         spacing: 6,
                         crossAxisAlignment: WrapCrossAlignment.end,
                         children: [
-                          const Text(
+                          Text(
                             'mulai dari',
                             style: TextStyle(
                               fontSize: 13,
@@ -702,7 +699,7 @@ class _KartuFlashSale extends StatelessWidget {
                           ),
                           Text(
                             rupiah(mitra.hargaTermurah),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               height: 24 / 20,
                               letterSpacing: -0.2,
@@ -733,7 +730,7 @@ class _BarisMitra extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const gayaMeta = TextStyle(
+    final gayaMeta = TextStyle(
       fontSize: 13,
       height: 18 / 13,
       fontWeight: FontWeight.w600,
@@ -744,7 +741,7 @@ class _BarisMitra extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Warna.garis)),
         ),
         child: Row(
@@ -767,7 +764,7 @@ class _BarisMitra extends StatelessWidget {
                     mitra.nama,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       height: 22 / 15,
                       fontWeight: FontWeight.w600,
@@ -777,7 +774,7 @@ class _BarisMitra extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${mitra.jenis} · ${mitra.jarak} · ${mitra.jumlahPaket} paket',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       height: 16 / 12,
                       letterSpacing: 0.1,
@@ -794,7 +791,7 @@ class _BarisMitra extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.schedule,
                             size: 16,
                             color: Warna.teksPendukung,
@@ -986,7 +983,7 @@ class _TombolLokasi extends StatelessWidget {
                   key: ValueKey(teks),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     height: 22 / 16,
                     fontWeight: FontWeight.w700,
@@ -997,7 +994,7 @@ class _TombolLokasi extends StatelessWidget {
             ),
             if (!aktif) ...[
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 18, color: Warna.teks),
+              Icon(Icons.chevron_right, size: 18, color: Warna.teks),
             ],
           ],
         ),

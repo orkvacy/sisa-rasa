@@ -83,7 +83,7 @@ class _DetailPaketState extends State<DetailPaket> {
     final habis = sisa == 0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Warna.latar,
       body: Column(
         children: [
           Expanded(
@@ -107,8 +107,8 @@ class _DetailPaketState extends State<DetailPaket> {
                   Container(
                     margin: const EdgeInsets.only(top: 236),
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Warna.latar,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(28),
                       ),
@@ -124,7 +124,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.storefront_outlined,
                                   size: 18,
                                   color: Warna.teksPendukung,
@@ -133,12 +133,12 @@ class _DetailPaketState extends State<DetailPaket> {
                                 Expanded(
                                   child: Text(
                                     '${paket['mitra']} · ${paket['jenisMitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Warna.teksPendukung,
                                     ),
                                   ),
                                 ),
-                                const Text(
+                                Text(
                                   'Lihat mitra',
                                   style: TextStyle(
                                     fontSize: Teks.keterangan,
@@ -146,7 +146,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                     color: Warna.hijau,
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.chevron_right,
                                   size: 18,
                                   color: Warna.hijau,
@@ -180,7 +180,7 @@ class _DetailPaketState extends State<DetailPaket> {
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
                                 rupiah(paket['hargaAsli']),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: Teks.isi,
                                   color: Warna.teksPendukung,
                                   decoration: TextDecoration.lineThrough,
@@ -202,7 +202,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           ),
                           child: Text(
                             'Hemat ${rupiah(paket['hargaAsli'] - paket['hargaDiskon'])}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: Teks.keterangan,
                               fontWeight: FontWeight.w700,
                               color: Warna.hijau,
@@ -212,7 +212,7 @@ class _DetailPaketState extends State<DetailPaket> {
                         const SizedBox(height: 16),
                         Text(
                           paket['deskripsi'],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Teks.isi,
                             height: 1.5,
                             color: Warna.teksPendukung,
@@ -247,7 +247,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           habis
                               ? 'Semua $total porsi sudah diselamatkan'
                               : '${total - sisa} dari $total porsi sudah diselamatkan · sisa $sisa',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Teks.keterangan,
                             color: Warna.teksPendukung,
                           ),
@@ -266,7 +266,7 @@ class _DetailPaketState extends State<DetailPaket> {
                             children: [
                               Row(
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                     child: Text(
                                       'Ambil hari ini',
                                       style: TextStyle(
@@ -286,7 +286,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.schedule,
                                           size: 14,
                                           color: Warna.mendesak,
@@ -296,7 +296,7 @@ class _DetailPaketState extends State<DetailPaket> {
                                           sudahBuka(paket)
                                               ? 'Tutup ${sisaWaktu(paket['tutup'])} lagi'
                                               : 'Buka ${sisaWaktu(paket['mulai'])} lagi',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: Teks.keterangan,
                                             fontWeight: FontWeight.w700,
                                             color: Warna.mendesak,
@@ -324,7 +324,7 @@ class _DetailPaketState extends State<DetailPaket> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.place_outlined,
                               size: 20,
                               color: Warna.hijau,
@@ -334,7 +334,7 @@ class _DetailPaketState extends State<DetailPaket> {
                           ],
                         ),
                         const SizedBox(height: 10),
-                        const Row(
+                        Row(
                           children: [
                             Icon(
                               Icons.payments_outlined,
@@ -358,11 +358,11 @@ class _DetailPaketState extends State<DetailPaket> {
                     left: 16,
                     child: CircleAvatar(
                       radius: 22,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Warna.latar,
                       child: IconButton(
                         tooltip: 'Kembali',
                         onPressed: () => context.pop(),
-                        icon: const Icon(Icons.arrow_back, color: Warna.teks),
+                        icon: Icon(Icons.arrow_back, color: Warna.teks),
                       ),
                     ),
                   ),
@@ -386,11 +386,11 @@ class _DetailPaketState extends State<DetailPaket> {
               12 + MediaQuery.of(context).padding.bottom,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Warna.latar,
               // BoxShadow: offset y minus biar bayangannya jatuh ke atas
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -3),
                 ),

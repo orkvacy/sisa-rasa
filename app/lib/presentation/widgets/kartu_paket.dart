@@ -26,7 +26,7 @@ class KartuPaket extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           // rata tanpa bayangan, antar paket cuma dipisah garis tipis
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Warna.kartu,
             border: Border(bottom: BorderSide(color: Warna.garis)),
           ),
@@ -84,7 +84,7 @@ class KartuPaket extends StatelessWidget {
                           color: Warna.hijau,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Meja Berbagi',
                           style: TextStyle(
                             fontSize: 9,
@@ -104,7 +104,7 @@ class KartuPaket extends StatelessWidget {
                   children: [
                     Text(
                       '${paket['mitra']} · ${context.watch<LokasiCubit>().teks(paket)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: Teks.keterangan,
                         color: Warna.teksPendukung,
                       ),
@@ -133,7 +133,7 @@ class KartuPaket extends StatelessWidget {
                         // harga asli dicoret
                         Text(
                           rupiah(paket['hargaAsli']),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Teks.keterangan,
                             color: Warna.teksPendukung,
                             decoration: TextDecoration.lineThrough,
@@ -146,7 +146,7 @@ class KartuPaket extends StatelessWidget {
                     Text.rich(
                       // TextSpan: potongan teks, jadi satu baris bisa beda2 gaya
                       TextSpan(
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: Teks.keterangan,
                           color: Warna.teksPendukung,
                         ),

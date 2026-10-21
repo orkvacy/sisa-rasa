@@ -66,7 +66,7 @@ class _VoucherAdminState extends State<VoucherAdmin> {
       appBar: AppBar(
         backgroundColor: Warna.latar,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
+        title: Text(
           'Voucher',
           style: TextStyle(
             fontSize: 18,
@@ -92,7 +92,7 @@ class _VoucherAdminState extends State<VoucherAdmin> {
             : daftar.isEmpty
             ? ListView(
                 padding: const EdgeInsets.all(32),
-                children: const [
+                children: [
                   Text(
                     'Belum ada voucher. Buat voucher pertama untuk promo akuisisi pengguna.',
                     textAlign: TextAlign.center,
@@ -148,7 +148,7 @@ class _KartuVoucherAdmin extends StatelessWidget {
                 children: [
                   Text(
                     v['kode'],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'JetBrainsMono',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -157,7 +157,7 @@ class _KartuVoucherAdmin extends StatelessWidget {
                   ),
                   Text(
                     v['judul'],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Warna.teks,
                     ),
@@ -167,11 +167,11 @@ class _KartuVoucherAdmin extends StatelessWidget {
                       ringkasVoucher(v, rupiah),
                       if (minBelanja > 0) 'min. ${rupiah(minBelanja)}',
                     ].join(' · '),
-                    style: const TextStyle(fontSize: 12, color: Warna.teks),
+                    style: TextStyle(fontSize: 12, color: Warna.teks),
                   ),
                   Text(
                     '${tanggalPendek(mulai)} – ${tanggalPendek(berakhir)} · ${label.join(' · ')}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       color: Warna.teksPendukung,
                     ),
@@ -308,7 +308,7 @@ class _FormVoucherState extends State<_FormVoucher> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Potongan ditanggung platform. Penerimaan mitra tidak berkurang.',
               style: TextStyle(fontSize: 12, color: Warna.teksPendukung),
             ),
@@ -376,7 +376,7 @@ class _FormVoucherState extends State<_FormVoucher> {
             ),
             if (galat != null) ...[
               const SizedBox(height: 6),
-              Text(galat!, style: const TextStyle(color: Warna.merah)),
+              Text(galat!, style: TextStyle(color: Warna.merah)),
             ],
             const SizedBox(height: 12),
             FilledButton(

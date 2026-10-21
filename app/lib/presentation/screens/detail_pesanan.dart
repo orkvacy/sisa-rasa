@@ -110,7 +110,7 @@ class _DetailPesananState extends State<DetailPesanan> {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'Butuh bantuan?',
                               style: TextStyle(
                                 fontSize: 14,
@@ -200,7 +200,7 @@ class _KotakMenungguBayar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const gaya = TextStyle(
+    final gaya = TextStyle(
       fontSize: 16,
       height: 22 / 16,
       fontWeight: FontWeight.w700,
@@ -218,7 +218,7 @@ class _KotakMenungguBayar extends StatelessWidget {
           Wrap(
             alignment: WrapAlignment.center,
             children: [
-              const Text('Selesaikan pembayaran dalam ', style: gaya),
+              Text('Selesaikan pembayaran dalam ', style: gaya),
               HitungMundur(
                 batas: pesanan['batasBayar'],
                 onHabis: () => context.read<PesananBloc>().add(
@@ -236,7 +236,7 @@ class _KotakMenungguBayar extends StatelessWidget {
           Text(
             'Porsimu disimpan sampai ${jam(pesanan['batasMenit'])}. Lewat dari itu, pesanan batal otomatis dan porsinya dilepas.',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 16 / 12,
               letterSpacing: 0.1,
@@ -276,7 +276,7 @@ class _KotakKode extends StatelessWidget {
           Text(
             siap ? 'Pesananmu siap diambil!' : 'Pesananmu sedang disiapkan',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               height: 22 / 16,
               fontWeight: FontWeight.w700,
@@ -289,7 +289,7 @@ class _KotakKode extends StatelessWidget {
                 ? 'Tunjukkan kode ini di kasir ${pesanan['mitra']} sebelum ${jam(pesanan['tutup'])}.'
                 : 'Ambil di kasir ${pesanan['mitra']} mulai ${jam(pesanan['mulai'])}, sebelum ${jam(pesanan['tutup'])}.',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 16 / 12,
               letterSpacing: 0.1,
@@ -300,7 +300,7 @@ class _KotakKode extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             pesanan['kode'],
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'JetBrainsMono',
               fontSize: 24,
               height: 48 / 30,
@@ -337,7 +337,7 @@ class _BagianLokasi extends StatelessWidget {
           teks: pesanan['alamat'],
           kanan: TextButton(
             onPressed: () => bukaPeta(context, pesanan['alamat']),
-            child: const Text(
+            child: Text(
               'Peta',
               style: TextStyle(
                 fontSize: 14,
@@ -401,10 +401,10 @@ class _BagianRincian extends StatelessWidget {
             warnaNilai: Warna.hijau,
           ),
         ],
-        const Divider(height: 21, color: Warna.garis),
+        Divider(height: 21, color: Warna.garis),
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
                 'Total pembayaran',
                 style: TextStyle(
@@ -416,7 +416,7 @@ class _BagianRincian extends StatelessWidget {
             ),
             Text(
               rupiah(pesanan['total']),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: Warna.teks,
@@ -448,7 +448,7 @@ class _BagianRincian extends StatelessWidget {
             Expanded(
               child: Text(
                 MetodeBayar.nama(pesanan['metode']),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Warna.teksPendukung,

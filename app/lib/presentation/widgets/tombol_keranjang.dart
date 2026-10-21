@@ -34,7 +34,7 @@ class TombolKeranjang extends StatelessWidget {
             key: const Key('jumlah-keranjang'),
           ),
           backgroundColor: Warna.merah,
-          child: const Icon(Icons.shopping_bag_outlined, color: Warna.teks),
+          child: Icon(Icons.shopping_bag_outlined, color: Warna.teks),
         ),
       ),
     );

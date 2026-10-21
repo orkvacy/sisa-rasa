@@ -43,13 +43,13 @@ class ProfilUsaha extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Warna.kartu,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Warna.garis),
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 28,
                     backgroundColor: Warna.softGreen,
                     child: Icon(Icons.storefront, color: Warna.hijau, size: 28),
@@ -61,7 +61,7 @@ class ProfilUsaha extends StatelessWidget {
                       children: [
                         Text(
                           nama,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Teks.nama,
                             fontWeight: FontWeight.w800,
                             color: Warna.teks,
@@ -70,7 +70,7 @@ class ProfilUsaha extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           'Kategori: $jenis',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Teks.keterangan,
                             color: Warna.teksPendukung,
                           ),
@@ -83,7 +83,7 @@ class ProfilUsaha extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Informasi Gerai',
               style: TextStyle(
                 fontSize: Teks.keterangan,
@@ -95,7 +95,7 @@ class ProfilUsaha extends StatelessWidget {
 
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Warna.kartu,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Warna.garis),
               ),
@@ -106,33 +106,33 @@ class ProfilUsaha extends StatelessWidget {
                     label: 'Nama Usaha / Gerai',
                     nilai: nama,
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
+                  Divider(height: 1, indent: 52, color: Warna.garis),
                   _InfoItem(
                     ikon: Icons.category_outlined,
                     label: 'Jenis Usaha',
                     nilai: jenis,
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
+                  Divider(height: 1, indent: 52, color: Warna.garis),
                   _InfoItem(
                     ikon: Icons.place_outlined,
                     label: 'Alamat Gerai',
                     nilai: alamat,
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
+                  Divider(height: 1, indent: 52, color: Warna.garis),
                   _InfoItem(
                     ikon: Icons.access_time_outlined,
                     label: 'Jam Pengambilan Paket',
                     nilai: '$buka - $tutup',
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
+                  Divider(height: 1, indent: 52, color: Warna.garis),
                   _InfoItem(
                     ikon: Icons.my_location,
                     label: 'Titik Lokasi Gerai',
                     nilai: adaTitik ? 'Terpasang' : 'Belum dipasang',
                     nilaiColor: adaTitik ? Warna.hijau : Warna.mendesak,
                   ),
-                  const Divider(height: 1, indent: 52, color: Warna.garis),
-                  const _InfoItem(
+                  Divider(height: 1, indent: 52, color: Warna.garis),
+                  _InfoItem(
                     ikon: Icons.verified_outlined,
                     label: 'Status Kemitraan',
                     nilai: 'Terverifikasi Aktif',
@@ -154,7 +154,7 @@ class ProfilUsaha extends StatelessWidget {
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Warna.hijau,
-                side: const BorderSide(color: Warna.hijau),
+                side: BorderSide(color: Warna.hijau),
               ),
             ),
             const SizedBox(height: 20),
@@ -166,7 +166,7 @@ class ProfilUsaha extends StatelessWidget {
                 color: Warna.softGreen,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.info_outline, size: 20, color: Warna.hijau),
@@ -258,7 +258,7 @@ class _InfoItem extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: Teks.kecil,
                     color: Warna.teksPendukung,
                   ),

@@ -7,6 +7,7 @@ import 'package:sisa_rasa/domain/repositories/layanan_akun.dart';
 import 'package:sisa_rasa/presentation/cubit/akun_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/favorit_cubit.dart';
 import 'package:sisa_rasa/presentation/cubit/keranjang_cubit.dart';
+import 'package:sisa_rasa/presentation/cubit/tema_cubit.dart';
 import 'package:sisa_rasa/presentation/router.dart';
 import 'package:sisa_rasa/core/theme/teks.dart';
 import 'package:sisa_rasa/core/theme/warna.dart';
@@ -22,6 +23,7 @@ class Akun extends StatelessWidget {
     // sesaat abis keluar, layar ini masih sempet digambar sekali sebelum router pindah
     final akun = context.watch<AkunCubit>().state;
     if (akun['id'] == null) return const SizedBox.shrink();
+    final modeTema = context.watch<TemaCubit>().state;
     final daftarPesanan = PesananBloc.milik(
       context.watch<PesananBloc>().state,
       akun['id']!,
@@ -70,7 +72,7 @@ class Akun extends StatelessWidget {
           const SizedBox(height: 16),
           // Material dipake buat latar kartu, soalnya kalau Container berwarna efek pencet ListTile nya ketutup
           Material(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             // ListTile: baris siap pakai, ada leading (kiri), title, subtitle, trailing (kanan)
@@ -83,7 +85,7 @@ class Akun extends StatelessWidget {
                 backgroundColor: Warna.softGreen,
                 child: Text(
                   inisial(akun['nama']!),
-                  style: const TextStyle(
+                  style:       TextStyle(
                     fontSize: Teks.nama,
                     fontWeight: FontWeight.w800,
                     color: Warna.hijau,
@@ -113,7 +115,7 @@ class Akun extends StatelessWidget {
                     ),
                     child: Text(
                       namaPeran(akun['peran']!),
-                      style: const TextStyle(
+                      style:       TextStyle(
                         fontSize: Teks.kecil,
                         fontWeight: FontWeight.w700,
                         color: Warna.hijau,
@@ -133,14 +135,16 @@ class Akun extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Warna.kartu,
-                border: Border.all(color: Warna.garis),
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                        Row(
                     children: [
                       Icon(Icons.eco_outlined, size: 18, color: Warna.hijau),
                       SizedBox(width: 8),
@@ -162,13 +166,13 @@ class Akun extends StatelessWidget {
                           children: [
                             Text(
                               '$porsi',
-                              style: const TextStyle(
+                              style:       TextStyle(
                                 fontSize: Teks.subjudul,
                                 fontWeight: FontWeight.w800,
                                 color: Warna.hijau,
                               ),
                             ),
-                            const Text(
+                                  Text(
                               'porsi terselamatkan',
                               style: TextStyle(
                                 fontSize: Teks.kecil,
@@ -184,13 +188,13 @@ class Akun extends StatelessWidget {
                           children: [
                             Text(
                               rupiah(hemat),
-                              style: const TextStyle(
+                              style:       TextStyle(
                                 fontSize: Teks.subjudul,
                                 fontWeight: FontWeight.w800,
                                 color: Warna.hijau,
                               ),
                             ),
-                            const Text(
+                                  Text(
                               'kamu hemat',
                               style: TextStyle(
                                 fontSize: Teks.kecil,
@@ -209,7 +213,7 @@ class Akun extends StatelessWidget {
           ] else
             const SizedBox(height: 8),
 
-          const Padding(
+                Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
             child: Text(
               'Akun',
@@ -221,7 +225,7 @@ class Akun extends StatelessWidget {
             ),
           ),
           Material(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -249,7 +253,7 @@ class Akun extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
+                Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
             child: Text(
               'Preferensi',
@@ -261,15 +265,16 @@ class Akun extends StatelessWidget {
             ),
           ),
           Material(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                const _BarisMenu(
+                _BarisMenu(
                   ikon: Icons.dark_mode_outlined,
                   judul: 'Tampilan',
-                  nilai: 'Ikuti sistem',
+                  nilai: TemaCubit.label(modeTema),
+                  onTap: () => _pilihTema(context),
                 ),
                 // favorit cuma buat pembeli
                 if (akun['peran'] == 'pembeli')
@@ -283,7 +288,7 @@ class Akun extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
+                Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
             child: Text(
               'Lainnya',
@@ -295,7 +300,7 @@ class Akun extends StatelessWidget {
             ),
           ),
           Material(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -356,6 +361,106 @@ void _hapusAkun(BuildContext context) {
       ],
       child: const _DialogHapusAkun(),
     ),
+  );
+}
+
+/// F-27: ganti tema antara terang, gelap, dan mengikuti sistem
+void _pilihTema(BuildContext context) {
+  final temaCubit = context.read<TemaCubit>();
+  final terpilih = temaCubit.state;
+  final cs = Theme.of(context).colorScheme;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: cs.surface,
+    showDragHandle: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (modalContext) {
+      Widget opsiTema({
+        required ThemeMode mode,
+        required String judul,
+        required String deskripsi,
+        required IconData ikon,
+      }) {
+        final aktif = terpilih == mode;
+        return ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: aktif ? cs.primaryContainer : cs.surfaceContainerLowest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              ikon,
+              color: aktif ? cs.primary : cs.onSurfaceVariant,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            judul,
+            style: TextStyle(
+              fontWeight: aktif ? FontWeight.w800 : FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            deskripsi,
+            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+          ),
+          trailing: aktif
+              ? Icon(Icons.check_circle, color: cs.primary)
+              : Icon(Icons.circle_outlined, color: cs.outlineVariant),
+          onTap: () {
+            Navigator.pop(modalContext);
+            temaCubit.ganti(mode);
+          },
+        );
+      }
+
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  'Pilih Tema Tampilan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              opsiTema(
+                mode: ThemeMode.system,
+                judul: 'Ikuti sistem',
+                deskripsi: 'Menyesuaikan otomatis dengan tema perangkat',
+                ikon: Icons.brightness_auto_outlined,
+              ),
+              opsiTema(
+                mode: ThemeMode.light,
+                judul: 'Terang',
+                deskripsi: 'Tampilan bersih dengan latar putih',
+                ikon: Icons.light_mode_outlined,
+              ),
+              opsiTema(
+                mode: ThemeMode.dark,
+                judul: 'Gelap',
+                deskripsi: 'Latar gelap yang nyaman di mata & hemat baterai',
+                ikon: Icons.dark_mode_outlined,
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -493,13 +598,13 @@ class _DialogHapusAkunState extends State<_DialogHapusAkun> {
           ),
           const SizedBox(height: 16),
           if (tanpaSandi) ...[
-            const Text(
+                  Text(
               'Kamu masuk dengan Google. Pilih akun Google yang sama untuk konfirmasi.',
               style: TextStyle(color: Warna.teksPendukung),
             ),
             if (galat != null) ...[
               const SizedBox(height: 8),
-              Text(galat!, style: const TextStyle(color: Warna.merah)),
+              Text(galat!, style:       TextStyle(color: Warna.merah)),
             ],
           ] else
             TextField(
@@ -579,7 +684,7 @@ class _TombolGantiAkun extends StatelessWidget {
       context: context,
       // useRootNavigator: dibuka di atas navigasi bawah, kalau ga bawahnya ketutup
       useRootNavigator: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Warna.kartu,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
         // bisa digulir, layar pendek / landscape ga muat semua akun
@@ -598,7 +703,7 @@ class _TombolGantiAkun extends StatelessWidget {
                   ),
                 ),
               ),
-              const Padding(
+                    Padding(
                 padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
                 child: Text(
                   'Khusus mode uji. Keranjang dikosongkan saat pindah akun.',
@@ -615,7 +720,7 @@ class _TombolGantiAkun extends StatelessWidget {
                     backgroundColor: Warna.softGreen,
                     child: Text(
                       inisial(akun['nama']!),
-                      style: const TextStyle(
+                      style:       TextStyle(
                         fontWeight: FontWeight.w800,
                         color: Warna.hijau,
                       ),
@@ -629,7 +734,7 @@ class _TombolGantiAkun extends StatelessWidget {
                     '${namaPeran(akun['peran']!)} · ${akun['email']}',
                   ),
                   trailing: akun['id'] == aktif
-                      ? const Icon(Icons.check_circle, color: Warna.hijau)
+                      ?       Icon(Icons.check_circle, color: Warna.hijau)
                       : null,
                   onTap: () {
                     Navigator.pop(sheetContext);
@@ -688,15 +793,16 @@ class _BarisMenu extends StatelessWidget {
     required this.judul,
     this.nilai,
     this.onTap,
-    this.warna = Warna.teks,
+    this.warna,
   });
 
   final IconData ikon;
   final String judul;
   final String? nilai;
 
-  /// warna ikon + judul, merah buat aksi berbahaya (Hapus akun)
-  final Color warna;
+  /// warna ikon + judul, merah buat aksi berbahaya (Hapus akun).
+  /// null = mengikuti warna tema teks
+  final Color? warna;
 
   /// kosong = halamannya belum ada, cuma munculin snackbar
   final VoidCallback? onTap;
@@ -709,15 +815,17 @@ class _BarisMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final warnaTeks = warna ?? Theme.of(context).colorScheme.onSurface;
+    final warnaPendukung = Theme.of(context).colorScheme.onSurfaceVariant;
     return ListTile(
-      leading: Icon(ikon, color: warna),
-      title: Text(judul, style: TextStyle(color: warna)),
+      leading: Icon(ikon, color: warnaTeks),
+      title: Text(judul, style: TextStyle(color: warnaTeks)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (nilai != null)
-            Text(nilai!, style: const TextStyle(color: Warna.teksPendukung)),
-          const Icon(Icons.chevron_right, color: Warna.teksPendukung),
+            Text(nilai!, style: TextStyle(color: warnaPendukung)),
+          Icon(Icons.chevron_right, color: warnaPendukung),
         ],
       ),
       onTap: onTap ?? () => segeraHadir(context, judul),

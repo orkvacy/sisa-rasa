@@ -58,8 +58,8 @@ class TombolPercakapan extends StatelessWidget {
       label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
       style: OutlinedButton.styleFrom(
         foregroundColor: Warna.teks,
-        backgroundColor: Colors.white,
-        side: const BorderSide(color: Warna.garisKontrol),
+        backgroundColor: Warna.kartu,
+        side: BorderSide(color: Warna.garisKontrol),
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
