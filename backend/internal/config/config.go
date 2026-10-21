@@ -41,6 +41,10 @@ type Config struct {
 	// GoogleClientID web client ID OAuth (boleh lebih dari satu, pisah koma).
 	// kosong = masuk dengan Google dimatiin. ini bukan rahasia
 	GoogleClientID []string
+	// MidtransServerKey kunci rahasia Midtrans (isi di Coolify aja). kosong =
+	// pembayaran mode uji. MidtransProduksi = pakai server produksi, bukan sandbox
+	MidtransServerKey string
+	MidtransProduksi  bool
 }
 
 func Baca() (Config, error) {
@@ -75,6 +79,12 @@ func Baca() (Config, error) {
 		if id = strings.TrimSpace(id); id != "" {
 			c.GoogleClientID = append(c.GoogleClientID, id)
 		}
+	}
+	c.MidtransServerKey = strings.TrimSpace(os.Getenv("MIDTRANS_SERVER_KEY"))
+	c.MidtransProduksi = os.Getenv("MIDTRANS_PRODUKSI") == "1"
+	// kunci sandbox diawali SB-, jangan sampai ketuker sama mode produksi
+	if c.MidtransServerKey != "" && c.MidtransProduksi == strings.HasPrefix(c.MidtransServerKey, "SB-") {
+		return c, errors.New("MIDTRANS_SERVER_KEY ga cocok sama MIDTRANS_PRODUKSI: kunci sandbox diawali SB-")
 	}
 	c.R2IDAkun = os.Getenv("R2_ID_AKUN")
 	c.R2Kunci = os.Getenv("R2_ACCESS_KEY_ID")

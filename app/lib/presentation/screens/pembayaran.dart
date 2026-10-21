@@ -7,6 +7,7 @@ import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_bloc.dart';
 import 'package:sisa_rasa/presentation/bloc/pesanan_event.dart';
 import 'package:sisa_rasa/domain/aturan/status_pesanan.dart';
@@ -264,7 +265,15 @@ class Pembayaran extends StatelessWidget {
                 ],
               ),
             ),
-            if (bloc.modeUji) ...[
+            // pembayaran asli lewat Midtrans: status lunas dikabari server sendiri
+            if (tagihan['penyedia'] == 'midtrans') ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Halaman ini lanjut sendiri setelah pembayaranmu diterima.',
+                textAlign: TextAlign.center,
+                style: _Gaya.keterangan,
+              ),
+            ] else if (bloc.modeUji) ...[
               const SizedBox(height: 12),
               Text(
                 // server ngisi QRIS asli (QRIS statis yg dijadiin dinamis) tapi
@@ -356,21 +365,32 @@ class Pembayaran extends StatelessWidget {
 
   List<String> _langkah(Map<String, dynamic> pesanan) {
     final String metode = pesanan['metode'];
+    final Map<String, String> tagihan = pesanan['tagihan'];
+    // Midtrans ngabarin server sendiri, pembeli ga perlu nekan apa-apa
+    final otomatis = tagihan['penyedia'] == 'midtrans';
+    final akhir = otomatis
+        ? 'Halaman ini lanjut sendiri setelah pembayaran diterima.'
+        : 'Tekan "Saya sudah bayar".';
     return switch (metode) {
-      MetodeBayar.qris => const [
+      MetodeBayar.qris => [
         'Buka GoPay, OVO, DANA, ShopeePay, atau m-banking.',
         'Pindai QR di atas, atau unggah QR yang sudah disimpan.',
-        'Bayar, lalu tekan "Saya sudah bayar".',
+        'Bayar. $akhir',
       ],
-      MetodeBayar.gopay => const [
+      MetodeBayar.gopay => [
         'Tekan Buka GoPay, aplikasi Gojek akan terbuka.',
         'Periksa total, lalu konfirmasi pembayaran.',
-        'Kembali ke sini dan tekan "Saya sudah bayar".',
+        'Kembali ke sini. $akhir',
+      ],
+      MetodeBayar.vaMandiri when tagihan['kodePerusahaan'] != null => [
+        'Buka Livin\' by Mandiri, pilih Bayar lalu Multipayment.',
+        'Masukkan kode perusahaan ${tagihan['kodePerusahaan']} dan kode bayar di atas.',
+        'Bayar tepat sesuai total. $akhir',
       ],
       _ => [
         'Buka ${MetodeBayar.aplikasiBank(metode)}, lalu pilih transfer ke ${MetodeBayar.namaBank(metode)} Virtual Account.',
         'Masukkan nomor di atas. Pastikan nama penerima tertulis Sisa Rasa – ${pesanan['mitra']}.',
-        'Bayar tepat sesuai total, lalu tekan "Saya sudah bayar".',
+        'Bayar tepat sesuai total. $akhir',
       ],
     };
   }
@@ -444,7 +464,20 @@ class _IsiTagihan extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text('Nomor virtual account', style: _Gaya.keterangan),
+          // Mandiri lewat Midtrans pakai kode perusahaan + kode bayar
+          if (tagihan['kodePerusahaan'] != null) ...[
+            Text(
+              'Kode perusahaan ${tagihan['kodePerusahaan']}',
+              style: _Gaya.keterangan,
+            ),
+            const SizedBox(height: 2),
+          ],
+          Text(
+            tagihan['kodePerusahaan'] != null
+                ? 'Kode bayar'
+                : 'Nomor virtual account',
+            style: _Gaya.keterangan,
+          ),
           const SizedBox(height: 4),
           FittedBox(
             child: Text(
@@ -541,6 +574,25 @@ class _AksiTagihan extends StatelessWidget {
     }
   }
 
+  /// Midtrans ngasih tautan yang langsung buka pembayaran di aplikasi Gojek
+  Future<void> _bukaGopay(BuildContext context) async {
+    final tautan = _tagihan['tautan'];
+    if (tautan == null) {
+      _kabar(
+        context,
+        'Mode uji: aplikasi Gojek belum dibuka. Tekan "Saya sudah bayar".',
+      );
+      return;
+    }
+    final bisa = await launchUrl(
+      Uri.parse(tautan),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!bisa && context.mounted) {
+      _kabar(context, 'Aplikasi Gojek tidak bisa dibuka. Pilih QRIS saja.');
+    }
+  }
+
   Future<void> _salinNomor(BuildContext context) async {
     await Clipboard.setData(
       ClipboardData(text: _tagihan['nomorVa']!.replaceAll(' ', '')),
@@ -553,10 +605,7 @@ class _AksiTagihan extends StatelessWidget {
     if (_metode == MetodeBayar.gopay) {
       return _TombolGaris(
         teks: 'Buka GoPay',
-        onPressed: () => _kabar(
-          context,
-          'Mode uji: aplikasi Gojek belum dibuka. Tekan "Saya sudah bayar".',
-        ),
+        onPressed: () => _bukaGopay(context),
       );
     }
     final qris = _metode == MetodeBayar.qris;

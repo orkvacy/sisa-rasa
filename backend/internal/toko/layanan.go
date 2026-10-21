@@ -50,6 +50,8 @@ type Layanan struct {
 	QRISStatis string
 	// FotoSah ngecek URL foto unggahan (foto.Penyimpanan.Sah). nil = cuma foto bawaan
 	FotoSah func(url string) bool
+	// Gerbang penyedia pembayaran asli (Midtrans). nil = mode uji
+	Gerbang Gerbang
 }
 
 func (l *Layanan) sekarang() time.Time {
@@ -269,6 +271,13 @@ func (l *Layanan) BuatPesanan(ctx context.Context, a akun.Akun, isi map[string]i
 			return Pesanan{}, false, galat(http.StatusUnprocessableEntity,
 				"Kunci pesanan ini sudah dipakai untuk pesanan lain.")
 		}
+		if err != nil {
+			return p, dibuat, err
+		}
+		// tagihan dari penyedia diminta di luar transaksi, biar stok ga kekunci
+		// selama nunggu jawaban. kalau gagal, request yang diulang (kunci sama)
+		// bakal nyoba bikin tagihannya lagi
+		p, err = l.pastikanTagihan(ctx, p)
 		return p, dibuat, err
 	}
 	return Pesanan{}, false, errors.New("nomor pesanan bentrok terus")
@@ -411,26 +420,18 @@ func (l *Layanan) batal(p *Pesanan, alasan string, otomatis bool) {
 }
 
 // CekBayar "Saya sudah bayar · cek status". status lunas cuma ditentukan server (NF-10).
-// selama belum pakai Midtrans, server pura-pura penyedia pembayaran bilang lunas
+// pakai Midtrans: statusnya ditanya ke Midtrans. mode uji: langsung dianggap lunas
 func (l *Layanan) CekBayar(ctx context.Context, a akun.Akun, id string) (Pesanan, error) {
+	if l.Gerbang != nil {
+		return l.cekBayarGerbang(ctx, a, id)
+	}
 	for range 5 {
 		p, err := l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
 			if p.Status != MenungguBayar {
 				// udah lunas / batal: jawab apa adanya, request ulang aman
 				return Perubahan{}, nil
 			}
-			kode, err := acak("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 4)
-			if err != nil {
-				return Perubahan{}, err
-			}
-			now := l.sekarang()
-			menit := l.menitSekarang()
-			kode = "SR-" + kode
-			p.Status = Disiapkan
-			p.Kode = &kode
-			p.DibayarPada = &now
-			p.Dibayar = &menit
-			return Perubahan{}, nil
+			return l.lunasi(p)
 		})
 		if errors.Is(err, ErrBentrok) {
 			continue // kode ambil kebetulan kembar sama pesanan aktif lain
@@ -463,14 +464,24 @@ func (l *Layanan) GantiMetode(ctx context.Context, a akun.Akun, id, metode strin
 	if !slices.Contains(metodeBayar, metode) {
 		return Pesanan{}, galat(http.StatusUnprocessableEntity, "Pilih metode pembayaran.")
 	}
-	return l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
+	var lama string
+	p, err := l.ubahMilik(ctx, a, id, "pembeli", func(p *Pesanan) (Perubahan, error) {
 		if p.Status != MenungguBayar {
 			return Perubahan{}, galat(http.StatusConflict, "Metode hanya bisa diganti sebelum dibayar.")
 		}
+		lama = p.Tagihan["idTagihan"]
 		p.Metode = metode
 		p.Tagihan = l.tagihan(p.ID, p.Total, metode)
 		return Perubahan{}, nil
 	})
+	if err != nil || l.Gerbang == nil {
+		return p, err
+	}
+	// tagihan lama dibatalin biar ga kebayar dua kali, lalu minta yang baru
+	if lama != "" {
+		_ = l.Gerbang.Batalkan(ctx, lama)
+	}
+	return l.pastikanTagihan(ctx, p)
 }
 
 // UbahStatus tahapan dari mitra: disiapkan -> siap diambil (F-43) -> selesai (F-20)
@@ -560,9 +571,12 @@ func (l *Layanan) Bersihkan(ctx context.Context) {
 
 // ---------- alat bantu ----------
 
-// tagihan isi QR / nomor VA buat satu pesanan. QRIS pakai QR asli kalau
-// QRISStatis diisi, sisanya tiruan sampai Midtrans dipasang
+// tagihan isi QR / nomor VA buat satu pesanan. pakai Midtrans: kosong dulu,
+// diisi pastikanTagihan. mode uji: QRIS asli kalau QRISStatis diisi, sisanya tiruan
 func (l *Layanan) tagihan(id string, total int, metode string) map[string]string {
+	if l.Gerbang != nil {
+		return map[string]string{}
+	}
 	t := tagihanUji(id, total)
 	if metode == "qris" && l.QRISStatis != "" {
 		if qr, err := QRISDinamis(l.QRISStatis, total); err == nil {

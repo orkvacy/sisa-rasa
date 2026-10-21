@@ -1,6 +1,7 @@
 package toko
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,6 +13,9 @@ import (
 // [opsional] masang akun kalau ada token yang berlaku tapi tetap lanjut kalau ga ada
 func Pasang(mux *http.ServeMux, l *Layanan, wajib, opsional func(http.Handler) http.Handler) {
 	h := func(f httpx.Handler) http.Handler { return wajib(f) }
+
+	// webhook Midtrans: tanpa sesi, keasliannya dicek dari tanda tangan
+	mux.Handle("POST /v1/pembayaran/midtrans", httpx.Handler(l.handleNotifikasi))
 
 	// daftar paket boleh dilihat tamu (F-65)
 	mux.Handle("GET /v1/paket", opsional(httpx.Handler(l.handlePaket)))
@@ -377,5 +381,31 @@ func (l *Layanan) handleAturFavorit(w http.ResponseWriter, r *http.Request) erro
 		return err
 	}
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// ---------- pembayaran ----------
+
+// handleNotifikasi isi webhook Midtrans banyak field lain, jadi ga pakai
+// httpx.BacaJSON yang nolak field tak dikenal
+func (l *Layanan) handleNotifikasi(w http.ResponseWriter, r *http.Request) error {
+	var isi struct {
+		OrderID     string `json:"order_id"`
+		StatusCode  string `json:"status_code"`
+		GrossAmount string `json:"gross_amount"`
+		Signature   string `json:"signature_key"`
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 64<<10)
+	if err := json.NewDecoder(r.Body).Decode(&isi); err != nil {
+		return httpx.NewGalat(http.StatusBadRequest, "Isian tidak bisa dibaca.")
+	}
+	err := l.TerimaNotifikasi(r.Context(), NotifikasiBayar{
+		IDTagihan: isi.OrderID, KodeStatus: isi.StatusCode,
+		Total: isi.GrossAmount, TandaTangan: isi.Signature,
+	})
+	if err != nil {
+		return err
+	}
+	httpx.TulisJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	return nil
 }
